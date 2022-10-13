@@ -25,7 +25,17 @@ int main()
 	else
 		std::cout << "Socket OK" << std::endl;
 
-	int ft_listen = listen(ft_socket, 5);
+	int	ft_bind = bind(ft_socket, (sockaddr*)&serv_addr, sizeof(serv_addr));
+	if (ft_bind < 0)
+		std::cerr << "Bind 1 failed" << strerror(errno) << std::endl;
+	else
+		std::cout << "Bind OK" << std::endl;
+	int	ft_bind2 = bind(ft_socket2, (sockaddr*)&serv_addr, sizeof(serv_addr));
+	if (ft_bind2 < 0)
+		std::cerr << "Bind 2 failed" << strerror(errno) << std::endl;
+	else
+		std::cout << "Bind OK" << std::endl;
+	int ft_listen = listen(ft_socket2, 5);
 	if (ft_listen < 0)
 		std::cerr << "Listen failed code : " << ft_listen
 		<< strerror(errno) << std::endl;
@@ -37,12 +47,14 @@ int main()
 		<< strerror(errno) << std::endl;
 	else
 		std::cout << "Listen2 OK" << std::endl;
+	
 	int ft_connect = connect(ft_socket, (sockaddr*)&serv_addr, sizeof(serv_addr));
 	if (ft_connect < 0)
 		std::cerr << "Error connect on socket failed code : "
 			<< strerror(errno) << ft_connect << "errno : " << errno << std::endl;
 	else
 		std::cout << "Connect OK" << std::endl;
+	
 	int ft_connect2 = connect(ft_socket2, (sockaddr*)&serv_addr2, sizeof(serv_addr2));
 	if (ft_connect2 < 0)
 		std::cerr << "Error connect on socket failed code : "
