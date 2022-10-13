@@ -2,7 +2,7 @@ NAME = webserv
 
 CXX = c++
 
-CXXFLAGS = -Wall -Werror -Wextra -I $(INCLUDES)
+CXXFLAGS = -Wall  -Wextra -I $(INCLUDES)
 
 LDFLAGS =
 
