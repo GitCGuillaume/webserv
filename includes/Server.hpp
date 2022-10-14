@@ -7,14 +7,22 @@
 #include <netinet/in.h>
 #include <vector>
 #include <map>
+#include <set>
 #include "Client.hpp"
 #include <cstring>
 #include <errno.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
 
 class Server
 {
 private:
-    std::vector<int> _sockets;
+    std::set<int> _sockets;
     int _socket;
     std::map<int, Client> _clients;
     int _epfd;
@@ -37,8 +45,8 @@ public:
         std::string m_error;
 
     public:
-        ServerException(const std::string &error)
-            : m_error(error)
+        ServerException(const std::string &fun, const std::string &error)
+            : m_error(fun + ": " + error)
         {
         }
 
