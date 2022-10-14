@@ -3,13 +3,15 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <vector>
+#include "Client.hpp"
 
 class Server
 {
     private:
+        std::vector<int> _sockets;
         int _socket;
-        int _listen;
-        int _bind;
+        std::vector<Client> _clients;
     
     public:
         Server();
@@ -17,11 +19,7 @@ class Server
         Server &    operator=(Server const cpy);
         Server(Server const & cpy);
         int const & getSocket() const;
-        int const & getListen() const;
-        int const & getBind() const;
-        int setSocket(int const domain, int const type, int protocol);
-        int setBind(int const socketfd, const struct sockaddr *addr, socklen_t const addrlen);
-        int setListen(int const socketfd, int const backlog);
+        void setSocket(int const domain, int const type, int protocol);
 };
 
 #endif

@@ -2,20 +2,36 @@ NAME = webserv
 
 CXX = c++
 
-CXXFLAGS = -Wall -Werror -Wextra -I $(INCLUDES)
+CXXFLAGS = -Wall -Werror -Wextra -std=c++98 -I $(INCLUDES)
 
 LDFLAGS =
 
-SRCS = $(addprefix srcs/, main.cpp)
+SERVER = Server.cpp
+
+CLIENT = Client.cpp
+
+SRCS			= $(addprefix srcs/,	\
+					$(SERVER)			\
+					$(CLIENT)			\
+					main.cpp)
+
 
 OBJS_DIR = objs
 
-HEADER = $(addprefix $(INCLUDES)/, webserv.hpp)
+HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp)
 
 INCLUDES = includes
 
 OBJS = $(SRCS:srcs%.cpp=$(OBJS_DIR)%.o)
 
+
+$(OBJS_DIR)/%.o : srcs/*/%.cpp $(HEADER)
+	@mkdir -p $(OBJS_DIR)
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+$(OBJS_DIR)/%.o : srcs/*/*/%.cpp $(HEADER)
+	@mkdir -p $(OBJS_DIR)
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 $(OBJS_DIR)/%.o : srcs/%.cpp $(HEADER)
 	@mkdir -p $(OBJS_DIR)
