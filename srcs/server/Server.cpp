@@ -6,7 +6,11 @@ Server::Server() : _socket(0), _epfd(epoll_create(1))
         throw ServerException("epoll create constructor", strerror(errno));
 }
 
-Server::~Server() {}
+Server::~Server()
+{
+    for (std::set<int>::iterator it = _sockets.begin(); it != _sockets.end(); ++it)
+        close(*it);
+}
 
 Server &    Server::operator=(Server const cpy)
 {
@@ -49,6 +53,7 @@ void    Server::createNewSocket(int port)
 
 void    Server::loop()
 {
+    char buf [6000];
     struct epoll_event events[20];
     int nb_fds;
     struct sockaddr_in cli_addr;
@@ -65,6 +70,12 @@ void    Server::loop()
                 inet_ntop(AF_INET, (char *)&(cli_addr.sin_addr), inet, sizeof(cli_addr));
 				std::cout << "[+] connected with " << inet << ": " << ntohs(cli_addr.sin_port) << std::endl;
                 epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
+            }
+            if (events[i].events & EPOLLIN)
+            {
+                bzero(buf, 6000);
+                recv(events[i].data.fd, buf, 6000, 0);
+                std::cout << buf;
             }
             if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
 				std::cout << "[+] connection closed" << std::endl;
