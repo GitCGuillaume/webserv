@@ -10,9 +10,12 @@ SERVER = Server.cpp
 
 CLIENT = Client.cpp
 
+RESPONSE = autoindex.cpp
+
 SRCS			= $(addprefix srcs/,	\
 					$(SERVER)			\
 					$(CLIENT)			\
+					$(RESPONSE)			\
 					main.cpp)
 
 

@@ -4,10 +4,12 @@
 int main()
 {
 	Server s;
-
-	s.createNewSocket(9000);
+	std::list<char *>	&lst = load_directory_autoindex();
+	open_stream_autoindex(lst);
+	/*s.createNewSocket(9000);
 	s.createNewSocket(9001);
 	s.createNewSocket(9002);
 	s.loop();
+	*/
 	return (0);
 }
