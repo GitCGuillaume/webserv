@@ -10,15 +10,18 @@ SERVER = Server.cpp
 
 CLIENT = Client.cpp
 
+REQUESTS = Request.cpp
+
 SRCS			= $(addprefix srcs/,	\
 					$(SERVER)			\
 					$(CLIENT)			\
+					$(REQUESTS)			\
 					main.cpp)
 
 
 OBJS_DIR = objs
 
-HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp)
+HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp)
 
 INCLUDES = includes
 

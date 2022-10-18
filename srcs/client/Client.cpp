@@ -1,10 +1,10 @@
 #include "Client.hpp"
 
-Client::Client(int port): _port(port)
+Client::Client(uint16_t port, int socket): _port(port), _socket(socket)
 {
 }
 
-Client::Client(const Client &src): _port(src._port)
+Client::Client(const Client &src): _port(src._port), _socket(src._socket)
 {
 }
 
@@ -16,6 +16,10 @@ Client &Client::operator=(const Client &rhs)
 		_port = rhs._port;
 	}
 	return (*this);
+}
+void    Client::sendResponse(void)
+{
+
 }
 
 Client::~Client()

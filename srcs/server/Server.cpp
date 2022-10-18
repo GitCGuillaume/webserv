@@ -32,11 +32,23 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 	return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));
 }
 
+static int setnonblocking(int sockfd)
+{
+	if (fcntl(sockfd, F_SETFD, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) ==
+	    -1) {
+		return -1;
+	}
+	return 0;
+}
+
 void    Server::createNewSocket(int port)
 {
     int newSock = socket(AF_INET, SOCK_STREAM, 0);
     if (newSock < 0)
         throw ServerException("socket createNewSocket", strerror(errno));
+    if (setnonblocking(newSock) < 0)
+        throw ServerException("setnonblocking createNewSocket", strerror(errno));
+    
     struct sockaddr_in addr;
     bzero(&addr, sizeof(sockaddr_in));
     addr.sin_family = AF_INET;
@@ -51,33 +63,54 @@ void    Server::createNewSocket(int port)
     _sockets.insert(newSock);
 }
 
+void Server::poll_in()
+{
+    char buf [BUFFER_SIZE];
+    ssize_t n;
+
+    bzero(buf, BUFFER_SIZE);
+    n = recv(_curr_event.data.fd, buf, BUFFER_SIZE, 0);
+    _requests[_curr_event.data.fd] += buf;
+
+    
+    //std::cout << _requests[_curr_event.data.fd];
+    if (_requests[_curr_event.data.fd].getReq().find("\r\n") != std::string::npos) // \r\n (CRLF) is always ending of http headers
+    {
+        std:: cout << _requests[_curr_event.data.fd];
+    }
+
+}
 void    Server::loop()
 {
-    char buf [6000];
-    struct epoll_event events[20];
+    epoll_event events[20];
     int nb_fds;
     struct sockaddr_in cli_addr;
     socklen_t s_len (sizeof(cli_addr));
     char inet[16];
     while (1)
     {
-        nb_fds = epoll_wait(_epfd, events, 20, 5000);
+        nb_fds = epoll_wait(_epfd, events, 20, -1);
         for (int i = 0; i < nb_fds; ++i)
         {
+            _curr_event = events[i];
             if (_sockets.find(events[i].data.fd) != _sockets.end())
             {
                 int sockClient = accept(events[i].data.fd, (sockaddr *)&cli_addr, &s_len);
+                if (setnonblocking(sockClient) < 0)
+                    throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 inet_ntop(AF_INET, (char *)&(cli_addr.sin_addr), inet, sizeof(cli_addr));
 				std::cout << "[+] connected with " << inet << ": " << ntohs(cli_addr.sin_port) << std::endl;
-                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
+                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP | EPOLLOUT);
+                _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), events[i].data.fd)));
             }
-            if (events[i].events & EPOLLIN)
+           
+            if (_curr_event.events & EPOLLIN)
             {
-                bzero(buf, 6000);
-                recv(events[i].data.fd, buf, 6000, 0);
-                std::cout << buf;
+                std::cout << "here\n";
+                poll_in();
             }
-            if (events[i].events & (EPOLLRDHUP | EPOLLHUP)) {
+             
+            if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP)) {
 				std::cout << "[+] connection closed" << std::endl;
 				epoll_ctl(_epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
 				close(events[i].data.fd);

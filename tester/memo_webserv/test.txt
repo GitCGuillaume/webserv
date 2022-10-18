@@ -1,0 +1,33 @@
+Liste tester :
+(Pas a jour)
+https://github.com/hygoni/webserv_tester
+https://github.com/ibnesayeed/webserver-tester
+https://github.com/fredrikalindh/webserv_tester
+
+plusieurs ports
+Limiter a 1 serveur
+Test connexion Clients vers Serveur
+Test POST, GET, DELETE
+Tester conformite RFC
+Tester Header
+{
+	"Accept"[
+	{
+		Accept
+	}]
+}
+Tester formats (dates...)
+https://www.rfc-editor.org/rfc/rfc2616#section-7
+Tester taille body client
+Test erreurs codes HTML
+Test plusieurs fichiers de configuration
+Telecharger fichiers
+Tester routes
+Tester content length
+Tester une liste de méthodes HTTP acceptées pour la route ?
+Tester redirection
+Tester CGI (voir sujet)
+Une requête à votre serveur ne devrait jamais se bloquer pour indéfiniment.
+Tester envp -i
+Tester les fermetures de FD
+
