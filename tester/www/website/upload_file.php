@@ -1,12 +1,10 @@
 <?php
 
-$countFiles = count($_FILES['upload_files']['name'])
-for ($i = 0; i < $count; $i++)
+#$countFiles = count($_FILES['upload_files']['name']);
+foreach ($_FILES['upload_files']['name'] as $key => $val)
 {
-	print_r($_REQUEST);
-	$tmp = $_FILES['upload_files']['name'][$i];
-	print("FILE: $tmp");
-        file_uploaded_file($_FILES['upload_files']['tmp_name'][$i], 'upload'.$tmp);
+	$tmp = $_FILES["upload_files"]["tmp_name"][$key];
+        move_uploaded_file($tmp, getcwd().'/upload/'.$val);
 }
 
 ?>
