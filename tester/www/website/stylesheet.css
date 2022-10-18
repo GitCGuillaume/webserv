@@ -1,0 +1,23 @@
+body{
+	margin: 0;
+	padding: 0;
+	background: brown;
+	font-family: Arial, sans-serif;
+}
+
+section{
+	margin-top:50px;
+	margin-left:50px;
+	margin-right: auto;
+}
+
+img{
+	width: 250px;
+	padding-right 50px;
+	margin: auto;
+	padding-left: auto;
+}
+
+h1,h2,h3,h4,h5,h6{
+	font-size: 1em;
+}
