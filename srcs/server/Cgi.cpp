@@ -123,7 +123,7 @@ void    Cgi::start()
     else if (pid == 0)
     {
         close(fds[0]);
-        char *ft_argv[1] = {0};
+        char *ft_argv[2] = { const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/post.php"), 0};
         char *ft_envp[_vec.size() + 1];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i]);
@@ -134,19 +134,21 @@ void    Cgi::start()
             std::cerr << "CGI Child process error" << std::endl;
             return ;
         }
-        close(fds[1]);
-        if (execve("", ft_argv, ft_envp) < 0)
+        //close(fds[1]);
+        if (execve("/usr/bin/ls", ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
     }
-    else
-    {
-        if (dup2(fds[0], STDIN_FILENO) < 0)
+    //else
+    //{
+        /*if (dup2(fds[0], STDIN_FILENO) < 0)
         {
             close(fds[0]);
             close(fds[1]);
             throw std::range_error("CGI Child process error");
-        }
+        }*/
+        int	wstatus = 0;
         close(fds[0]);
         close(fds[1]);
-    }
+        waitpid(pid, &wstatus, 0);
+    //}
 }

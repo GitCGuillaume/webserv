@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <vector>
-
+#include <sys/wait.h>
 class Cgi
 {
     private:
