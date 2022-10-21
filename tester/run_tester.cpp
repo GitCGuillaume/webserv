@@ -82,8 +82,8 @@ int main(int argc, char **argv)
 	if (ft_connect == 1)
 		return (1);
 	std::cout << "Sending message..." << std::endl;
-	std::string message("GET /website/ HTTP/1.1\n\
-Host: localhost:50000\n\n");
+	std::string message("GET /phpver/ HTTP/1.1\n\
+Host: localhost:79\r\n\n");
 	msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
 	sleep(1);
 	// std::cout << message;
@@ -157,3 +157,4 @@ Host: localhost:50000\n\n");
 // 	ft_close(cli_sock);
 // 	return (0);
 // }
+

@@ -5,7 +5,16 @@ int main()
 {
 	Server s;
 
-	s.createNewSocket(8000);
+	try
+	{
+		s.createNewSocket(8003);
+		/* code */
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+	
 	// s.createNewSocket(9001);
 	// s.createNewSocket(9002);
 	//s.createNewSocket(80);

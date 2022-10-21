@@ -19,7 +19,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-# define BUFFER_SIZE 5120
 
 
 class Server
@@ -39,16 +38,14 @@ public:
 
     int const &getSocket() const;
     void setSocket(int const domain, int const type, int protocol);
-
 private:
     std::set<int> _sockets;
     int _socket;
     std::map<int, Client> _clients;
-    std::map<int, Request> _requests;
     int _epfd;
     epoll_event _curr_event;
 
-    class ServerException
+    class ServerException: public std::exception
     {
     private:
         std::string m_error;
@@ -58,8 +55,8 @@ private:
             : m_error(fun + ": " + error)
         {
         }
-
-        const std::string &getError() const { return m_error; }
+        ~ServerException() throw(){}
+        const char *what() const throw() { return (m_error.c_str());}
     };
 };
 

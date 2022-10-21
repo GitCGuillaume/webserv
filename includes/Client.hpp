@@ -3,11 +3,15 @@
 
 #include <iostream>
 #include <stdint.h>
+#include "ServerInput.hpp"
+#include "ServerOutput.hpp"
+
 class Client
 {
     private:
         uint16_t _port;
-        int _socket;
+        ServerInput _si;
+        ServerOutput _so;
     public:
         Client(uint16_t port, int socket);
         Client(const Client &src);
@@ -15,9 +19,8 @@ class Client
 
         Client &operator=(const Client &rhs);
 
-        void    sendResponse(void);
+        void    epoll_in(void);
 
         int getPort(void) const;
-        int getSocket(void) const;
 };
 #endif

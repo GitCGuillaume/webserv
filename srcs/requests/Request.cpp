@@ -46,6 +46,20 @@ Request::~Request()
 {
 }
 
+bool Request::is_method(const std::string &str)
+{
+	static std::set<std::string> methods;
+
+	if (methods.empty())
+	{
+		methods.insert("GET");
+		methods.insert("POST");
+		methods.insert("DELETE");
+	}
+	return (methods.find(str) != methods.end());
+}
+
+
 const std::string &Request::getReq(void) const
 {
 	return (_req);

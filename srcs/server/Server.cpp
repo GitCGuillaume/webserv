@@ -43,12 +43,18 @@ static int setnonblocking(int sockfd)
 
 void    Server::createNewSocket(int port)
 {
+    int opt = 1;
     int newSock = socket(AF_INET, SOCK_STREAM, 0);
     if (newSock < 0)
         throw ServerException("socket createNewSocket", strerror(errno));
+    
+    if (setsockopt(newSock, SOL_SOCKET,
+            SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+        throw ServerException("setsockopt createNewSocket", strerror(errno));
+
     if (setnonblocking(newSock) < 0)
         throw ServerException("setnonblocking createNewSocket", strerror(errno));
-    
+
     struct sockaddr_in addr;
     bzero(&addr, sizeof(sockaddr_in));
     addr.sin_family = AF_INET;
@@ -58,28 +64,11 @@ void    Server::createNewSocket(int port)
         throw ServerException("bind createNewSocket", strerror(errno));
     if (listen(newSock, 5) < 0)
         throw ServerException("listen createNewSocket", strerror(errno));
-    if (epoll_ctl_add(_epfd, newSock, EPOLLIN | EPOLLOUT | EPOLLET) < 0)
+    if (epoll_ctl_add(_epfd, newSock, EPOLLIN) < 0)
         throw ServerException("epoll_ctl_add createNewSocket", strerror(errno));
     _sockets.insert(newSock);
 }
 
-void Server::poll_in()
-{
-    char buf [BUFFER_SIZE];
-    ssize_t n;
-
-    bzero(buf, BUFFER_SIZE);
-    n = recv(_curr_event.data.fd, buf, BUFFER_SIZE, 0);
-    _requests[_curr_event.data.fd] += buf;
-
-    
-    //std::cout << _requests[_curr_event.data.fd];
-    if (_requests[_curr_event.data.fd].getReq().find("\r\n") != std::string::npos) // \r\n (CRLF) is always ending of http headers
-    {
-        std:: cout << _requests[_curr_event.data.fd];
-    }
-
-}
 void    Server::loop()
 {
     epoll_event events[20];
@@ -93,27 +82,32 @@ void    Server::loop()
         for (int i = 0; i < nb_fds; ++i)
         {
             _curr_event = events[i];
-            if (_sockets.find(events[i].data.fd) != _sockets.end())
+            if (_sockets.find(_curr_event.data.fd) != _sockets.end())
             {
-                int sockClient = accept(events[i].data.fd, (sockaddr *)&cli_addr, &s_len);
+                int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
                 if (setnonblocking(sockClient) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 inet_ntop(AF_INET, (char *)&(cli_addr.sin_addr), inet, sizeof(cli_addr));
 				std::cout << "[+] connected with " << inet << ": " << ntohs(cli_addr.sin_port) << std::endl;
-                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP | EPOLLOUT);
-                _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), events[i].data.fd)));
+                std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
+                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLRDHUP | EPOLLHUP);
+                _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient)));
             }
            
-            if (_curr_event.events & EPOLLIN)
+            else if (_curr_event.events & EPOLLIN)
             {
-                std::cout << "here\n";
-                poll_in();
+                if (setnonblocking(_curr_event.data.fd) < 0)
+                    throw ServerException("setnonblocking createNewSocket", strerror(errno));
+                //std::cout << "here " << _curr_event.data.fd << std::endl;
+                std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
+                if (it != _clients.end())
+                    it->second.epoll_in();
             }
              
             if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP)) {
 				std::cout << "[+] connection closed" << std::endl;
-				epoll_ctl(_epfd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
-				close(events[i].data.fd);
+				epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
+				close(_curr_event.data.fd);
 			}   
         }
     }
