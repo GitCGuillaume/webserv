@@ -74,19 +74,19 @@ Cgi::Cgi(std::string const content_type, std::string const gateway_interface,
    _ft_envp[11] = const_cast<char *>(content_length.c_str());
    _ft_envp[12] = const_cast<char *>(server_port.c_str());
    _ft_envp[13] = NULL;*/
-    _vec.push_back(content_type.c_str());
-    _vec.push_back(gateway_interface.c_str());
-    _vec.push_back(path_info.c_str());
-    _vec.push_back(path_translated.c_str());
-    _vec.push_back(query_string.c_str());
-    _vec.push_back(remote_addr.c_str());
-    _vec.push_back(remote_host.c_str());
-    _vec.push_back(request_method.c_str());
-    _vec.push_back(script_name.c_str());
-    _vec.push_back(server_name.c_str());
-    _vec.push_back(server_protocol.c_str());
-    _vec.push_back(content_length.c_str());
-    _vec.push_back(server_port.c_str());
+    _vec.push_back(content_type);
+    _vec.push_back(gateway_interface);
+    _vec.push_back(path_info);
+    _vec.push_back(path_translated);
+    _vec.push_back(query_string);
+    _vec.push_back(remote_addr);
+    _vec.push_back(remote_host);
+    _vec.push_back(request_method);
+    _vec.push_back(script_name);
+    _vec.push_back(server_name);
+    _vec.push_back(server_protocol);
+    _vec.push_back(content_length);
+    _vec.push_back(server_port);
 }
 
 Cgi::~Cgi()
@@ -123,19 +123,20 @@ void    Cgi::start()
     else if (pid == 0)
     {
         close(fds[0]);
-        char *ft_argv[2] = { const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/post.php"), 0};
-        char *ft_envp[_vec.size() + 1];
+        char *ft_argv[3] = { const_cast<char *>("/usr/bin/php-cgi"), const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/post.php"), 0};
+        char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
-            ft_envp[i] = const_cast<char *>(_vec[i]);
-        ft_envp[13] = 0;
-        if (dup2(fds[1], STDOUT_FILENO) < 0)
+            ft_envp[i] = const_cast<char *>(_vec[i].c_str());
+        ft_envp[13] = const_cast<char *>("REDIRECT_STATUS=200");//hardcoded
+        ft_envp[14] = 0;
+        /*if (dup2(fds[1], STDOUT_FILENO) < 0)
         {
             close(fds[1]);
             std::cerr << "CGI Child process error" << std::endl;
             return ;
-        }
-        //close(fds[1]);
-        if (execve("/usr/bin/ls", ft_argv, ft_envp) < 0)
+        }*/
+        std::cout << "temporaire, entrer val1=1&val2=2"<<std::endl;
+        if (execve("/usr/bin/php-cgi", ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
     }
     //else
@@ -146,9 +147,11 @@ void    Cgi::start()
             close(fds[1]);
             throw std::range_error("CGI Child process error");
         }*/
-        int	wstatus = 0;
+        //std::cout<<"euuhh"<<std::endl;
         close(fds[0]);
         close(fds[1]);
-        waitpid(pid, &wstatus, 0);
+        int	wstatus = 0;
+        wait(&wstatus);
+        //waitpid(-1, &wstatus, 0);
     //}
 }

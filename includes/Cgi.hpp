@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
+
 class Cgi
 {
     private:
@@ -23,19 +24,20 @@ class Cgi
         std::string _server_protocol;
         std::string _content_length;
         std::string _server_port;*/
-        std::vector<const char *> _vec;
+        std::vector<std::string> _vec;
 
     public:
         Cgi();
-        explicit Cgi(std::string const content_type, std::string const gateway_interface,
-            std::string const path_info, std::string const path_translated, std::string const query_string,
+        explicit Cgi(std::string const content_length, std::string const content_type,
+            std::string const gateway_interface, std::string const path_info,
+            std::string const path_translated, std::string const query_string,
             std::string const remote_addr, std::string const remote_host, std::string const request_method,
-            std::string const script_name, std::string const server_name, std::string const server_protocol,
-            std::string const content_length, std::string const server_port);
+            std::string const script_name, std::string const server_name, std::string const server_port,
+            std::string const server_protocol);
         ~Cgi();
         Cgi(Cgi const & src);
         Cgi & operator=(Cgi const & src);
-        void    start();
+        void start();
 };
 
 #endif
