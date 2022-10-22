@@ -123,7 +123,12 @@ void    Cgi::start()
     else if (pid == 0)
     {
         close(fds[0]);
-        char *ft_argv[3] = { const_cast<char *>("/usr/bin/php-cgi"), const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/post.php"), 0};
+        //char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
+        //    const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/get.php"), 0};
+        char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
+            const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/delete.php"), 0};
+        //char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/ubuntu_cgi_tester"),
+        //    const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/YoupiBanane/youpi.bad_extension"), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
@@ -136,7 +141,7 @@ void    Cgi::start()
             return ;
         }*/
         std::cout << "temporaire, entrer val1=1&val2=2"<<std::endl;
-        if (execve("/usr/bin/php-cgi", ft_argv, ft_envp) < 0)
+        if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
     }
     //else

@@ -22,21 +22,21 @@
 			<p>Static website for webserv project, 42 School</p>
 		</article>
 		<article>
-			<form action="post.php" method="post">
+			<form action="cgi-bin/post.php" method="post">
 				<label>POST :</label>
 				</br><input type="text" name="test1" />
 				</br><input type="text" name="test2" />
 				</br><input type="text" name="test3" />
 				<input type="submit" name="submit">
 			</form>
-			<form action="" method="get">
+			<form action="cgi-bin/get.php" method="get">
 				<label>GET :</label>
 				</br><input type="text" name="test1" />
 				</br><input type="text" name="test2" />
 				</br><input type="text" name="test3" />
 				<input type="submit" name="submit">
 			</form>
-			<form action="upload_file.php" method="post" enctype="multipart/form-data">
+			<form action="php/upload_file.php" method="post" enctype="multipart/form-data">
 				<label>Upload a file (Shift + move_key for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
