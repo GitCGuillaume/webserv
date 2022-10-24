@@ -20,6 +20,7 @@ class Client
         Client &operator=(const Client &rhs);
 
         void    epoll_in(void);
+        void    epoll_out(void);
 
         int getPort(void) const;
 };

@@ -20,6 +20,9 @@ public:
     ~ServerInput();
 
     void readData();
+    void reset();
+
+    const  Request &getReq(void);
 };
 
 

@@ -76,6 +76,7 @@ void    Server::loop()
     struct sockaddr_in cli_addr;
     socklen_t s_len (sizeof(cli_addr));
     char inet[16];
+    int cpt = 0;
     while (1)
     {
         nb_fds = epoll_wait(_epfd, events, 20, -1);
@@ -90,7 +91,7 @@ void    Server::loop()
                 inet_ntop(AF_INET, (char *)&(cli_addr.sin_addr), inet, sizeof(cli_addr));
 				std::cout << "[+] connected with " << inet << ": " << ntohs(cli_addr.sin_port) << std::endl;
                 std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
-                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLRDHUP | EPOLLHUP);
+                epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
                 _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient)));
             }
            
@@ -98,10 +99,17 @@ void    Server::loop()
             {
                 if (setnonblocking(_curr_event.data.fd) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                //std::cout << "here " << _curr_event.data.fd << std::endl;
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
                     it->second.epoll_in();
+            }
+            else if (_curr_event.events & EPOLLOUT)
+            {
+                if (setnonblocking(_curr_event.data.fd) < 0)
+                    throw ServerException("setnonblocking createNewSocket", strerror(errno));
+                std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
+                if (it != _clients.end())
+                    it->second.epoll_out();
             }
              
             if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP)) {
