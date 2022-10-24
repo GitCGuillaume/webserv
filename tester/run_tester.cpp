@@ -82,7 +82,18 @@ int	main(int argc, char **argv)
 	if (ft_connect == 1)
 	 	return (1);
 	std::cout << "Sending message..." << std::endl;
-	msg = send(ft_socket, "message", sizeof(char) * 8, 0);
+	char header[]="POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+      "Host: 127.0.0.1\r\n"
+      "Content-Type: multipart/form-data; boundary=myboundary\r\n"
+	  "Content-length: 35\r\n"
+      "Connection: close\r\n"
+      "\r\n"
+      "--myboundary\r\n"
+      "Content-Type: application/octet-stream\r\n"
+      "Content-Disposition: form-data; name=\"test.txt\"; filename=\"test.txt\"\r\n"
+      "Content-Transfer-Encoding: 8bit\r\n"
+      "\r\n";
+	msg = send(ft_socket, header, strlen(header), 0);
 	if (msg < 0)
 		std::cerr << "Couldn't send message." << std::endl;
 	char buffer[50000];

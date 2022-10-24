@@ -122,25 +122,29 @@ void    Cgi::start()
     }
     else if (pid == 0)
     {
-        close(fds[0]);
-        //char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
-        //    const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/get.php"), 0};
+        std::string request_method(_vec[8].substr(15, _vec[8].length()));
         char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
-            const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/delete.php"), 0};
-        //char *ft_argv[3] = { const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/ubuntu_cgi_tester"),
-        //    const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/YoupiBanane/youpi.bad_extension"), 0};
+            const_cast<char *>(_vec[3].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
         ft_envp[13] = const_cast<char *>("REDIRECT_STATUS=200");//hardcoded
         ft_envp[14] = 0;
-        /*if (dup2(fds[1], STDOUT_FILENO) < 0)
+        if (request_method.compare("POST") == 0) //POST
+        {
+            close(fds[0]);
+            if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
+                std::cerr << "Execve CGI failed" << std::endl;
+            close(fds[1]);
+        }
+        else if (request_method.compare("GET") == 0) //GET
         {
             close(fds[1]);
-            std::cerr << "CGI Child process error" << std::endl;
-            return ;
-        }*/
-        std::cout << "temporaire, entrer val1=1&val2=2"<<std::endl;
+            if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
+                std::cerr << "Execve CGI failed" << std::endl;
+            close(fds[0]);
+        }
+        //pas de delete?
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
     }

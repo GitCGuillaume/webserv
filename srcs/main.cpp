@@ -31,22 +31,30 @@ static void	seek_pathinfo(char **envp, std::string & path_info)
 int main()
 {
 	/* POST */
-	/*Cgi cgi("CONTENT_LENGTH=","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
-		"PATH_INFO=/website/cgi-bin/YoupiBanane/youpi.bad_extension","PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/YoupiBanane/youpi.bad_extension",
-		"QUERY_STRING=","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=POST",
+	/*Cgi cgi("CONTENT_LENGTH=3","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
+		"PATH_INFO=tester/www/website/cgi-bin/YoupiBanane/youpi.bla","",
+		"QUERY_STRING=val1=d","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=POST",
 		"SCRIPT_NAME=","SERVER_NAME=localhost","SERVER_PORT=80","SERVER_PROTOCOL=HTTP/1.1");
 	*/
+	Cgi cgi("CONTENT_LENGTH=3","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
+		"PATH_INFO=/website/cgi-bin/post.php","PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/post.php",
+		"QUERY_STRING=","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=POST",
+		"SCRIPT_NAME=","SERVER_NAME=localhost","SERVER_PORT=80","SERVER_PROTOCOL=HTTP/1.1");
+	
 	/* GET */
 	/*Cgi cgi("CONTENT_LENGTH=","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
 		"PATH_INFO=/website/cgi-bin/get.php","PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/get.php",
-		"QUERY_STRING=hayoo=1&test2=éé","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=GET",
+		"QUERY_STRING=test1=1&test2=éé&test3=ff","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=GET",
 		"SCRIPT_NAME=","SERVER_NAME=localhost","SERVER_PORT=80","SERVER_PROTOCOL=HTTP/1.1");
 	*/
 	/* DELETE */
-	Cgi cgi("CONTENT_LENGTH=","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
+	/*Cgi cgi("CONTENT_LENGTH=","CONTENT_TYPE=application/x-www-form-urlencoded","GATEWAY_INTERFACE=CGI/1.1",
 		"PATH_INFO=/website/cgi-bin/delete.php","PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/delete.php",
 		"QUERY_STRING=","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=DELETE",
 		"SCRIPT_NAME=","SERVER_NAME=localhost","SERVER_PORT=80","SERVER_PROTOCOL=HTTP/1.1");
+	*/
+	/* UPLOAD */
+	
 	cgi.start();
 	//Server s;
 	//std::string path_info;
