@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include <sys/epoll.h>
+#include <fstream>
 /* man 7 ip */
 
 typedef struct s_message
@@ -59,6 +60,43 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 	return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));
 }
 */
+
+void	upload_multiple_file(std::string & header)
+{
+	std::ifstream file("test.txt", std::ifstream::in | std::ifstream::binary);
+	//std::ifstream file2("www/website/pictures/logo_42.jpg", std::ifstream::in | std::ifstream::binary);
+	file.seekg (0, file.end);
+	int length = file.tellg();
+	char * buf = new char [length + 1];
+	/*file2.seekg (0, file2.end);
+	int length2 = file2.tellg();
+	char * buf2 = new char [length2 + 1];
+*/
+	file.seekg (0, file.beg);
+	file.read(buf, length);
+	buf[length]=0;
+	file.close();
+/*	
+	file2.seekg (0, file2.beg);
+	file2.read(buf2, length2);
+	buf2[length2]=0;
+	file2.close();
+*/
+	header="POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+      "Host: 127.0.0.1\r\n"
+      "Content-Type: multipart/form-data; boundary=myboundary\r\n"
+	  "Content-Length: 149\r\n"
+      "Connection: keep-alive\r\n"
+      "\r\n"
+      "--myboundary\r\n"
+	  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test.txt\"\r\n"
+      "Content-Type: application/octet-stream\r\n"
+      "\r\n";
+	  header.insert(header.size(), buf);
+	  header.insert(header.size(), "\r\n--myboundary\r\n");
+	  delete[] buf;
+//	  delete[] buf2;
+}
 int	main(int argc, char **argv)
 {
 	ssize_t	msg = 0;
@@ -82,18 +120,10 @@ int	main(int argc, char **argv)
 	if (ft_connect == 1)
 	 	return (1);
 	std::cout << "Sending message..." << std::endl;
-	char header[]="POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
-      "Host: 127.0.0.1\r\n"
-      "Content-Type: multipart/form-data; boundary=myboundary\r\n"
-	  "Content-length: 35\r\n"
-      "Connection: close\r\n"
-      "\r\n"
-      "--myboundary\r\n"
-      "Content-Type: application/octet-stream\r\n"
-      "Content-Disposition: form-data; name=\"test.txt\"; filename=\"test.txt\"\r\n"
-      "Content-Transfer-Encoding: 8bit\r\n"
-      "\r\n";
-	msg = send(ft_socket, header, strlen(header), 0);
+	std::string	header;
+	upload_multiple_file(header);
+	msg = send(ft_socket, header.c_str(), header.size(), 0);
+	sleep(1);
 	if (msg < 0)
 		std::cerr << "Couldn't send message." << std::endl;
 	char buffer[50000];
@@ -105,9 +135,6 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	std::cout << buffer << std::endl;
-	//for (unsigned int i = 0; i < 50; ++i)
-	//	std::cout << buffer[i];
-	std::cout << std::endl;
 	ft_close(ft_socket);
 	return (0);
 }
