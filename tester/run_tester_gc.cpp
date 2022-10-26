@@ -62,6 +62,26 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 }
 */
 
+void	upload_single_file(std::string & header, std::string link)
+{
+	std::ifstream file(link, std::ifstream::in | std::ifstream::binary);
+	std::istreambuf_iterator<char>	it(file), ite;
+	std::string	buf(it, ite);
+
+	header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+	"Host: 127.0.0.1\r\n"
+	"Content-Type: multipart/form-data; boundary=myboundary\r\n"
+	"Content-Length: 5685\r\n"
+	"Connection: keep-alive\r\n"
+	"\r\n"//length start after \n
+	"--myboundary\r\n";//14
+	header.insert(header.size(),
+		"Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"horizontal-logo-monochromatic-white.jpg\"\r\n");//107
+	header.insert(header.size(), "Content-Type: image/jpeg\r\n\r\n");//28
+	header.insert(header.size(), buf);//5518
+	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");//18
+}
+
 void	upload_multiple_file(std::string & header)
 {
 	std::ifstream file("www/website/pictures/42_Logo.svg", std::ifstream::in | std::ifstream::binary);
@@ -89,6 +109,28 @@ void	upload_multiple_file(std::string & header)
 	header.insert(header.size(), buf2);//2
 	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");//18
 }
+
+void	upload_single_all(std::string link, int ft_socket)
+{
+	char buffer2[50000];
+	std::string	header;
+	ssize_t	msg = 0;
+
+	upload_single_file(header, link);
+	msg = send(ft_socket, header.c_str(), header.size(), 0);
+	sleep(1);
+	if (msg < 0)
+		std::cerr << "Couldn't send message." << std::endl;
+	msg = recv(ft_socket, buffer2, sizeof(buffer2), 0);
+	if (msg < 0)
+	{
+		ft_close(ft_socket);
+		std::cerr << "Couldn't receive message." << std::endl;
+		return ;
+	}
+	std::cout << buffer2 << std::endl;
+}
+
 int	main(int argc, char **argv)
 {
 	ssize_t	msg = 0;
@@ -113,6 +155,7 @@ int	main(int argc, char **argv)
 	 	return (1);
 	std::cout << "Sending message..." << std::endl;
 	std::string	header;
+	
 	upload_multiple_file(header);
 	msg = send(ft_socket, header.c_str(), header.size(), 0);
 	sleep(1);
@@ -127,6 +170,7 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	std::cout << buffer << std::endl;
+	upload_single_all("www/website/pictures/horizontal-logo-monochromatic-white.jpg", ft_socket);
 	ft_close(ft_socket);
 	return (0);
 }
