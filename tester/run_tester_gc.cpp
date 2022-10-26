@@ -8,6 +8,7 @@
 #include <sstream>
 #include <sys/epoll.h>
 #include <fstream>
+#include <iterator>
 /* man 7 ip */
 
 typedef struct s_message
@@ -63,43 +64,30 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 
 void	upload_multiple_file(std::string & header)
 {
-	std::ifstream file("test.txt", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file2("www/website/pictures/logo_42.jpg", std::ifstream::in | std::ifstream::binary);
-	file.seekg (0, file.end);
-	int length = file.tellg();
-	char * buf = new char [length + 1];
-	file2.seekg (0, file2.end);
-	int length2 = file2.tellg();
-	char * buf2 = new char [length2 + 1];
+	std::ifstream file("www/website/pictures/42_Logo.svg", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file2("test.txt", std::ifstream::in | std::ifstream::binary);
+	std::istreambuf_iterator<char>	it(file), ite;
+	std::istreambuf_iterator<char>	it2(file2), ite2;
+	std::string	buf(it, ite);
+	std::string	buf2(it2, ite2);
 
-	file.seekg (0, file.beg);
-	file.read(buf, length);
-	buf[length]=0;
-	file.close();
-
-	file2.seekg (0, file2.beg);
-	file2.read(buf2, length2);
-	buf2[length2]=0;
-	file2.close();
-
-	header="POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
-      "Host: 127.0.0.1\r\n"
-      "Content-Type: multipart/form-data; boundary=myboundary\r\n"
-	  "Content-Length: 312\r\n"
-      "Connection: keep-alive\r\n"
-      "\r\n"
-      "--myboundary\r\n"
-	  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test.txt\"\r\n"
-      "Content-Type: application/octet-stream\r\n"
-      "\r\n";
-	  header.insert(header.size(), buf);
-	  header.insert(header.size(), "\r\n--myboundary\r\n");
-	  header.insert(header.size(), "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"www/website/pictures/logo_42.jpg\"\r\n");
-	  header.insert(header.size(), "Content-Type: application/octet-stream\r\n\r\n");
-	  header.insert(header.size(), buf2);
-	  header.insert(header.size(), "\r\n--myboundary\r\n");
-	  delete[] buf;
-	  delete[] buf2;
+	header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+	"Host: 127.0.0.1\r\n"
+	"Content-Type: multipart/form-data; boundary=myboundary\r\n"
+	"Content-Length: 5192\r\n"
+	"Connection: keep-alive\r\n"
+	"\r\n"//length start after \n
+	"--myboundary\r\n";//14
+	header.insert(header.size(),
+		"Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"logo_42.jpg\"\r\n");//79
+	header.insert(header.size(), "Content-Type: image/svg+xml\r\n\r\n");//31
+	header.insert(header.size(), buf);//4928
+	header.insert(header.size(), "\r\n--myboundary\r\n");//16
+	header.insert(header.size(),
+		"Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test.txt\"\r\n");//76
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");//28
+	header.insert(header.size(), buf2);//2
+	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");//18
 }
 int	main(int argc, char **argv)
 {
