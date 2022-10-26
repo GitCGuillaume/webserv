@@ -9,11 +9,9 @@
 #include <sstream>
 #include <stdint.h>
 
-
 class Config
 {
 private:
-
 	struct location
 	{
 		std::string name;
@@ -23,9 +21,9 @@ private:
 		std::map<std::string, std::string> fastcgi_param;
 		std::string fastcgi_pass;
 		size_t client_max_body_size;
-		location() : name("/"), root("/var/lib/webserv/html/") {}
+		location() : name("/"), root("/var/lib/webserv/html/"), autoindex(false) {}
 	};
-	
+
 	struct server
 	{
 		std::string name;
@@ -36,17 +34,15 @@ private:
 		server() : host("127.0.0.1") {}
 	};
 
-	std::string _conf;
-	std::vector<server> _servers;
-	std::ifstream _is;
+	void parse_conf();
+
 	std::string _content;
+	std::vector<server> _servers;
 
 public:
-	Config(const std::string &conf);
+	Config(const char *conf);
 	Config(const Config &src);
-	Config &operator=(const Config &other);
 	~Config();
-	std::vector<server> getServers();
+	const std::string &getContent() const;
+	const std::vector<server> &getServers() const;
 };
-
-

@@ -1,9 +1,10 @@
 #include "webserv.hpp"
 #include "Server.hpp"
 
-int main()
+int main(int argc, char **argv)
 {
 	Server s;
+    Config c(argv[1]);
 
 	try
 	{

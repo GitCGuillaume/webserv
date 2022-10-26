@@ -16,18 +16,21 @@ RESPONSE = autoindex.cpp
 
 IO = ServerInput.cpp ServerOutput.cpp
 
+CONFIG = Config.cpp
+
 SRCS			= $(addprefix srcs/,	\
 					$(SERVER)			\
 					$(CLIENT)			\
 					$(REQUESTS)			\
 					$(RESPONSE)			\
+					$(CONFIG)			\
 					$(IO)			\
 					main.cpp)
 
 
 OBJS_DIR = objs
 
-HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp Cgi.hpp)
+HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp Cgi.hpp Config.hpp)
 
 INCLUDES = includes
 
