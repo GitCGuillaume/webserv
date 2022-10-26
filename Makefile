@@ -6,11 +6,13 @@ CXXFLAGS = -Wall -Wextra -std=c++98  -g3 -I $(INCLUDES) #-Werror
 
 LDFLAGS =
 
-SERVER = Server.cpp
+SERVER = Server.cpp Cgi.cpp
 
 CLIENT = Client.cpp
 
 REQUESTS = Request.cpp
+
+RESPONSE = autoindex.cpp
 
 IO = ServerInput.cpp ServerOutput.cpp
 
@@ -18,13 +20,14 @@ SRCS			= $(addprefix srcs/,	\
 					$(SERVER)			\
 					$(CLIENT)			\
 					$(REQUESTS)			\
+					$(RESPONSE)			\
 					$(IO)			\
 					main.cpp)
 
 
 OBJS_DIR = objs
 
-HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp)
+HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp Cgi.hpp)
 
 INCLUDES = includes
 
