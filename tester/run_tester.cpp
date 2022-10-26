@@ -64,28 +64,28 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 void	upload_multiple_file(std::string & header)
 {
 	std::ifstream file("test.txt", std::ifstream::in | std::ifstream::binary);
-	//std::ifstream file2("www/website/pictures/logo_42.jpg", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file2("www/website/pictures/logo_42.jpg", std::ifstream::in | std::ifstream::binary);
 	file.seekg (0, file.end);
 	int length = file.tellg();
 	char * buf = new char [length + 1];
-	/*file2.seekg (0, file2.end);
+	file2.seekg (0, file2.end);
 	int length2 = file2.tellg();
 	char * buf2 = new char [length2 + 1];
-*/
+
 	file.seekg (0, file.beg);
 	file.read(buf, length);
 	buf[length]=0;
 	file.close();
-/*	
+
 	file2.seekg (0, file2.beg);
 	file2.read(buf2, length2);
 	buf2[length2]=0;
 	file2.close();
-*/
+
 	header="POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
       "Host: 127.0.0.1\r\n"
       "Content-Type: multipart/form-data; boundary=myboundary\r\n"
-	  "Content-Length: 149\r\n"
+	  "Content-Length: 315\r\n"
       "Connection: keep-alive\r\n"
       "\r\n"
       "--myboundary\r\n"
@@ -94,8 +94,12 @@ void	upload_multiple_file(std::string & header)
       "\r\n";
 	  header.insert(header.size(), buf);
 	  header.insert(header.size(), "\r\n--myboundary\r\n");
+	  header.insert(header.size(), "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"www/website/pictures/logo_42.jpg\"\r\n");
+	  header.insert(header.size(), "Content-Type: application/octet-stream\r\n\r\n");
+	  header.insert(header.size(), buf2);
+	  header.insert(header.size(), "\r\n--myboundary\r\n");
 	  delete[] buf;
-//	  delete[] buf2;
+	  delete[] buf2;
 }
 int	main(int argc, char **argv)
 {
