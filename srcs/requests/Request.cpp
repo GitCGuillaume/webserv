@@ -118,7 +118,7 @@ size_t Request::parse_header(size_t start)
 	std::string field_value = _req.substr(start, pos - start);
 	if (_map_headers.find(field_name) != _map_headers.end()) // else bad request
 	{
-		if (field_name == "content_length")
+		if (field_name == "content-length")
 			*static_cast<size_t *>(_map_headers[field_name]) = std::strtoul(field_value.c_str(), NULL, 10);
 		else
 			*static_cast<std::string *>(_map_headers[field_name]) = field_value;
