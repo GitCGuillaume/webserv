@@ -29,9 +29,8 @@ Request &Request::operator=(const std::string &rhs)
 	return (*this);
 }
 
-Request &Request::operator+=(const std::string &rhs)
+Request &Request::operator+=(const char *rhs)
 {
-	_req += rhs;
 	return (*this);
 }
 
@@ -47,6 +46,7 @@ std::ostream &operator<<(std::ostream &os, const Request &rhs)
 	os << "date: " << rhs._header.date << std::endl;
 	os << "host: " << rhs._header.host << std::endl;
 	os << "transfer-encoding: " << rhs._header.transfer_encoding << std::endl;
+	os << "-------\n";
 
 	return (os);
 }
@@ -68,17 +68,28 @@ bool Request::is_method(const std::string &str)
 	return (methods.find(str) != methods.end());
 }
 
-void Request::parse(void)
+size_t Request::parse(void)
 {
-	size_t start;
+	_req = ss.str();
+	size_t start = 0;
+	size_t prec = 0;
 	if ((start = parse_request_line()) == std::string::npos)
 	{
 		_code = 400;
-		return;
+		return 0;
 	}
-	while ((start = parse_header(start)) != std::string::npos)
-		;
-	_is_ready = true;
+	while (start != std::string::npos)
+	{
+		prec = start;
+		start = parse_header(start);
+	}
+
+	if (_header.content_length < 0)
+	{
+		_is_ready = true;
+		std::cout << "READY" << std::endl;
+	}
+	return prec + 2;
 }
 
 size_t Request::parse_request_line(void)
@@ -108,8 +119,9 @@ size_t Request::parse_header(size_t start)
 	size_t pos = _req.find(": ", start);
 	if (pos == std::string::npos)
 		return (pos);
+	// std::cout<<"pos:"<<pos<<std::endl;
 	std::string field_name = _req.substr(start, pos - start);
-	std::cout << "here " << field_name << std::endl;
+	// std::cout << "here " << field_name << std::endl;
 	transform(field_name.begin(), field_name.end(), field_name.begin(), ::tolower);
 	start = pos + 2;
 	pos = _req.find("\r\n", start);
@@ -118,7 +130,7 @@ size_t Request::parse_header(size_t start)
 	std::string field_value = _req.substr(start, pos - start);
 	if (_map_headers.find(field_name) != _map_headers.end()) // else bad request
 	{
-		if (field_name == "content_length")
+		if (field_name == "content-length")
 			*static_cast<size_t *>(_map_headers[field_name]) = std::strtoul(field_value.c_str(), NULL, 10);
 		else
 			*static_cast<std::string *>(_map_headers[field_name]) = field_value;
@@ -126,9 +138,24 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
+size_t Request::parse_body(size_t start)
+{
+	std::cout << _req << std::endl;
+	ss.seekg(start);
+	std::string body = ss.str();
+	std::cout << body;
+	_is_ready = true;
+	return (0);
+}
+
 void Request::reset(void)
 {
 	new (this) Request;
+}
+
+void Request::append_data(const char *data, size_t n)
+{
+	ss.write(data, n);
 }
 
 void Request::init_map_headers(void)
@@ -140,12 +167,32 @@ void Request::init_map_headers(void)
 	_map_headers["transfer_encoding"] = &_header.transfer_encoding;
 }
 
-const std::string &Request::getReq(void) const
+const std::string &Request::getReq(void)
 {
+	_req = ss.str();
 	return (_req);
 }
 
 bool Request::is_ready() const
 {
 	return (_is_ready);
+}
+
+const Request::t_header &Request::getHeader() const
+{
+	return (_header);
+}
+
+size_t Request::size()
+{
+	size_t size = 0;
+	if (ss)
+	{
+		// get length of file:
+		size_t old = ss.tellg();
+		ss.seekg(0, ss.end);
+		size = ss.tellg();
+		ss.seekg(old);
+	}
+	return (size);
 }
