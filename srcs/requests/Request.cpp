@@ -138,12 +138,43 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
+void	upload_file(std::string boundary)
+{
+	if (boundary[0] == '\"' && boundary[boundary.size() - 1] == '\"')//check if "" then remove
+	{
+		boundary.erase(0);
+		boundary.erase(boundary.size() - 1);
+	}
+	std::cout << "Boundary : " << boundary;
+	if (boundary.size() > 70)
+		return ;
+}
+
 size_t Request::parse_body(size_t start)
 {
-	std::cout << _req << std::endl;
+	std::cout<< "_header.content_type: " <<_header.content_type<<"END";
+	std::cout<<"_method:"<<_method<<"END"<<std::endl;
+	bool	allow_upload = true;
+	char upload_path[] = {"/tmp"};
+	/*
+		if (allow_upload == false)
+			send 405 Not allowed
+	*/
+	ss.seekg(0, ss.end);
+	int size = ss.tellg();
 	ss.seekg(start);
-	std::string body = ss.str();
+	std::string body = ss.str().substr(start, size);
 	std::cout << body;
+	if (_method.compare("POST") == 0
+		&& _header.content_type.find("multipart/form-data") != std::string::npos
+		&& _header.content_type.find("boundary=") != std::string::npos)
+	{
+		std::cout<<"content:"<<_header.content_type<<std::endl;
+		size_t start_boundary = _header.content_type.find("boundary=");
+		std::cout << "UPLOAD GOGO" << std::endl;
+		//upload gogo
+		upload_file(_header.content_type.substr(start_boundary + 9, _header.content_type.size()));
+	}
 	_is_ready = true;
 	return (0);
 }

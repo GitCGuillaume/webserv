@@ -70,16 +70,16 @@ void upload_single_file(std::string &header, std::string link)
 
 	header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
-			 "Content-Type: multipart/form-data; boundary=myboundary\r\n"
-			 "Content-Length: 5685\r\n"
+			 "Content-Type: multipart/form-data; boundary=\"0123456789012345678901234567890123456789012345678901234567890123456789\"\r\n"
+			 "Content-Length: 5805\r\n"
 			 "Connection: keep-alive\r\n"
 			 "\r\n"				 // length start after \n
-			 "--myboundary\r\n"; // 14
+			 "--0123456789012345678901234567890123456789012345678901234567890123456789\r\n"; // 74
 	header.insert(header.size(),
 				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"horizontal-logo-monochromatic-white.jpg\"\r\n"); // 107
 	header.insert(header.size(), "Content-Type: image/jpeg\r\n\r\n");																	// 28
 	header.insert(header.size(), buf);																									// 5518
-	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");																			// 18
+	header.insert(header.size(), "\r\n--0123456789012345678901234567890123456789012345678901234567890123456789\r\n\r\n");	//78																		// 18
 }
 
 void upload_multiple_file(std::string &header)
@@ -93,13 +93,13 @@ void upload_multiple_file(std::string &header)
 
 	header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
-			 "Content-Type: multipart/form-data; boundary=myboundary\r\n"
+			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
 			 "Content-Length: 5192\r\n"
 			 "Connection: keep-alive\r\n"
 			 "\r\n"				 // length start after \n
 			 "--myboundary\r\n"; // 14
 	header.insert(header.size(),
-				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"logo_42.jpg\"\r\n"); // 79
+				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"42_Logo.svg\"\r\n"); // 79
 	header.insert(header.size(), "Content-Type: image/svg+xml\r\n\r\n");									// 31
 	header.insert(header.size(), buf);																		// 4928
 	header.insert(header.size(), "\r\n--myboundary\r\n");													// 16
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 	if (ft_connect == 1)
 		return (1);
 	std::cout << "Sending message..." << std::endl;
-	/*std::string header;
+	std::string header;
 
 	upload_multiple_file(header);
 	msg = send(ft_socket, header.c_str(), header.size(), 0);
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
 		std::cerr << "Couldn't receive message." << std::endl;
 		return (1);
 	}
-	std::cout << buffer << std::endl;*/
+	std::cout << buffer << std::endl;
 	upload_single_all("www/website/pictures/horizontal-logo-monochromatic-white.jpg", ft_socket);
 	ft_close(ft_socket);
 	return (0);

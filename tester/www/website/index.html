@@ -11,18 +11,18 @@
 	<section>
 		<h1>Webserv test1</h1>
 		<article>
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
+			<img src="./pictures/42_Logo.svg">
+			<img src="./pictures/42_Logo.svg">
+			<img src="./pictures/42_Logo.svg">
+			<img src="./pictures/42_Logo.svg">
+			<img src="./pictures/42_Logo.svg">
+			<img src="./pictures/42_Logo.svg">
 		</article>
 		<article>
 			<p>Static website for webserv project, 42 School</p>
 		</article>
 		<article>
-			<form action="cgi-bin/post.php" method="post">
+			<form action="http://localhost:8003/cgi-bin/post.php" method="post">
 				<label>POST :</label>
 				</br><input type="text" name="test1" />
 				</br><input type="text" name="test2" />
@@ -36,7 +36,7 @@
 				</br><input type="text" name="test3" />
 				<input type="submit" name="submit">
 			</form>
-			<form action="http://localhost:8003/" method="post" enctype="multipart/form-data">
+			<form action="http://localhost:8003" method="post" enctype="multipart/form-data">
 				<label>Upload a file (Shift + move_key for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
