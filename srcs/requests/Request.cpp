@@ -138,16 +138,52 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
-void	upload_file(std::string boundary)
+bool	check_boundary(std::string content_type)
 {
+	size_t i = 0;
+	size_t start_boundary = content_type.find("boundary=");
+	std::string boundary = content_type.substr(start_boundary + 9, content_type.size());
+	std::cout << "UPLOAD GOGO:" << start_boundary << std::endl;
+	if (start_boundary == std::string::npos)
+		return (false);
 	if (boundary[0] == '\"' && boundary[boundary.size() - 1] == '\"')//check if "" then remove
 	{
-		boundary.erase(0);
-		boundary.erase(boundary.size() - 1);
+		boundary.erase(0, 1);
+		boundary.erase(boundary.size() - 1, 1);
+		while (boundary[i] && boundary[i] != '\"')
+			++i;
+		if (boundary[i] && boundary[i] == '\"')
+			return (false);
 	}
 	std::cout << "Boundary : " << boundary;
 	if (boundary.size() > 70)
+		return (false);
+	return (true);
+}
+
+void	get_media_type(std::string & content_type, std::string & type,
+	std::string & sub_type)
+{
+	size_t	find_slash = content_type.find("/");
+	size_t	find_comma = content_type.find(";");
+
+	if (find_slash == std::string::npos || find_comma == std::string::npos)
 		return ;
+	type = content_type.substr(0, find_slash);
+	sub_type = content_type.substr(find_slash, find_comma - find_slash);
+}
+
+bool	upload_file(std::string content_type)
+{
+	std::string	type;
+	std::string	sub_type;
+
+	get_media_type(content_type, type, sub_type);
+	if (type.size() == 0 || sub_type.size() == 0)
+		return (false);
+	std::cout<<"type:"<<type<<" subtype:"<<sub_type<<std::endl;
+	bool result = check_boundary(content_type);
+	return (true);
 }
 
 size_t Request::parse_body(size_t start)
@@ -170,10 +206,8 @@ size_t Request::parse_body(size_t start)
 		&& _header.content_type.find("boundary=") != std::string::npos)
 	{
 		std::cout<<"content:"<<_header.content_type<<std::endl;
-		size_t start_boundary = _header.content_type.find("boundary=");
-		std::cout << "UPLOAD GOGO" << std::endl;
 		//upload gogo
-		upload_file(_header.content_type.substr(start_boundary + 9, _header.content_type.size()));
+		upload_file(_header.content_type);
 	}
 	_is_ready = true;
 	return (0);
