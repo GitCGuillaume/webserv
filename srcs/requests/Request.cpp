@@ -1,4 +1,5 @@
 #include "Request.hpp"
+#include "Cgi.hpp"
 
 Request::Request() : _is_ready(false), _code(0)
 {
@@ -138,7 +139,7 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
-bool	check_boundary(std::string content_type)
+bool	get_boundary(std::string content_type)
 {
 	size_t i = 0;
 	size_t start_boundary = content_type.find("boundary=");
@@ -182,14 +183,15 @@ bool	upload_file(std::string content_type)
 	if (type.size() == 0 || sub_type.size() == 0)
 		return (false);
 	std::cout<<"type:"<<type<<" subtype:"<<sub_type<<std::endl;
-	bool result = check_boundary(content_type);
+	bool result = get_boundary(content_type);
 	return (true);
 }
 
 size_t Request::parse_body(size_t start)
 {
-	std::cout<< "_header.content_type: " <<_header.content_type<<"END";
-	std::cout<<"_method:"<<_method<<"END"<<std::endl;
+	std::cout<<_req<<std::endl;
+	//std::cout<< "_header.content_type: " <<_header.content_type<<"END";
+	//std::cout<<"_method:"<<_method<<"END"<<std::endl;
 	bool	allow_upload = true;
 	char upload_path[] = {"/tmp"};
 	/*
@@ -200,15 +202,23 @@ size_t Request::parse_body(size_t start)
 	int size = ss.tellg();
 	ss.seekg(start);
 	std::string body = ss.str().substr(start, size);
-	std::cout << body;
-	if (_method.compare("POST") == 0
+	//std::cout<<body;
+	/*if (_method.compare("POST") == 0
 		&& _header.content_type.find("multipart/form-data") != std::string::npos
 		&& _header.content_type.find("boundary=") != std::string::npos)
-	{
-		std::cout<<"content:"<<_header.content_type<<std::endl;
+	{*/
+		//std::istringstream input(body);
+		//std::cin.rdbuf(input.rdbuf());
+		//std::cout << body;
+		/*std::cout<<"content:"<<_header.content_type<<std::endl;
 		//upload gogo
-		upload_file(_header.content_type);
-	}
+		upload_file(_header.content_type);*/
+		Cgi cgi("CONTENT_LENGTH=","CONTENT_TYPE=" + _header.content_type,"GATEWAY_INTERFACE=CGI/1.1",
+		"PATH_INFO=/website/cgi-bin/post.php","PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/post.php",
+		"QUERY_STRING=","REMOTE_ADDR=127.0.0.1","REMOTE_HOST=127.0.0.1","REQUEST_METHOD=" + _method,
+		"SCRIPT_NAME=","SERVER_NAME=localhost","SERVER_PORT=8003" ,"SERVER_PROTOCOL=HTTP/1.1");
+		cgi.start();
+	//}
 	_is_ready = true;
 	return (0);
 }

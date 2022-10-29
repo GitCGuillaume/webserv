@@ -110,10 +110,11 @@ void    Cgi::start()
 {
     pid_t   pid = 0;
     int fds[2];
-
+    //int fds2[2];
     if (pipe(fds) < 0)
         throw std::range_error("Error pipe");
     pid = fork();
+    write(fds[1], "a=a", 3);
     if (pid < 0)
     {
         close(fds[0]);
@@ -133,9 +134,12 @@ void    Cgi::start()
         if (request_method.compare("POST") == 0) //POST
         {
             close(fds[0]);
+            dup2(fds[1], STDIN_FILENO);
+            //dup2(fds2[0], STDOUT_FILENO);
             if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
                 std::cerr << "Execve CGI failed" << std::endl;
             close(fds[1]);
+            //close(fds2[0]);
         }
         else if (request_method.compare("GET") == 0) //GET
         {
