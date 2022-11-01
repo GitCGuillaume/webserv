@@ -38,7 +38,7 @@ void Config::parse_config()
 		if (key[0] == '#')
 			cur = _content.find("\n", cur + 1);
 		else if (key == "server")
-			_servers.push_back(parse_server(&cur));
+			_servers.push_back(parse_server(&cur, "server"));
 		else {
 			std::cout << "error" << key << std::endl;
 			throw ConfigException("incorrect keyword at the beginning of line", strerror(errno));
@@ -48,13 +48,16 @@ void Config::parse_config()
 		throw ConfigException("no server found", strerror(errno));
 }
 
-Config::server Config::parse_server(size_t *i)
+Config::server Config::parse_server(size_t *i, std::string type)
 {
-	size_t 	cur;
+	size_t 	cur = *i;
 	std::string key;
 	Config::server result;
 
-	cur = _content.find_first_not_of(" \t\n", *i);
+	if (type == "location")
+		result.name =  get_key(&cur, " \t\n");
+
+	cur = _content.find_first_not_of(" \t\n", cur);
 	if (cur == std::string::npos || _content[cur] != '{')
 		throw ConfigException("missing open bracket in server block", strerror(errno));
 	cur++;
@@ -72,21 +75,39 @@ Config::server Config::parse_server(size_t *i)
 			*i = _content.find_first_not_of(" \n\t", cur + 1);
 			break;
 		}
-		if (key == "location")
+		if (type == "server" && key == "location")
 		{
 			std::cout << key << " " << cur << std::endl;
-			cur =  _content.find_first_not_of(" \t\n", get_char(cur, '}') + 1);
-			std::cout << "cur end loc " << cur << std::endl;
+			// cur =  _content.find_first_not_of(" \t\n", get_char(cur, '}') + 1);
+			parse_server(&cur, "location");
 			// result.locations.push_back(parse_location(&cur));
 		}
 		else
 		{
 			std::string value = get_value(&cur);
 			std::cout << "value " << value << std::endl;
-
+			set_values(&result, key, value);
 		}
 	}
 	return result;
+}
+
+
+void Config::set_values(server *server, const std::string key, const std::string value)
+{
+	std::vector<std::string> tmp = split(value, ':');
+	if (key == "server_name")
+		server->name = value;
+	else if (key == "listen") {}
+	else if (key == "root")
+		server->root = value;
+	else if (key == "autoindex")
+		server->autoindex = value == "on" ? true : false;
+	else if (key == "error_page") {}
+	else {
+		std::cout << "key error " << key << std::endl;
+		// throw ConfigException("key error", strerror(errno));
+	}
 }
 
 std::string Config::get_key(size_t *idx, std::string delimiter)
@@ -111,6 +132,19 @@ std::string Config::get_value(size_t *idx)
 	return drop_comments(value);
 }
 
+size_t Config::get_char(size_t idx, char c)
+{
+	while(_content[idx] && _content[idx] != c)
+	{
+		if (_content[idx] == '#')
+			idx = _content.find_first_of("\n", idx + 1);
+		idx++;
+	}
+	if (_content[idx] == c)
+		return idx;
+	throw ConfigException("no terminating line", strerror(errno));
+}
+
 std::string Config::drop_comments(std::string str) 
 {
 	size_t i = 0;
@@ -124,15 +158,12 @@ std::string Config::drop_comments(std::string str)
 	return str;
 }
 
-size_t Config::get_char(size_t idx, char c)
+std::vector<std::string> Config::split(std::string input, char delimiter)
 {
-	while(_content[idx] && _content[idx] != c)
-	{
-		if (_content[idx] == '#')
-			idx = _content.find_first_of("\n", idx + 1);
-		idx++;
-	}
-	if (_content[idx] == c)
-		return idx;
-	throw ConfigException("no terminating line", strerror(errno));
+    std::vector<std::string> res;
+    std::stringstream ss(input);
+    std::string str;
+    while (getline(ss, str, delimiter))
+        res.push_back(str);
+    return res;
 }

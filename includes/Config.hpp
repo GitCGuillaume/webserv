@@ -18,35 +18,30 @@ class Config
 {
 	private:
 
-		struct location
+		struct server
 		{
+			std::string host;
 			std::string name;
 			std::string root;
 			std::string index;
 			bool autoindex;
-			std::map<std::string, std::string> fastcgi_param;
 			std::string fastcgi_pass;
+			std::map<std::string, std::string> fastcgi_param;
 			size_t client_max_body_size;
-			location() : name("/"), root("/var/lib/webserv/html/"), autoindex(false) {}
-		};
-
-		struct server
-		{
-			std::string name;
-			std::string host;
 			std::set<uint16_t> listens;
 			std::map<int, std::string> error_pages;
-			std::map<std::string, location> locations;
-			server() : host("127.0.0.1") {}
+			std::map<std::string, server> locations;
+			server() : host("127.0.0.1"), name("/"), root("/var/lib/webserv/html/"), autoindex(false) {}
 		};
 
 		void parse_config();
-		server parse_server(size_t *pos);
-		int check_line_syntax(std::string line);
+		server parse_server(size_t *pos, std::string type);
+		void set_values(server *server, std::string key, std::string value);
 		std::string get_key(size_t *idx, std::string delimiter);
 		std::string get_value(size_t *idx);
 		size_t get_char(size_t idx, char c);
 		std::string drop_comments(std::string str);
+		std::vector<std::string> split(std::string input, char delimiter);
 
 		std::string _content;
 		std::vector<server> _servers;
