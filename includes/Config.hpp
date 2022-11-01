@@ -34,11 +34,13 @@ private:
 		server() : host("127.0.0.1") {}
 	};
 
+	
+
+	std::vector<server> _servers;
+	std::string _content;
+	
 	void parse_config();
 	server parse_server(size_t &pos);
-
-	std::string _content;
-	std::vector<server> _servers;
 
 public:
 	Config(const char *conf);

@@ -1,15 +1,12 @@
 #include "ServerInput.hpp"
 
-
-ServerInput::ServerInput(Client &handler, int sock): _handler(handler), _socket(sock)
-{
-
-}
-
-ServerInput::ServerInput(const ServerInput &src): _handler(src._handler), _socket(src._socket)
+ServerInput::ServerInput(Client &handler, int sock) : _handler(handler), _socket(sock), _pos_end_header(0)
 {
 }
 
+ServerInput::ServerInput(const ServerInput &src) : _handler(src._handler), _socket(src._socket), _pos_end_header(src._pos_end_header)
+{
+}
 
 ServerInput::~ServerInput()
 {
@@ -17,22 +14,49 @@ ServerInput::~ServerInput()
 
 void ServerInput::readData()
 {
-    static size_t len = 0;
-    char buf [BUFFER_SIZE + 1];
+    size_t readBytes = _req.size();
+    char buf[BUFFER_SIZE + 1];
     ssize_t n;
-
+    int found = 0;
     n = recv(_socket, buf, BUFFER_SIZE, 0);
-    buf[n] = '\0';
-    _req += buf;
-    if (len >= 3)
-        len -= 3;
-    if (_req.getReq().rfind("\r\n\r\n", len) != std::string::npos)
+
+    if (n == -1)
     {
-        _req.parse();
-        std::cout << _req << std::endl;
-        len = 0;
+        perror(0);
+        exit(1);
     }
-    len = _req.getReq().size();
+    
+    _req.append_data(buf, n);
+    if (_req.getEntityHeader().content_length.empty())
+    {
+        size_t tmp = readBytes;
+        if (tmp >= 3)
+            tmp -= 3;
+        if ((_pos_end_header = _req.getReq().find("\r\n\r\n", tmp)) != std::string::npos)
+        {
+            _pos_end_header += 4;
+            _req.parse();
+            if (_req.is_ready())
+            {
+                std::cout << "is ready" << std::endl;
+                readBytes = 0;
+                _pos_end_header = 0;
+                return;
+            }
+        }
+    }
+    readBytes += n;
+    //if (len != _req.size())
+     //   std::cout << "len " << len << " size " << _req.size() << std::endl;
+    // std::cout << "length " << _req.getHeader().content_length << std::endl;
+    // std::cout << "len " << len << " end req " << _pos_end_header << std::endl;
+    if (!_req.getEntityHeader().content_length.empty() && _req.getContentLength() <= (readBytes - _pos_end_header))
+    {
+        std::cout << "LA" << std::endl;
+        _req.parse_body(_pos_end_header);
+        _pos_end_header = 0;
+        readBytes = 0;
+    }
 }
 
 void ServerInput::reset()
@@ -40,7 +64,7 @@ void ServerInput::reset()
     _req.reset();
 }
 
-const  Request &ServerInput::getReq(void)
+const Request &ServerInput::getReq(void)
 {
     return (_req);
 }

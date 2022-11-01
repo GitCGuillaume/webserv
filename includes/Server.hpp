@@ -10,6 +10,7 @@
 #include <set>
 #include "Client.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 #include <cstring>
 #include <errno.h>
 #include <sys/socket.h>
