@@ -202,7 +202,7 @@ size_t Request::parse_body(size_t start)
 	int size = ss.tellg();
 	ss.seekg(start);
 	std::string body = ss.str().substr(start, size);
-	// std::cout<<body;
+	//std::cout<<body;
 	/*if (_method.compare("POST") == 0
 		&& _header.content_type.find("multipart/form-data") != std::string::npos
 		&& _header.content_type.find("boundary=") != std::string::npos)
@@ -214,8 +214,11 @@ size_t Request::parse_body(size_t start)
 	//upload gogo
 	upload_file(_header.content_type);*/
 	// write(STDIN_FILENO, body.c_str(), 42);
-	Cgi cgi(body, "CONTENT_LENGTH=42", "CONTENT_TYPE=" + _header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
-			"PATH_INFO=/website/cgi-bin/post.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/post.php",
+	std::ostringstream ss;
+	ss << _header.content_length;
+	std::string content_length(ss.str());
+	Cgi cgi(body, "CONTENT_LENGTH=" + content_length, "CONTENT_TYPE=" + _header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
+			"PATH_INFO=/website/cgi-bin/post.php", "PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
 			"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
 			"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
 	cgi.start();
