@@ -6,15 +6,15 @@ CXXFLAGS = -Wall -Wextra -std=c++98  -g3 -I $(INCLUDES) #-Werror
 
 LDFLAGS =
 
-SERVER = Server.cpp Cgi.cpp
+SERVER = #Server.cpp Cgi.cpp
 
-CLIENT = Client.cpp
+CLIENT = #Client.cpp
 
-REQUESTS = Request.cpp
+REQUESTS = #Request.cpp
 
-RESPONSE = autoindex.cpp
+RESPONSE = #autoindex.cpp
 
-IO = ServerInput.cpp ServerOutput.cpp
+IO = #ServerInput.cpp ServerOutput.cpp
 
 CONFIG = Config.cpp
 
