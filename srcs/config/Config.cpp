@@ -106,7 +106,7 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 
 void Config::set_values(server *server, const std::string key, const std::string value)
 {
-	std::vector<std::string> tmp = split(value, ' ');
+	
 	if (key == "server_name")
 		server->server_name = value;
 	else if (key == "root")
@@ -116,7 +116,11 @@ void Config::set_values(server *server, const std::string key, const std::string
 	else if (key == "autoindex")
 		server->autoindex = value == "on" ? true : false;
 	else if (key == "fastcgi_param") {}
-	else if (key == "listen") {}
+	else if (key == "listen") {
+		std::vector<std::string> tmp = split(value, ':');
+		std::cout << "port: " << atoi(tmp[1].c_str()) << std::endl;
+		server->listens.insert(atoi(tmp[1].c_str()));
+	}
 	else if (key == "error_page") {
 		// server->error_page[]
 	}
@@ -129,7 +133,6 @@ void Config::server::init_error_page() {
 	error_page[400]= "response/error_pages/400.html";
 
 }
-
 
 
 std::vector<std::string> Config::split(std::string input, char delimiter)

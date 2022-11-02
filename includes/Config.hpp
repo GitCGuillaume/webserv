@@ -23,7 +23,8 @@ class Config
 			bool autoindex;
 			std::vector<std::string> index;
 			std::map<std::string, std::string> fastcgi_param;
-			std::set<uint16_t> listens;
+			// std::set<uint16_t> listens;
+			std::set<int> listens;
 			std::map<int, std::string> error_page;
 			std::map<std::string, server> locations;
 			void init_error_page();
