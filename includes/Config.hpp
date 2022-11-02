@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string.h>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -10,28 +11,23 @@
 #include <stdint.h>
 #include <algorithm>
 
-#define SUCCESS 1
-#define FAILED -1
-#define EMPTY -2
-
 class Config
 {
 	private:
 
 		struct server
 		{
-			std::string host;
-			std::string name;
+			std::string server_name;
 			std::string root;
-			std::string index;
-			bool autoindex;
 			std::string fastcgi_pass;
+			bool autoindex;
+			std::vector<std::string> index;
 			std::map<std::string, std::string> fastcgi_param;
-			size_t client_max_body_size;
 			std::set<uint16_t> listens;
-			std::map<int, std::string> error_pages;
-			std::vector<server> locations;
-			server() : host("127.0.0.1"), name("/"), root("/var/lib/webserv/html/"), autoindex(false) {}
+			std::map<int, std::string> error_page;
+			std::map<std::string, server> locations;
+			void init_error_page();
+			server() : root("/var/lib/webserv/html/"), autoindex(false) {init_error_page();}
 		};
 
 		void drop_comments();

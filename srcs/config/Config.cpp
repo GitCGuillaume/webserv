@@ -66,9 +66,6 @@ Config::server Config::parse_server(size_t *idx, std::string type)
 	size_t pos = *idx;
 	Config::server res;
 
-	if (type == "location")
-		res.name = get_key(&pos, " \t\n");
-
 	if (get_key(&pos, " \t\n") != "{")
 		throw ConfigException("open bracket missing in server block", strerror(errno));
 		
@@ -78,8 +75,11 @@ Config::server Config::parse_server(size_t *idx, std::string type)
 		std::cout << "key: " << key << std::endl;
 		if (key == "}" && (*idx = _content.find_first_not_of(" \n\t", pos + 1)))
 			break;
-		if (type == "server" && key == "location")
-			res.locations.push_back(parse_server(&pos, "location"));
+		if (type == "server" && key == "location") {
+			std::string name = get_key(&pos, " \t\n");
+			std::cout << "test" << name<< std::endl;
+			res.locations[name] = parse_server(&pos, "location");
+		}
 		else
 		{
 			std::string value = get_key(&pos, ";");
@@ -106,20 +106,31 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 
 void Config::set_values(server *server, const std::string key, const std::string value)
 {
-	std::vector<std::string> tmp = split(value, ':');
+	std::vector<std::string> tmp = split(value, ' ');
 	if (key == "server_name")
-		server->name = value;
-	else if (key == "listen") {}
+		server->server_name = value;
 	else if (key == "root")
 		server->root = value;
+	else if (key == "fastcgi_pass")
+		server->fastcgi_pass = value;
 	else if (key == "autoindex")
 		server->autoindex = value == "on" ? true : false;
-	else if (key == "error_page") {}
+	else if (key == "fastcgi_param") {}
+	else if (key == "listen") {}
+	else if (key == "error_page") {
+		// server->error_page[]
+	}
 	else {
 		std::cout << "key error: " << key << std::endl;
-		// throw ConfigException("key error", strerror(errno));
+		// throw ConfigException("key error" + key, strerror(errno));
 	}
 }
+void Config::server::init_error_page() {
+	error_page[400]= "response/error_pages/400.html";
+
+}
+
+
 
 std::vector<std::string> Config::split(std::string input, char delimiter)
 {
