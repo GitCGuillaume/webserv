@@ -10,7 +10,7 @@ SERVER = Server.cpp Cgi.cpp
 
 CLIENT = Client.cpp
 
-REQUESTS = Request.cpp
+REQUESTS = upload_tools.cpp Request.cpp
 
 RESPONSE = autoindex.cpp
 
@@ -27,7 +27,7 @@ SRCS			= $(addprefix srcs/,	\
 
 OBJS_DIR = objs
 
-HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp Cgi.hpp)
+HEADER = $(addprefix $(INCLUDES)/, webserv.hpp Server.hpp Client.hpp Request.hpp ServerInput.hpp ServerOutput.hpp Cgi.hpp upload_tools.hpp)
 
 INCLUDES = includes
 

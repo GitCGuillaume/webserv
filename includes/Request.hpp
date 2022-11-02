@@ -1,11 +1,13 @@
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
+#include "upload_tools.hpp"
 #include <iostream>
 #include <set>
 #include <map>
 #include <algorithm>
 #include <sstream>
+
 class Request
 {
 
@@ -51,7 +53,7 @@ private:
     std::string _method;
     std::string _url;
     std::string _version;
-    
+
     std::map<std::string, void *> _map_headers;
     t_header _header;
     bool _is_ready;

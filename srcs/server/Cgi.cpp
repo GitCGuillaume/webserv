@@ -110,7 +110,7 @@ Cgi &Cgi::operator=(Cgi const &src)
 
 void Cgi::start()
 {
-    std::FILE   *tmp = std::tmpfile();
+    std::FILE *tmp = std::tmpfile();
     pid_t pid = 0;
     int fds_child[2];
     int fds_parent[2];
@@ -135,14 +135,13 @@ void Cgi::start()
     }
     else if (pid == 0)
     {
-        char *ft_argv[3] = {const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
+        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
                             const_cast<char *>(_vec[3].c_str()), 0};
-        char *ft_envp[_vec.size() + 3];
+        char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
         ft_envp[13] = const_cast<char *>("REDIRECT_STATUS=200"); // hardcoded
-        ft_envp[14] = const_cast<char *>("TMPDIR=/home/gchopin/Documents/webserv/tester/www/website/");
-        ft_envp[15] = 0;
+        ft_envp[14] = 0;
         close(fds_parent[0]);
         close(fds_child[1]);
         dup2(fds_parent[1], STDOUT_FILENO);
@@ -158,13 +157,13 @@ void Cgi::start()
     close(fds_child[0]);
     int wstatus = 0;
     wait(&wstatus);
-    //exit(0);
+    // exit(0);
     char c = 0;
     for (int i = 0; i < 10000; ++i)
     {
         read(fds_parent[0], &c, 1);
         std::cout << c;
-        c=0;
+        c = 0;
     }
     close(fds_parent[0]);
     close(fds_child[1]);

@@ -39,14 +39,35 @@
 				</br><input type="text" name="test3" />
 				<input type="submit" name="submit">
 			</form>
+		</article>
+		<article>
+			<h2>Multiple upload</h2>
 			<form action="http://localhost:8003/cgi-bin/upload_file.php" method="post" enctype="multipart/form-data">
-				<label>Upload a file (Shift + move_key for multiple files):</label>
+				<label>Upload a file with CGI (Shift + move_key for multiple files):</label>
+				<input type="file" name="upload_files[]" multiple>
+				</br><input type="submit" name="submit">
+			</form>
+			<form action="http://localhost:8003/upload/" method="post" enctype="multipart/form-data">
+				<label>Upload a file without CGI (Shift + move_key for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
 			</form>
 		</article>
 		<article>
-			<h2>LINKS</h2>
+			<h3>Single upload</h3>
+			<form action="http://localhost:8003/cgi-bin/upload_file.php" method="post" enctype="multipart/form-data">
+				<label>Upload a file with CGI</label>
+				<input type="file" name="upload_files[]">
+				</br><input type="submit" name="submit">
+			</form>
+			<form action="http://localhost:8003/upload/" method="post" enctype="multipart/form-data">
+				<label>Upload a file without CGI</label>
+				<input type="file" name="upload_files[]">
+				</br><input type="submit" name="submit">
+			</form>
+		</article>
+		<article>
+			<h4>LINKS</h4>
 			<ul>
 				<li><a href="list_codes.html">TESTS CODES</a></li>
 				<li><a href="pictures">IMG FOLDER</a></li>

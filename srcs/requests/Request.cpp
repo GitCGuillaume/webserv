@@ -139,59 +139,11 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
-bool get_boundary(std::string content_type)
-{
-	size_t i = 0;
-	size_t start_boundary = content_type.find("boundary=");
-	std::string boundary = content_type.substr(start_boundary + 9, content_type.size());
-	std::cout << "UPLOAD GOGO:" << start_boundary << std::endl;
-	if (start_boundary == std::string::npos)
-		return (false);
-	if (boundary[0] == '\"' && boundary[boundary.size() - 1] == '\"') // check if "" then remove
-	{
-		boundary.erase(0, 1);
-		boundary.erase(boundary.size() - 1, 1);
-		while (boundary[i] && boundary[i] != '\"')
-			++i;
-		if (boundary[i] && boundary[i] == '\"')
-			return (false);
-	}
-	std::cout << "Boundary : " << boundary;
-	if (boundary.size() > 70)
-		return (false);
-	return (true);
-}
-
-void get_media_type(std::string &content_type, std::string &type,
-					std::string &sub_type)
-{
-	size_t find_slash = content_type.find("/");
-	size_t find_comma = content_type.find(";");
-
-	if (find_slash == std::string::npos || find_comma == std::string::npos)
-		return;
-	type = content_type.substr(0, find_slash);
-	sub_type = content_type.substr(find_slash, find_comma - find_slash);
-}
-
-bool upload_file(std::string content_type)
-{
-	std::string type;
-	std::string sub_type;
-
-	get_media_type(content_type, type, sub_type);
-	if (type.size() == 0 || sub_type.size() == 0)
-		return (false);
-	std::cout << "type:" << type << " subtype:" << sub_type << std::endl;
-	bool result = get_boundary(content_type);
-	return (true);
-}
-
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
-	//  std::cout<< "_header.content_type: " <<_header.content_type<<"END";
-	//  std::cout<<"_method:"<<_method<<"END"<<std::endl;
+	//   std::cout<< "_header.content_type: " <<_header.content_type<<"END";
+	//   std::cout<<"_method:"<<_method<<"END"<<std::endl;
 	bool allow_upload = true;
 	char upload_path[] = {"/tmp"};
 	/*
@@ -202,7 +154,7 @@ size_t Request::parse_body(size_t start)
 	int size = ss.tellg();
 	ss.seekg(start);
 	std::string body = ss.str().substr(start, size);
-	//std::cout<<body;
+	std::cout << body;
 	/*if (_method.compare("POST") == 0
 		&& _header.content_type.find("multipart/form-data") != std::string::npos
 		&& _header.content_type.find("boundary=") != std::string::npos)
@@ -214,14 +166,22 @@ size_t Request::parse_body(size_t start)
 	//upload gogo
 	upload_file(_header.content_type);*/
 	// write(STDIN_FILENO, body.c_str(), 42);
-	std::ostringstream ss;
-	ss << _header.content_length;
-	std::string content_length(ss.str());
-	Cgi cgi(body, "CONTENT_LENGTH=" + content_length, "CONTENT_TYPE=" + _header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
-			"PATH_INFO=/website/cgi-bin/post.php", "PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
-			"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
-			"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
-	cgi.start();
+	if (use_cgi(_url, ".php") == false)
+	{
+		try_upload(_header.content_type, body, _header.content_length);
+	}
+	else
+	{
+		// std::cout << "Use cgi" << use_cgi(_url, "") << std::endl;
+		std::ostringstream ss;
+		ss << _header.content_length;
+		std::string content_length(ss.str());
+		Cgi cgi(body, "CONTENT_LENGTH=" + content_length, "CONTENT_TYPE=" + _header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
+				"PATH_INFO=/website/cgi-bin/post.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
+				"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
+				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
+		cgi.start();
+	}
 	// }
 	_is_ready = true;
 	return (0);
