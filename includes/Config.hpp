@@ -30,17 +30,15 @@ class Config
 			size_t client_max_body_size;
 			std::set<uint16_t> listens;
 			std::map<int, std::string> error_pages;
-			std::map<std::string, server> locations;
+			std::vector<server> locations;
 			server() : host("127.0.0.1"), name("/"), root("/var/lib/webserv/html/"), autoindex(false) {}
 		};
 
+		void drop_comments();
 		void parse_config();
-		server parse_server(size_t *pos, std::string type);
-		void set_values(server *server, std::string key, std::string value);
+		server parse_server(size_t *idx, std::string type);
 		std::string get_key(size_t *idx, std::string delimiter);
-		std::string get_value(size_t *idx);
-		size_t get_char(size_t idx, char c);
-		std::string drop_comments(std::string str);
+		void set_values(server *server, std::string key, std::string value);
 		std::vector<std::string> split(std::string input, char delimiter);
 
 		std::string _content;
