@@ -1,9 +1,10 @@
 #include "Server.hpp"
 
-Server::Server() : _socket(0), _epfd(epoll_create(1))
+Server::Server(const char *conf) : _socket(0), _epfd(epoll_create(1)), _config(conf)
 {
     if (_epfd < 0)
         throw ServerException("epoll create constructor", strerror(errno));
+    init_map_config();
 }
 
 Server::~Server()
@@ -20,7 +21,7 @@ Server &    Server::operator=(Server const cpy)
     }
     return (*this);
 }
-Server::Server(Server const & cpy) : _socket(cpy._socket)
+Server::Server(Server const & cpy) : _socket(cpy._socket), _config(cpy._config)
 {
 }
 
@@ -41,7 +42,7 @@ static int setnonblocking(int sockfd)
 	return 0;
 }
 
-void    Server::createNewSocket(int port)
+void    Server::createNewSocket(uint16_t port)
 {
     int opt = 1;
     int newSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,6 +70,23 @@ void    Server::createNewSocket(int port)
     _sockets.insert(newSock);
 }
 
+void Server::init_map_config(void)
+{
+    for (Config::vect_serv::const_iterator it = _config.getServers().begin(); it != _config.getServers().end();++it)
+    {
+        Config::ptr_server ref(&*it);
+        for (Config::vect_listens::const_iterator it2 = it->listens.begin(); it2 != it->listens.end(); ++it2)
+        {
+            if (_map_config.find(*it2) == _map_config.end())
+            {
+                _map_config.insert(std::make_pair(*it2, &*it));
+                createNewSocket(it2->second);
+            }
+        }
+    }
+}
+
+
 void    Server::loop()
 {
     epoll_event events[20];
@@ -77,6 +95,7 @@ void    Server::loop()
     socklen_t s_len (sizeof(cli_addr));
     char inet[16];
     int cpt = 0;
+    std::pair<std::string, uint16_t> host;
     while (1)
     {
         nb_fds = epoll_wait(_epfd, events, 20, -1);
@@ -88,11 +107,16 @@ void    Server::loop()
                 int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
                 if (setnonblocking(sockClient) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                inet_ntop(AF_INET, (char *)&(cli_addr.sin_addr), inet, sizeof(cli_addr));
-				std::cout << "[+] connected with " << inet << ": " << ntohs(cli_addr.sin_port) << std::endl;
+                getsockname(sockClient, reinterpret_cast<sockaddr*>(&cli_addr), &s_len);
+                host.first = inet_ntoa(cli_addr.sin_addr);
+                host.second = ntohs(cli_addr.sin_port);
+				std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
                 std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
                 epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
-                _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient)));
+                if (_map_config.find(host) != _map_config.end())
+                    _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, _map_config[host])));
+                else
+                    _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, NULL)));
             }
            
             else if (_curr_event.events & EPOLLIN)
@@ -120,6 +144,7 @@ void    Server::loop()
         }
     }
 }
+
 
 int const & Server::getSocket() const
 {

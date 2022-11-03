@@ -144,6 +144,7 @@ void Config::set_values(server *server, const std::string key, const std::string
 	else if (key == "listen" && !server->is_location) {
 		uint16_t port;
 		std::vector<std::string> tmp = split(value, ':');
+		std::cout << "size " << (inet_addr(tmp[0].c_str()) != (in_addr_t) -1) << std::endl;
 		std::cout << "split " << tmp[0] << std::endl;
 		if (tmp.size() == 1)
 		{
@@ -162,8 +163,9 @@ void Config::set_values(server *server, const std::string key, const std::string
 				throw ConfigException("invalid ip address", "");
 
 		}
-		else if (tmp.size() == 2 && inet_addr(tmp[0].c_str()) != (in_addr_t) -1 && str_is_num(tmp[1]) && server::assign_port(tmp[1], port))
+		else if (tmp.size() == 2 && (tmp[0].empty() || inet_addr(tmp[0].c_str()) != (in_addr_t) -1) && str_is_num(tmp[1]) && server::assign_port(tmp[1], port))
 		{
+			std::cout << "here" <<tmp[1] << std::endl;
 			if (tmp[0].empty())
 				tmp[0] = "0.0.0.0";
 			server->listens.push_back(std::make_pair(tmp[0], port));

@@ -30,6 +30,8 @@ class Config
 			std::map<int, std::string> error_page;
 			std::map<std::string, server> locations;
 			bool is_location;
+
+
 			void init_error_page();
 			static bool assign_port(const std::string &str, uint16_t &val);
 			server() : root("/var/lib/webserv/html/"), autoindex(false), is_location(false) {init_error_page();}
@@ -91,6 +93,10 @@ class Config
 		Config(const char *conf);
 		Config(const Config &src);
 		~Config();
+
+		typedef std::vector<server> vect_serv;
+		typedef std::vector<std::pair<std::string, uint16_t> > vect_listens;
+		typedef const server * ptr_server;
 		
 		const std::string &getContent() const;
 		const std::vector<server> &getServers() const;

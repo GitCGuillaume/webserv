@@ -1,7 +1,9 @@
 #include "Client.hpp"
 
-Client::Client(uint16_t port, int socket): _port(port), _si(*this, socket), _so(socket)
+Client::Client(uint16_t port, int socket, Config::ptr_server conf): _port(port), _conf(conf), _si(*this, socket), _so(socket)
 {
+	if (_conf)
+		std::cout << "Client " << _conf->server_name << std::endl;
 }
 
 Client::Client(const Client &src): _port(src._port), _si(src._si), _so(src._so)

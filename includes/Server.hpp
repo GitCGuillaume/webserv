@@ -29,15 +29,15 @@ class Server
 public:
     typedef struct epoll_event epoll_event;
 
-    Server();
+    Server(const char *conf);
     ~Server();
     Server &operator=(Server const cpy);
     Server(Server const &cpy);
 
-    void createNewSocket(int port);
+    void createNewSocket(uint16_t port);
+    void init_map_config(void);
     void poll_in();
     void loop(void);
-
     int const &getSocket() const;
     void setSocket(int const domain, int const type, int protocol);
 private:
@@ -46,6 +46,8 @@ private:
     std::map<int, Client> _clients;
     int _epfd;
     epoll_event _curr_event;
+    Config _config;
+    std::map<const std::pair<std::string, uint16_t>, Config::ptr_server> _map_config; 
 
     class ServerException: public std::exception
     {
