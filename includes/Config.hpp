@@ -31,7 +31,9 @@ class Config
 			std::map<std::string, server> locations;
 			bool is_location;
 			void init_error_page();
+			void set_values(std::string key, std::string value);
 			static bool assign_port(const std::string &str, uint16_t &val);
+			std::pair<std::string, uint16_t> handle_listen(const std::string value);
 			server() : root("/var/lib/webserv/html/"), autoindex(false), is_location(false) {init_error_page();}
 			const server &operator=(const server &rhs)
 			{
@@ -66,8 +68,7 @@ class Config
 		void parse_config();
 		server parse_server(size_t *idx, std::string type, server *parent);
 		std::string get_key(size_t *idx, std::string delimiter);
-		void set_values(server *server, std::string key, std::string value);
-		std::vector<std::string> split(std::string input, char delimiter);
+		static std::vector<std::string> split(std::string input, char delimiter);
 
 		std::string _content;
 		std::vector<server> _servers;
