@@ -4,6 +4,10 @@ Server::Server(const char *conf) : _socket(0), _epfd(epoll_create(1)), _config(c
 {
     if (_epfd < 0)
         throw ServerException("epoll create constructor", strerror(errno));
+    s_general_header::init_map_ge_headers();
+    s_request_header::init_map_re_headers();
+    s_entity_header::init_map_en_headers();
+    Response::init_map_method();
     init_map_config();
 }
 
@@ -13,7 +17,7 @@ Server::~Server()
         close(*it);
 }
 
-Server &    Server::operator=(Server const cpy)
+Server &Server::operator=(Server const cpy)
 {
     if (this != &cpy)
     {
@@ -21,36 +25,34 @@ Server &    Server::operator=(Server const cpy)
     }
     return (*this);
 }
-Server::Server(Server const & cpy) : _socket(cpy._socket), _config(cpy._config)
+Server::Server(Server const &cpy) : _socket(cpy._socket), _config(cpy._config)
 {
 }
 
 static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 {
-	struct epoll_event ev;
-	ev.events = events;
-	ev.data.fd = fd;
-	return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));
+    struct epoll_event ev;
+    ev.events = events;
+    ev.data.fd = fd;
+    return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));
 }
 
 static int setnonblocking(int sockfd)
 {
-	if (fcntl(sockfd, F_SETFD, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) ==
-	    -1) {
-		return -1;
-	}
-	return 0;
+    if (fcntl(sockfd, F_SETFD, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) == -1)
+        return -1;
+    return 0;
 }
 
-void    Server::createNewSocket(uint16_t port)
+void Server::createNewSocket(uint16_t port)
 {
     int opt = 1;
     int newSock = socket(AF_INET, SOCK_STREAM, 0);
     if (newSock < 0)
         throw ServerException("socket createNewSocket", strerror(errno));
-    
+
     if (setsockopt(newSock, SOL_SOCKET,
-            SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+                   SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
         throw ServerException("setsockopt createNewSocket", strerror(errno));
 
     if (setnonblocking(newSock) < 0)
@@ -72,7 +74,7 @@ void    Server::createNewSocket(uint16_t port)
 
 void Server::init_map_config(void)
 {
-    for (Config::vect_serv::const_iterator it = _config.getServers().begin(); it != _config.getServers().end();++it)
+    for (Config::vect_serv::const_iterator it = _config.getServers().begin(); it != _config.getServers().end(); ++it)
     {
         Config::ptr_server ref(&*it);
         for (Config::vect_listens::const_iterator it2 = it->listens.begin(); it2 != it->listens.end(); ++it2)
@@ -86,19 +88,16 @@ void Server::init_map_config(void)
     }
 }
 
-
-void    Server::loop()
+void Server::loop()
 {
-    epoll_event events[20];
+    epoll_event events[MAX_EVENTS];
     int nb_fds;
     struct sockaddr_in cli_addr;
-    socklen_t s_len (sizeof(cli_addr));
-    char inet[16];
-    int cpt = 0;
+    socklen_t s_len(sizeof(cli_addr));
     std::pair<std::string, uint16_t> host;
     while (1)
     {
-        nb_fds = epoll_wait(_epfd, events, 20, -1);
+        nb_fds = epoll_wait(_epfd, events, MAX_EVENTS, -1);
         for (int i = 0; i < nb_fds; ++i)
         {
             _curr_event = events[i];
@@ -107,18 +106,21 @@ void    Server::loop()
                 int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
                 if (setnonblocking(sockClient) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                getsockname(sockClient, reinterpret_cast<sockaddr*>(&cli_addr), &s_len);
+                getsockname(sockClient, reinterpret_cast<sockaddr *>(&cli_addr), &s_len);
                 host.first = inet_ntoa(cli_addr.sin_addr);
                 host.second = ntohs(cli_addr.sin_port);
-				std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
+                std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
                 std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
                 epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
                 if (_map_config.find(host) != _map_config.end())
-                    _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, _map_config[host])));
+                    _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, _map_config[host])));
                 else
-                    _clients.insert(std::pair<int,Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, NULL)));
+                {
+                    std::cout << "BOUH-----------------------------------------------------------\n";
+                    _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, NULL)));
+                }
             }
-           
+
             else if (_curr_event.events & EPOLLIN)
             {
                 if (setnonblocking(_curr_event.data.fd) < 0)
@@ -135,18 +137,18 @@ void    Server::loop()
                 if (it != _clients.end())
                     it->second.epoll_out();
             }
-             
-            if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP)) {
-				std::cout << "[+] connection closed" << std::endl;
-				epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
-				close(_curr_event.data.fd);
-			}   
+
+            if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP))
+            {
+                std::cout << "[+] connection closed" << std::endl;
+                epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
+                close(_curr_event.data.fd);
+            }
         }
     }
 }
 
-
-int const & Server::getSocket() const
+int const &Server::getSocket() const
 {
     return (_socket);
 }

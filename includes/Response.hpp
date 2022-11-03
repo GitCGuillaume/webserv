@@ -14,12 +14,13 @@ private:
     s_response_header _re_header;
     s_entity_header _en_header;
     std::ostringstream _bodyData;
+    Config::ptr_server _conf;
 
 
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
 
 public:
-    Response(const Request &req);
+    Response(const Request &req, Config::ptr_server conf);
     Response(const Response &src);
     ~Response();
 

@@ -46,13 +46,9 @@ void ServerInput::readData()
         }
     }
     readBytes += n;
-    //if (len != _req.size())
-     //   std::cout << "len " << len << " size " << _req.size() << std::endl;
-    // std::cout << "length " << _req.getHeader().content_length << std::endl;
-    // std::cout << "len " << len << " end req " << _pos_end_header << std::endl;
     if (!_req.getEntityHeader().content_length.empty() && _req.getContentLength() <= (readBytes - _pos_end_header))
     {
-        std::cout << "LA" << std::endl;
+        //std::cout << "LA" << std::endl;
         _req.parse_body(_pos_end_header);
         _pos_end_header = 0;
         readBytes = 0;

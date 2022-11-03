@@ -9,10 +9,6 @@ int main(int argc, char **argv)
 	try
 	{
 		Server s(argv[1]);
-		s_general_header::init_map_ge_headers();
-		s_request_header::init_map_re_headers();
-		s_entity_header::init_map_en_headers();
-		Response::init_map_method();
 		s.loop();
 		/* code */
 	}

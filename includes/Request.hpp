@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <sstream>
 #include "Header.hpp"
+#include "Config.hpp"
+
 class Request
 {
 

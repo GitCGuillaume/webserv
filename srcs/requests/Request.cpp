@@ -104,7 +104,7 @@ size_t Request::parse_request_line(void)
 	size_t pos2 = _req.find(" ", pos + 1);
 	if (pos2 == std::string::npos)
 		return (pos2);
-	_url = _req.substr(pos + 1, pos2 - pos);
+	_url = _req.substr(pos + 1, pos2 - pos - 1);
 	pos = _req.find("\r\n", pos2 + 1);
 	if (pos == std::string::npos)
 		return (pos);

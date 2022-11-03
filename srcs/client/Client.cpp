@@ -6,7 +6,7 @@ Client::Client(uint16_t port, int socket, Config::ptr_server conf): _port(port),
 		std::cout << "Client " << _conf->server_name << std::endl;
 }
 
-Client::Client(const Client &src): _port(src._port), _si(src._si), _so(src._so)
+Client::Client(const Client &src): _port(src._port), _conf(src._conf), _si(src._si), _so(src._so)
 {
 }
 
@@ -20,6 +20,7 @@ Client &Client::operator=(const Client &rhs)
 }
 void    Client::epoll_in(void)
 {
+	std::cout << "HGJHGJGJ " << this->_conf->server_name << std::endl;
 	_si.readData();
 }
 
@@ -30,7 +31,8 @@ void    Client::epoll_out(void)
 		std:: cout << "-------request----------" << std::endl;
 		std::cout << "Ready to send ..." << std::endl;
 		std::cout << _si.getReq();
-		Response rep (_si.getReq());
+		std::cout << "HGJHGJGJ " << this->_conf->server_name << std::endl;
+		Response rep (_si.getReq(), _conf);
 		_so.sendResponse(rep);
 		_si.reset();
 	}

@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-Response::Response(const Request &req) : _req(req), _version("HTTP/1.1")
+Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _version("HTTP/1.1"), _conf(conf)
 {
     (this->*_map_method_ptr[req.getMethod()])();
 }
@@ -15,9 +15,20 @@ Response::~Response()
 
 void Response::get_method(void)
 {
-    _status_code = 200;
-    _en_header.content_length = "17";
-    _bodyData << "Hey ! It's a test";
+    
+    std::cout << "HERE "<<_conf->server_name << std::endl;
+    std::cout << "URL " << _req.getUrl() <<"|" << std::endl;
+    std::cout << *_conf << std::endl;
+    std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(_req.getUrl());
+    if (it != _conf->locations.end())
+    {
+        Config::ptr_server s = &it->second;
+        std::string file = s->root + _req.getUrl();
+        std::cout << "file to open " << file << std::endl;
+        _status_code = 200;
+        _en_header.content_length = "17";
+        _bodyData << "Hey ! It's a test";
+    }
 }
 
 void Response::post_method(void)
