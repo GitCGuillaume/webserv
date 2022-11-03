@@ -31,8 +31,7 @@ const std::vector<Config::server> &Config::getServers() const
 void Config::drop_comments() 
 {
 	size_t i = 0;
-	size_t l = _content.length();
-	while (i < l)
+	while (i < _content.length())
 	{
 		if (_content[i] == '#')
 			_content.erase(i, _content.find_first_of("\n", i + 1) - i + 1);
@@ -51,10 +50,8 @@ void Config::parse_config()
 		std::cout << "key " << key << std::endl;
 		if (key == "server")
 			_servers.push_back(parse_server(&pos, "server"));
-		else {
-			std::cout << "error " << key << std::endl;
-			throw ConfigException("incorrect keyword at start of line", strerror(errno));
-		}
+		else 
+			throw ConfigException("incorrect keyword at start of line: " + key, strerror(errno));
 	}
 	if (_servers.empty())
 		throw ConfigException("no server found", strerror(errno));
@@ -80,8 +77,7 @@ Config::server Config::parse_server(size_t *idx, std::string type)
 			std::cout << "test" << name<< std::endl;
 			res.locations[name] = parse_server(&pos, "location");
 		}
-		else
-		{
+		else {
 			std::string value = get_key(&pos, ";");
 			std::cout << "value: " << value << std::endl;
 			set_values(&res, key, value);  
@@ -115,11 +111,15 @@ void Config::set_values(server *server, const std::string key, const std::string
 		server->fastcgi_pass = value;
 	else if (key == "autoindex")
 		server->autoindex = value == "on" ? true : false;
-	else if (key == "fastcgi_param") {}
+	else if (key == "fastcgi_param") {
+		std::vector<std::string> tmp = split(value, ' ');
+		std::cout << "param: " << tmp[0] << ", value: " << tmp[1] << std::endl;
+		server->fastcgi_param[tmp[0]] = tmp[1];
+	}
 	else if (key == "listen") {
-		std::vector<std::string> tmp = split(value, ':');
-		std::cout << "port: " << atoi(tmp[1].c_str()) << std::endl;
-		server->listens.insert(atoi(tmp[1].c_str()));
+		// std::vector<std::string> tmp = split(value, ':');
+		// std::cout << "port: " << atoi(tmp[1].c_str()) << std::endl;
+		// server->listens.insert(atoi(tmp[1].c_str()));
 	}
 	else if (key == "error_page") {
 		// server->error_page[]

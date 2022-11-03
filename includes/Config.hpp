@@ -24,6 +24,7 @@ class Config
 			std::vector<std::string> index;
 			std::map<std::string, std::string> fastcgi_param;
 			// std::set<uint16_t> listens;
+			
 			std::set<int> listens;
 			std::map<int, std::string> error_page;
 			std::map<std::string, server> locations;

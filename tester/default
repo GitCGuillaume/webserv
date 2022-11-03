@@ -22,9 +22,8 @@ server {
 	root /var/www/html;
 
 	# Add index.php to the list if you are using PHP
-	index index.php index.html;
-
-	server_name localhost;
+	
+	index index.php index.html;server_name localhost;
 
 	location / {
 		autoindex on;
@@ -32,7 +31,17 @@ server {
 		# as directory, then fall back to displaying a 404.
 		try_files $uri $uri/ =404;
 	}
-	location ~ \.php {
+
+	location /route/{
+		allow POST GET DELETE
+		redirection url
+		root directory
+		cgi .php chemin
+		cgi .py chemin
+		DEFAULT_FILE??????
+	}
+
+	location /test/ {
                 try_files $uri $uri/ =404;
                 include fastcgi_params;
                 fastcgi_index index.php;
