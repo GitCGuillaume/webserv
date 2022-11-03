@@ -163,11 +163,9 @@ void Config::server::set_values(const std::string key, const std::string value)
 		this->autoindex = value == "on" ? true : false;
 	else if (key == "listen" && !this->is_location) 
 		this->listens.push_back(handle_listen(value));
-	else if (key == "cgi_info") {
-		std::vector<std::string> tmp = split(value, ' ');
-		if (tmp.size() != 2)
-			throw ConfigException("error: allow_methods", "");
-		this->cgi_info[tmp[0]] =  tmp[1];
+	else if (key == "client_max_body_size") {
+		if (!str_is_num(value) || (client_body_limit = strtoul(value.c_str(), NULL, 10) && false) || errno == ERANGE)
+			throw ConfigException("error: client_max_body_size", "");
 	}
 	else if (key == "index") {
 		std::vector<std::string> tmp = split(value, ' ');
@@ -181,10 +179,6 @@ void Config::server::set_values(const std::string key, const std::string value)
 			this->allow_methods.push_back(tmp[i]);
 		}
 	}
-	else if (key == "client_max_body_size") {
-		if (!str_is_num(value) || (client_body_limit = strtoul(value.c_str(), NULL, 10) && false) || errno == ERANGE)
-			throw ConfigException("error: client_max_body_size", "");
-	}
 	else if (key == "error_page") {
 		int status_code;
 		std::vector<std::string> tmp = split(value, ' ');
@@ -195,6 +189,12 @@ void Config::server::set_values(const std::string key, const std::string value)
 				throw ConfigException("error: error_page", "");
 			this->error_page[status_code] = *(tmp.end() - 1);
 		}
+	}
+	else if (key == "cgi_info") {
+		std::vector<std::string> tmp = split(value, ' ');
+		if (tmp.size() != 2)
+			throw ConfigException("error: allow_methods", "");
+		this->cgi_info[tmp[0]] =  tmp[1];
 	}
 	else {
 		std::cout << "key error: " << key << std::endl;

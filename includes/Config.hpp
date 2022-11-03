@@ -75,7 +75,6 @@ class Config
 					os << "error_page: " << it->first <<" " << it->second << std::endl;
 				for (std::map<std::string, server>::const_iterator it = rhs.locations.begin(); it != rhs.locations.end() ; ++it)
 					os << it->first << " " << it->second;
-
 				os << "}\n";
 				return (os);
 			}
