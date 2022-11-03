@@ -38,7 +38,7 @@ class Config
 			void set_values(std::string key, std::string value);
 			static bool assign_port(const std::string &str, uint16_t &val);
 			std::pair<std::string, uint16_t> handle_listen(const std::string &value);
-			server() : root("/var/lib/webserv/html/"), client_body_limit(0), autoindex(false), is_location(false) {init_error_page();}
+			server() : root("/var/lib/webserv/html/"), autoindex(false), client_body_limit(0), is_location(false) {init_error_page();}
 			const server &operator=(const server &rhs)
 			{
 				server_name = rhs.server_name;

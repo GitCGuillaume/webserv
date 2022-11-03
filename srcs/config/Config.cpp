@@ -110,7 +110,7 @@ bool Config::server::str_is_num(const std::string &str)
 {
 	if (str.empty())
 		return (false);
-	for (int i = 0; i < str.length(); ++i)
+	for (size_t i = 0; i < str.length(); ++i)
 		if (!std::isdigit(str[i]))
 			return false;
 	return true;
