@@ -108,31 +108,44 @@ Cgi &Cgi::operator=(Cgi const &src)
     return (*this);
 }
 
+/* use tmpfile, because fd alone have a limit of size
+    65KB ? */
 void Cgi::start()
 {
-    // std::FILE *tmp = std::tmpfile();
     pid_t pid = 0;
     int fds_child[2];
     int fds_parent[2];
     int fds_save[2];
-
+    std::FILE *tmp_child_in = std::tmpfile();
+    // std::FILE *tmp_child_out = std::tmpfile();
+    // std::FILE *tmp_parent_in = std::tmpfile();
+    std::FILE *tmp_parent_out = std::tmpfile();
+    std::rewind(tmp_child_in);
+    std::rewind(tmp_parent_out);
+    int fd_child_in = fileno(tmp_child_in);
+    // int fd_child_out = fileno(tmp_child_out);
+    // int fd_parent_in = fileno(tmp_parent_in);
+    int fd_parent_out = fileno(tmp_parent_out);
+    // std::cout << "filenb=" << filenb << std::endl;
     fds_save[0] = dup(STDIN_FILENO);
     fds_save[1] = dup(STDOUT_FILENO);
-    if (pipe(fds_child) < 0)
+    /*if (pipe(fds_child) < 0)
         throw std::range_error("Error pipe");
     if (pipe(fds_parent) < 0)
         throw std::range_error("Error pipe");
+    */
     pid = fork();
-    // std::cout << "AAA" << std::endl;
-    write(fds_child[1], _body.c_str(), _body.length()); // PAS SÛR QUE CA REPONDE AU SUJET
     // std::cout << "BBB" << std::endl;
     std::string request_method(_vec[8].substr(15, _vec[8].length()));
     if (pid < 0)
     {
-        close(fds_child[0]);
+        close(fd_child_in);
+        close(fd_parent_out);
+        /*close(fds_child[0]);
         close(fds_child[1]);
         close(fds_parent[0]);
         close(fds_parent[1]);
+        */
         throw std::range_error("Process creation failed");
     }
     else if (pid == 0)
@@ -144,31 +157,40 @@ void Cgi::start()
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
         ft_envp[13] = const_cast<char *>("REDIRECT_STATUS=200"); // hardcoded
         ft_envp[14] = 0;
-        close(fds_parent[0]);
-        close(fds_child[1]);
-        dup2(fds_parent[1], STDOUT_FILENO);
-        dup2(fds_child[0], STDIN_FILENO);
-        close(fds_parent[1]);
-        close(fds_child[0]);
+        dup2(fd_parent_out, STDOUT_FILENO);
+        dup2(fd_child_in, STDIN_FILENO);
+        // close(fd_parent_out);
+        // close(fd_child_in);
+        /*close(fds_parent[0]);
+        close(fds_child[1]);*/
+        /*dup2(fds_parent[1], STDOUT_FILENO);
+        dup2(fds_child[0], STDIN_FILENO);*/
+        /*close(fds_parent[1]);
+        close(fds_child[0]);*/
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
     }
+    write(fd_parent_out, _body.c_str(), _body.length()); // PAS SÛR QUE CA REPONDE AU SUJET
     // fcntl?
-    fcntl(fds_child[0], F_SETFL, O_NONBLOCK); // Otherwise it block server
-    close(fds_parent[1]);
-    close(fds_child[0]);
+    std::cout << "BB" << std::endl;
+    // fcntl(fd_child_in, F_SETFL, O_NONBLOCK); // Otherwise it block server
+    //   fcntl(fds_child[0], F_SETFL, O_NONBLOCK); // Otherwise it block server
+    /*close(fds_parent[1]);
+    close(fds_child[0]);*/
+    // close(fd_child_in);
     int wstatus = 0;
     wait(&wstatus);
     // exit(0);
     char c = 0;
-    for (int i = 0; i < 10000; ++i)
+    /*for (int i = 0; i < 10000; ++i)
     {
-        read(fds_parent[0], &c, 1);
+        read(fd_parent_out, &c, 1);
         std::cout << c;
         c = 0;
-    }
-    close(fds_parent[0]);
-    close(fds_child[1]);
+    }*/
+    close(fd_parent_out);
+    /*close(fds_parent[0]);
+    close(fds_child[1]);*/
     dup2(fds_save[0], STDIN_FILENO);
     dup2(fds_save[1], STDOUT_FILENO);
     close(fds_save[0]);

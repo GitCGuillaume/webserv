@@ -4,10 +4,12 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include <cstdio>
 #include <unistd.h>
 #include <vector>
 #include <sys/wait.h>
 #include <sstream>
+#include <fstream>
 
 class Cgi
 {

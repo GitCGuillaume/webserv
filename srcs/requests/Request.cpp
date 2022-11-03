@@ -142,8 +142,8 @@ size_t Request::parse_header(size_t start)
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
-	//    std::cout<< "_header.content_type: " <<_header.content_type<<"END";
-	//    std::cout<<"_method:"<<_method<<"END"<<std::endl;
+	//     std::cout<< "_header.content_type: " <<_header.content_type<<"END";
+	//     std::cout<<"_method:"<<_method<<"END"<<std::endl;
 	bool allow_upload = true;
 	char upload_path[] = {"/tmp"};
 	/*
@@ -180,9 +180,9 @@ size_t Request::parse_body(size_t start)
 			"PATH_INFO=/website/cgi-bin/upload_file.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
 			"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
 			"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
-	//cgi.start();
-	// }
+	cgi.start();
 	//  }
+	//   }
 	_is_ready = true;
 	return (0);
 }
