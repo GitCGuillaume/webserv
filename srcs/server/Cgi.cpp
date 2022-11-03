@@ -110,7 +110,7 @@ Cgi &Cgi::operator=(Cgi const &src)
 
 void Cgi::start()
 {
-    std::FILE *tmp = std::tmpfile();
+    // std::FILE *tmp = std::tmpfile();
     pid_t pid = 0;
     int fds_child[2];
     int fds_parent[2];
@@ -123,7 +123,9 @@ void Cgi::start()
     if (pipe(fds_parent) < 0)
         throw std::range_error("Error pipe");
     pid = fork();
+    // std::cout << "AAA" << std::endl;
     write(fds_child[1], _body.c_str(), _body.length()); // PAS SÛR QUE CA REPONDE AU SUJET
+    // std::cout << "BBB" << std::endl;
     std::string request_method(_vec[8].substr(15, _vec[8].length()));
     if (pid < 0)
     {

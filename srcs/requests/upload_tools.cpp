@@ -38,7 +38,7 @@ void get_boundary(std::string const &content_type, std::string &boundary, bool *
         *boundary_ok = false;
         return;
     }
-    std::cout << "Boundary : " << boundary;
+    std::cout << "Boundary : |" << boundary << "|" << std::endl;
     *boundary_ok = true;
 }
 
@@ -80,6 +80,7 @@ bool use_cgi(std::string const url, std::string const type_cgi)
 void upload_file(std::string const &body, std::string const &boundary)
 {
     std::string filename;
+    std::string copy_boundary;
     size_t pos = 0;
     size_t pos_old = 0;
 
@@ -92,12 +93,20 @@ void upload_file(std::string const &body, std::string const &boundary)
         pos += 2;
         pos_old = pos;
         pos = body.find("\r\n");
+        copy_boundary = body.substr(pos_old, pos - pos_old);
+        if (copy_boundary.compare(boundary) != 0)
+        {
+            // err
+            return;
+        }
+        copy_boundary.clear();
         pos = body.find("filename=\"");
         pos_old = pos + 10;
         pos = body.find("\"", pos_old);
         filename = body.substr(pos_old, pos - pos_old);
         std::cout << "filename: |" << filename << "|" << std::endl;
         pos = body.find("\r\n\r\n");
+        pos_old = pos;
         std::cout << "pos_old: " << body[pos_old] << " pos: " << body[pos + 4] << std::endl;
     }
 }
