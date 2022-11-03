@@ -25,8 +25,11 @@ void    Client::epoll_out(void)
 {
 	if (_si.getReq().is_ready())
 	{
+		std:: cout << "-------request----------" << std::endl;
 		std::cout << "Ready to send ..." << std::endl;
-		_so.sendResponse();
+		std::cout << _si.getReq();
+		Response rep (_si.getReq());
+		_so.sendResponse(rep);
 		_si.reset();
 	}
 }

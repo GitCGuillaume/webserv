@@ -1,8 +1,8 @@
 #include "webserv.hpp"
 
-void    open_stream_autoindex(std::list<std::string> &lst, std::stringstream &ret_html)
+void    open_stream_autoindex(std::list<std::string> &lst, std::string &ret_html)
 {
-    std::ifstream ifs("/home/gchopin/Documents/webserv/srcs/response/autoindex.html", std::ifstream::in);
+    std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
     std::list<std::string>::iterator it(lst.begin());
     std::list<std::string>::iterator ite(lst.end());
     std::string str;
@@ -11,23 +11,23 @@ void    open_stream_autoindex(std::list<std::string> &lst, std::stringstream &re
         throw std::runtime_error("Couldn't open autoindex.html");
     while (std::getline(ifs, str, '\n'))
     {
-        ret_html << str << std::endl;
+        ret_html += str + "\n";
         if (str.find("<pre>") != std::string::npos)
         {
             for (; it != ite; ++it)
             {
-                ret_html << "           <a href=\"" << *it << "\">" << *it << "</a>" << std::endl;
+                ret_html += "           <a href=\"" + *it + "\">" + *it + "</a>\n";
             }
         }
     }
     ifs.close();
 }
 
-void    load_directory_autoindex(std::stringstream &ret_html)
+void    load_directory_autoindex(std::string &ret_html)
 {
     std::list<std::string> lst;
     struct dirent   *dire = NULL;
-    DIR*   dir = opendir("/home/gchopin/Documents/webserv/tester/www");
+    DIR*   dir = opendir("tester/www");
 
     if (!dir)
         throw std::runtime_error("Couldn't open autoindex directory.");

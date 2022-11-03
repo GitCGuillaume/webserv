@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <iostream>
 #include <unistd.h>
+#include "Response.hpp"
 
 class ServerOutput
 {
@@ -14,7 +15,7 @@ public:
     ServerOutput(int socket);
     ~ServerOutput();
 
-    void sendResponse(void);
+    void sendResponse(const Response &response);
 };
 
 #endif
