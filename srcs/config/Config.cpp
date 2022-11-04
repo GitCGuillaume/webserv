@@ -9,6 +9,8 @@ Config::Config(const char *conf)
 		ss << f.rdbuf(); 
 		_content = ss.str();
 	}
+	else
+		throw ConfigException("constructor error", "failed to read file");
 	drop_comments();
 	parse_config();
 	for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
@@ -81,6 +83,8 @@ Config::server Config::parse_server(size_t *idx, std::string type, server *paren
 			break;
 		if (type == "server" && key == "location") {
 			std::string name = get_key(&pos, " \t\n");
+			if (name[name.size() - 1] != '/')
+				name += "/";
 			res.locations[name] = parse_server(&pos, "location", &res);
 		}
 		else

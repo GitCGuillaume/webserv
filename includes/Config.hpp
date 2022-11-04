@@ -70,8 +70,8 @@ class Config
 					os << "listen: " << it->first << ":" << it->second << std::endl;
 				for (std::map<std::string, std::string>::const_iterator it = rhs.cgi_info.begin(); it != rhs.cgi_info.end(); ++it)
 					os << "cgi_info: " << it->first <<" " << it->second << std::endl;
-				for (std::map<int, std::string>::const_iterator it = rhs.error_page.begin(); it != rhs.error_page.end(); ++it)
-					os << "error_page: " << it->first <<" " << it->second << std::endl;
+				// for (std::map<int, std::string>::const_iterator it = rhs.error_page.begin(); it != rhs.error_page.end(); ++it)
+				// 	os << "error_page: " << it->first <<" " << it->second << std::endl;
 				for (std::map<std::string, server>::const_iterator it = rhs.locations.begin(); it != rhs.locations.end() ; ++it)
 					os << it->first << "| " << it->second;
 				os << "}\n";

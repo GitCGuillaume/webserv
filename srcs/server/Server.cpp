@@ -116,7 +116,6 @@ void Server::loop()
                     _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, _map_config[host])));
                 else
                 {
-                    std::cout << "BOUH-----------------------------------------------------------\n";
                     _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, NULL)));
                 }
             }
