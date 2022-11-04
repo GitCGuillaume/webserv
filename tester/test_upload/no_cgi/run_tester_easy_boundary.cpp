@@ -54,22 +54,22 @@ void upload_single_file(std::string &header, std::string link)
 
 	header = "POST /website/upload/ HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
-			 "Content-Type: multipart/form-data; boundary=\"0123456789012345678901234567890123456789012345678901234567890123456789\"\r\n"
-			 "Content-Length: 258\r\n"
+			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
+			 "Content-Length: 200\r\n"
 			 "Connection: keep-alive\r\n"
-			 "\r\n"																			 // length start after \n
-			 "--0123456789012345678901234567890123456789012345678901234567890123456789\r\n"; // 74
+			 "\r\n"				 // length start after \n
+			 "--myboundary\r\n"; // 14
 	header.insert(header.size(),
-				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test.txt\"\r\n");				  // 76
-	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");													  // 28
-	header.insert(header.size(), buf);																					  // 2
-	header.insert(header.size(), "\r\n--0123456789012345678901234567890123456789012345678901234567890123456789\r\n\r\n"); // 78
+				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary.txt\"\r\n"); // 85
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											  // 28
+	header.insert(header.size(), buf);																			  // 55
+	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");													  // 18
 }
 
 void upload_multiple_file(std::string &header)
 {
-	std::ifstream file("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/Image.jpg", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file2("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/42_Logo.svg", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file2("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", std::ifstream::in | std::ifstream::binary);
 	std::istreambuf_iterator<char> it(file), ite;
 	std::istreambuf_iterator<char> it2(file2), ite2;
 	std::string buf(it, ite);
@@ -78,20 +78,20 @@ void upload_multiple_file(std::string &header)
 	header = "POST /website/upload/ HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
 			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
-			 "Content-Length: 31368\r\n"
+			 "Content-Length: 387\r\n"
 			 "Connection: keep-alive\r\n"
 			 "\r\n"				 // length start after \n
 			 "--myboundary\r\n"; // 14
 	header.insert(header.size(),
-				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"Image.jpg\"\r\n"); // 77
-	header.insert(header.size(), "Content-Type: image/jpeg\r\n\r\n");									  // 28
-	header.insert(header.size(), buf);																	  // 26177
-	header.insert(header.size(), "\r\n--myboundary\r\n");												  // 16
+				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary.txt\"\r\n"); // 85
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											  // 28
+	header.insert(header.size(), buf);																			  // 55
+	header.insert(header.size(), "\r\n--myboundary\r\n");														  // 16
 	header.insert(header.size(),
-				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"42_Logo.svg\"\r\n"); // 79
-	header.insert(header.size(), "Content-Type: image/svg+xml\r\n\r\n");									// 31
-	header.insert(header.size(), buf2);																		// 4928
-	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");												// 18
+				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary2.txt\"\r\n"); // 86
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											   // 28
+	header.insert(header.size(), buf2);																			   // 57
+	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");													   // 18
 }
 
 void upload_single_all(std::string link, int ft_socket)
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	if (ft_connect == 1)
 		return (1);
 	std::cout << "Sending message..." << std::endl;
-	/*upload_multiple_file(header);
+	upload_multiple_file(header);
 	msg = send(ft_socket, header.c_str(), header.size(), 0);
 	sleep(1);
 	if (msg < 0)
@@ -152,8 +152,9 @@ int main(int argc, char **argv)
 		std::cerr << "Couldn't receive message." << std::endl;
 		return (1);
 	}
-	std::cout << buffer << std::endl;*/
-	upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test.txt", ft_socket);
+	std::cout << buffer << std::endl;
+	
+	//upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", ft_socket);
 	ft_close(ft_socket);
 	return (0);
 }

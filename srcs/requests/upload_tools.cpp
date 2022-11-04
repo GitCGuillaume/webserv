@@ -80,34 +80,81 @@ bool use_cgi(std::string const url, std::string const type_cgi)
 void upload_file(std::string const &body, std::string const &boundary)
 {
     std::string filename;
-    std::string copy_boundary;
+    std::string copy;
     size_t pos = 0;
     size_t pos_old = 0;
+    std::string separator("--");
 
+    separator.append(boundary);
+    separator.append("\r\n");
     // boucle
-    // check boundary
-
-    // find first \r\n
+    // find first \r\n = pos_old
+    // + boundary, substr pos old et new pos
+    // compare boundary
+    // seek content-disposition
+    // check content type and if necessary MINE ?
     if (body[pos] && body[pos] == '-' && body[pos + 1] && body[pos + 1] == '-')
     {
         pos += 2;
         pos_old = pos;
         pos = body.find("\r\n");
-        copy_boundary = body.substr(pos_old, pos - pos_old);
-        if (copy_boundary.compare(boundary) != 0)
+        copy = body.substr(pos_old, pos - pos_old);
+        if (copy.compare(boundary) != 0)
         {
-            // err
+            // err?
             return;
         }
-        copy_boundary.clear();
-        pos = body.find("filename=\"");
-        pos_old = pos + 10;
-        pos = body.find("\"", pos_old);
-        filename = body.substr(pos_old, pos - pos_old);
-        std::cout << "filename: |" << filename << "|" << std::endl;
-        pos = body.find("\r\n\r\n");
+        pos_old = pos + 2;
+        pos = body.find("\"");
+        copy = body.substr(pos_old, (pos + 1) - pos_old);
+        if (copy.compare("Content-Disposition: form-data; name=\"") != 0)
+        {
+            // err?
+            return;
+        }
+        // pos += 38;
+        std::cout << "start content_dispo: |" << copy << "|" << std::endl;
+        ++pos;
         pos_old = pos;
-        std::cout << "pos_old: " << body[pos_old] << " pos: " << body[pos + 4] << std::endl;
+        pos = body.find("\"", pos);
+        if (pos == std::string::npos)
+        {
+            // err?
+            return;
+        }
+        pos = body.find("filename=\"");
+        if (pos == std::string::npos)
+        {
+            //?
+        }
+        else
+        {
+            pos_old = pos + 10;
+            pos = body.find("\"", pos_old);
+            filename = body.substr(pos_old, pos - pos_old);
+            std::cout << "filename: |" << filename << "|" << std::endl;
+            pos_old = pos + 3;
+            pos = body.find(":", pos_old);
+            copy = body.substr(pos_old, (pos + 1) - pos_old);
+            std::cout << "content-type:|" << copy << "|" << std::endl;
+            if (copy.compare("Content-Type:") != 0)
+            {
+                // Stop loop?
+                return;
+            }
+            pos_old = pos + 2;
+            pos = body.find("\r\n\r\n");
+            copy = body.substr(pos_old, pos - pos_old);
+            std::cout << "Content:|" << copy << "|" << std::endl;
+            pos += 4;
+            std::cout << "start body:" << body[pos] << std::endl;
+            pos_old = pos;
+            std::cout << "SEP:" << separator << "|" << std::endl;
+            pos = body.find(separator, pos_old);
+            copy.clear();
+            copy = body.substr(pos_old, pos - pos_old);
+            std::cout << "content body:|" << copy << "|";
+        }
     }
 }
 
