@@ -28,8 +28,7 @@ public:
     void get_method(void);
     void post_method(void);
     void delete_method (void);
-    void handle_index(const std::string &url);
-    bool fill_body(Config::ptr_server s, std::string const &file);
+    bool fill_body(std::string const &file);
     std::string seralize(void) const;
     static void init_map_method(void);
 
