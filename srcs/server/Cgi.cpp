@@ -66,7 +66,7 @@ void Cgi::start()
     }
     else if (pid == 0)
     {
-        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
+        char *ft_argv[3] = {const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
                             const_cast<char *>(_vec[3].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)

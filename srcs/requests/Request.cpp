@@ -158,7 +158,7 @@ size_t Request::parse_body(size_t start)
 		ss << _header.content_length;
 		std::string content_length(ss.str());
 		Cgi cgi(body, "CONTENT_LENGTH=" + content_length, "CONTENT_TYPE=" + _header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
-				"PATH_INFO=/website/cgi-bin/post.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/post.php",
+				"PATH_INFO=/website/cgi-bin/upload_file.php", "PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
 				"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
 				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
 		cgi.start();

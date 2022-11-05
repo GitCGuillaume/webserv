@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 
 bool try_upload(std::string const content_type, std::string const body, long const content_lenght);
 void get_boundary(std::string const &content_type, std::string &boundary);

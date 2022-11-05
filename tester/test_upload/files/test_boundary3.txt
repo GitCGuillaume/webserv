@@ -1,0 +1,4 @@
+myboundary
+Content-Disposition: form-data; name="upload_files[]"; filename="test_boundary3.txt"
+--myboundary
+Content-Disposition: form-data; name="upload_files[]"; filename="test_boundary.txt"

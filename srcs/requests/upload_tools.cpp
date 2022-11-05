@@ -79,14 +79,13 @@ bool use_cgi(std::string const url, std::string const type_cgi)
 
 void upload_file(std::string const &body, std::string const &boundary)
 {
+    std::ofstream    new_file;
     std::string filename;
     std::string copy;
     size_t pos = 0;
     size_t pos_old = 0;
-    std::string separator("--");
+    std::string separator("\n--" + boundary + "\r\n");
 
-    separator.append(boundary);
-    separator.append("\r\n");
     // boucle
     // find first \r\n = pos_old
     // + boundary, substr pos old et new pos
@@ -151,14 +150,22 @@ void upload_file(std::string const &body, std::string const &boundary)
             pos_old = pos;
             std::cout << "SEP:" << separator << "|" << std::endl;
             pos = body.find(separator, pos_old);
-            copy.clear();
-            copy = body.substr(pos_old, pos - pos_old);
-            std::cout << "content body:|" << copy << "|";
+            if (pos == std::string::npos)
+            {
+                //err / stop?
+                return ;
+            }
+            new_file.open(filename.c_str(), std::fstream::out);
+            if (new_file.is_open())
+            {
+                new_file.write(body.substr(pos_old, (pos+1) - pos_old).c_str(), pos - pos_old);
+                new_file.close();
+            }
         }
     }
 }
 
-bool try_upload(std::string const content_type, std::string const body, long const content_lenght)
+bool try_upload(std::string const content_type, std::string const body, long const content_length)
 {
     std::string type;
     std::string sub_type;
