@@ -198,7 +198,7 @@ void Config::server::set_values(const std::string key, const std::string value)
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
 			throw ConfigException("invalid cgi_info: " + value);
-		this->cgi_info[tmp[0]] =  tmp[1];
+		this->cgi_info[tmp[0]] = tmp[1];
 	}
 	else {
 		std::cout << "key error: " << key << std::endl;
