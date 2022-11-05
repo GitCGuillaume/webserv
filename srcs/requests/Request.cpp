@@ -1,4 +1,6 @@
 #include "Request.hpp"
+#include "Cgi.hpp"
+#include "upload_tools.hpp"
 
 Request::Request() : _is_ready(false), _code(0)
 {
@@ -134,9 +136,29 @@ size_t Request::parse_header(size_t start)
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
+	ss.seekg(0, ss.end);
+	int size = ss.tellg();
 	ss.seekg(start);
-	std::string body = ss.str();
-	// std::cout << body;
+	std::string body = ss.str().substr(start, size);
+	std::cout << body << std::endl;
+	// Besoin traitement methode
+	if (use_cgi(_url, ".php") == false)
+	{
+		try_upload(_en_header.content_type, body);
+	}
+	else // run cgi
+	{
+		/*std::ostringstream ss;
+		ss << _en_header.content_length;
+		std::string content_length(ss.str());
+		*/
+		std::cout<<"LENGTH"<<_en_header.content_length<<std::endl;
+		Cgi cgi(body, "CONTENT_LENGTH=" + _en_header.content_length, "CONTENT_TYPE=" + _en_header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
+				"PATH_INFO=/website/cgi-bin/upload_file.php", "PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
+				"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
+				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
+		cgi.start();
+	}
 	_is_ready = true;
 	return (0);
 }
