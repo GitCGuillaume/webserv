@@ -153,10 +153,8 @@ std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string
 		return 	std::make_pair(address, port); 
 }
 
-
 void Config::server::set_values(const std::string key, const std::string value)
 {
-	
 	if (key == "server_name" && !this->is_location)
 		this->server_name = value;
 	else if (key == "root")
