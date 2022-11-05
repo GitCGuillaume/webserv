@@ -1,9 +1,11 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
+#include <sys/stat.h>
 #include <iostream>
 #include <errno.h>
 #include "Request.hpp"
 #include <cstring>
+#include <cstdio>
 
 class Response
 {

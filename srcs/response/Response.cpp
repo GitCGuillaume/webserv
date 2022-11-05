@@ -62,9 +62,12 @@ void Response::post_method(void)
 
 void Response::delete_method(void)
 {
-    _status_code = 200;
-    _en_header.content_length = "17";
-    _bodyData << "Hey ! It's a test";
+    std::string url = _req.getUrl();
+    struct stat buffer;   
+    if (stat (url.c_str(), &buffer) == 0)
+	    _status_code = remove(url.c_str()) == 0 ? 204 : 403;
+	else
+        _status_code = 404;
 }
 
 std::string Response::seralize(void) const
