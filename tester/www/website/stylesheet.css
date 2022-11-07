@@ -3,17 +3,14 @@ body{
 	padding: 0;
 	background: brown;
 	font-family: Arial, sans-serif;
-}
-
-section{
-	margin-top:50px;
-	margin-left:50px;
-	margin-right: auto;
-}
+	height: 100vh;
+	background-image: url(pictures/alliance_background.jpg);
+	background-size: cover;
+}  
 
 img{
 	width: 250px;
-	padding-right 50px;
+	padding-right: 50px;
 	margin: auto;
 	padding-left: auto;
 }

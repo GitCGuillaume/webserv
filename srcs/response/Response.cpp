@@ -68,6 +68,7 @@ void Response::delete_method(void)
 	    _status_code = remove(url.c_str()) == 0 ? 204 : 403;
 	else
         _status_code = 404;
+    
 }
 
 std::string Response::seralize(void) const

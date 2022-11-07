@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>Webserv</title>
+	<link rel="icon" href="../favicon.ico" />
+	<link rel="stylesheet" href="stylesheet.css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+
+<body>			
+	<section>
+		<h1>Webserv</h1>
+		<article>
+			<img src="./pictures/logo_42.jpg">
+		</article>
+		<article>
+			<p>Static website for webserv project, 42 School</p>
+		</article>
+		<article>
+			<form action="cgi-bin/post.php" method="post">
+				<label>POST :</label>
+				</br><input type="text" name="test1" />
+				<input type="submit" name="submit">
+			</form>
+			<form action="cgi-bin/get.php" method="get">
+				<label>GET :</label>
+				</br><input type="text" name="test1" />
+				<input type="submit" name="submit">
+			</form>
+			<form action="http://localhost:8003/" method="post" enctype="multipart/form-data">
+				<label>Upload a file (Shift + move_key for multiple files):</label>
+				<input type="file" name="upload_files[]" multiple>
+				</br><input type="submit" name="submit">
+			</form>
+		</article>
+		<article>
+			<h2>LINKS</h2>
+			<ul>
+				<li><a href="list_codes.html">TESTS CODES</a></li>
+				<li><a href="pictures">IMG FOLDER</a></li>
+				<li><a href="upload">UPLOAD FOLDER</a></li>
+			</ul>
+		</article>
+	</section>
+</body>
+
+</html>
