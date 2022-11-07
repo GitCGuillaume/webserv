@@ -13,7 +13,6 @@
 
 
 <body>
-	<section>
 		<div id="title">
 			<div>
 				<h1>Webserv</h1>
@@ -21,33 +20,42 @@
 			</div>
 			<div><img src="./pictures/logo_42.jpg"></div>
 		</div>
+		<div class="content">
+		<div>
+			<h2>Links</h2>
+			<ul>
+				<li><a href="list_codes.html">http error codes</a></li>
+				<li><a href="upload">Uploads</a></li>
+			</ul>
+		</div>
 
-		<div class="forn">
-			<form action="cgi-bin/get.php" method="get">
-				<label>GET :</label>
-				</br><input type="text" name="test1" />
-				<input type="submit" name="submit">
-			</form>
-			<form action="cgi-bin/post.php" method="post">
-				<label>POST :</label>
-				</br><input type="text" name="test1" />
-				<input type="submit" name="submit">
-			</form>
-			<form action="http://localhost:8003/" method="post" enctype="multipart/form-data">
-				<label>Upload a file (Shift + move_key for multiple files):</label>
+		<article>
+			<h2>Upload</h2>
+			<form action="http://localhost:8003/cgi-bin/upload_file.php" method="post" enctype="multipart/form-data">
+				<label>Upload a file with CGI (press Shift for multiple files)</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
 			</form>
-		</div>
-		<div>
-			<h2>LINKS</h2>
+			<form action="http://localhost:8003/upload/" method="post" enctype="multipart/form-data">
+				<label>Upload a file without CGI (press Shift for multiple files)</label>
+				<input type="file" name="upload_files[]" multiple>
+				</br><input type="submit" name="submit">
+			</form>
+		</article>
+
+		<article>
+			<h2>CGI</h2>
 			<ul>
-				<li><a href="list_codes.html">TESTS CODES</a></li>
-				<li><a href="pictures">IMG FOLDER</a></li>
-				<li><a href="upload">UPLOAD FOLDER</a></li>
+				<li><a href="../phpver/">PHP info</a></li>
+				<li><a href="">test.py</a></li>
 			</ul>
-		</div>
-	</section>
+			
+					</article>
+
+
+	
+
+	</div>
 </body>
 
 </html>
