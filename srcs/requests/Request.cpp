@@ -45,6 +45,7 @@ std::ostream &operator<<(std::ostream &os, const Request &rhs)
 	os << rhs._ge_header.toString();
 	os << rhs._re_header.toString();
 	os << rhs._en_header.toString();
+	os << rhs._body;
 	os << "---req----\n";
 	return (os);
 }
@@ -108,7 +109,7 @@ size_t Request::parse_request_line(void)
 	pos = _req.find("\r\n", pos2 + 1);
 	if (pos == std::string::npos)
 		return (pos);
-	_version = _req.substr(pos2 + 1, pos - pos2);
+	_version = _req.substr(pos2 + 1, pos - pos2 - 1);
 	return (pos + 2);
 }
 
@@ -134,9 +135,9 @@ size_t Request::parse_header(size_t start)
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
-	ss.seekg(start);
-	std::string body = ss.str();
-	// std::cout << body;
+	//ss.seekg(start);
+	_body = ss.str().substr(start);
+	//std::cout << body;
 	_is_ready = true;
 	return (0);
 }
@@ -153,9 +154,9 @@ void Request::append_data(const char *data, size_t n)
 
 bool Request::fillHeader(const std::string &field_name, const std::string &field_value)
 {
-	if (s_general_header::_map_ge_headers_ptr.find(field_name) != s_general_header::_map_ge_headers_ptr.end())
+	if (s_general_header::__map_ge_headers_ptr.find(field_name) != s_general_header::__map_ge_headers_ptr.end())
 	{
-		_ge_header.*s_general_header::_map_ge_headers_ptr[field_name] = field_value;
+		_ge_header.*s_general_header::__map_ge_headers_ptr[field_name] = field_value;
 		return (true);
 	}
 	else if (s_request_header::_map_re_headers_ptr.find(field_name) != s_request_header::_map_re_headers_ptr.end())
@@ -163,9 +164,9 @@ bool Request::fillHeader(const std::string &field_name, const std::string &field
 		_re_header.*s_request_header::_map_re_headers_ptr[field_name] = field_value;
 		return (true);
 	}
-	else if (s_entity_header::_map_en_headers_ptr.find(field_name) != s_entity_header::_map_en_headers_ptr.end())
+	else if (s_entity_header::__map_en_headers_ptr.find(field_name) != s_entity_header::__map_en_headers_ptr.end())
 	{
-		_en_header.*s_entity_header::_map_en_headers_ptr[field_name] = field_value;
+		_en_header.*s_entity_header::__map_en_headers_ptr[field_name] = field_value;
 		return (true);
 	}
 	return (false);
@@ -207,10 +208,14 @@ const s_entity_header &Request::getEntityHeader() const
 	return (_en_header);
 }
 
-
 size_t Request::getContentLength() const
 {
 	return (std::strtoul(_en_header.content_length.c_str(), NULL, 10));
+}
+
+const std::string &Request::getBody() const
+{
+	return (_body);
 }
 
 size_t Request::size()

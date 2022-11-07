@@ -7,6 +7,7 @@ Server::Server(const char *conf) : _socket(0), _epfd(epoll_create(1)), _config(c
     s_general_header::init_map_ge_headers();
     s_request_header::init_map_re_headers();
     s_entity_header::init_map_en_headers();
+    s_entity_header::init_map_mime();
     Response::init_map_method();
     init_map_config();
 }
@@ -32,6 +33,7 @@ Server::Server(Server const &cpy) : _socket(cpy._socket), _config(cpy._config)
 static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 {
     struct epoll_event ev;
+    bzero(&ev.data, sizeof(ev.data));
     ev.events = events;
     ev.data.fd = fd;
     return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));

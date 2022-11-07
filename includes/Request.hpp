@@ -49,6 +49,7 @@ public:
     const s_entity_header &getEntityHeader() const;
     //const t_header &getHeader() const;
     size_t getContentLength() const;
+    const std::string &getBody() const;
     size_t size();
 
 private:
@@ -63,6 +64,7 @@ private:
     s_general_header _ge_header;
     s_request_header _re_header;
     s_entity_header _en_header;
+    std::string _body;
     bool _is_ready;
     int _code;
 };
