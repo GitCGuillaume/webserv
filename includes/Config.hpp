@@ -108,12 +108,9 @@ class Config
 			std::string m_error;
 
 		public:
-			ConfigException(const std::string &fun, const std::string &error)
-				: m_error(fun + ": " + error)
-			{
-			}
+			ConfigException(const std::string &error) : m_error("error: " + error) {}
 			~ConfigException() throw(){}
-			const char *what() const throw() { return (m_error.c_str());}
+			const char *what() const throw() {return m_error.c_str();}
 		};
 
 	

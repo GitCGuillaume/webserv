@@ -10,7 +10,7 @@ Config::Config(const char *conf)
 		_content = ss.str();
 	}
 	else
-		throw ConfigException("constructor error", "failed to read file");
+		throw ConfigException("failed to read file");
 	drop_comments();
 	parse_config();
 	for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
@@ -58,10 +58,10 @@ void Config::parse_config()
 		if (key == "server")
 			_servers.push_back(parse_server(&pos, "server", NULL));
 		else 
-			throw ConfigException("error: parse_config", "incorrect keyword at start of line" + key);
+			throw ConfigException("incorrect keyword at start of line" + key);
 	}
 	if (_servers.empty())
-		throw ConfigException("no server found", strerror(errno));
+		throw ConfigException("no server found");
 }
 
 Config::server Config::parse_server(size_t *idx, std::string type, server *parent)
@@ -71,7 +71,7 @@ Config::server Config::parse_server(size_t *idx, std::string type, server *paren
 	Config::server res;
 
 	if (get_key(&pos, " \t\n") != "{")
-		throw ConfigException("open bracket missing in server block", strerror(errno));
+		throw ConfigException("open bracket missing in server block");
 
 	if (parent)
 		res = *parent;
@@ -101,10 +101,10 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 {
 	size_t pre = _content.find_first_not_of(" \t\n", *idx);
 	if (pre == std::string::npos)
-		throw ConfigException("parsing error", strerror(errno));
+		throw ConfigException("parsing error");
 	size_t pos = _content.find_first_of(delimiter, pre);
 	if (pos == std::string::npos)
-		throw ConfigException("no delimiter found", strerror(errno));
+		throw ConfigException("no delimiter found");
 	std::string key = _content.substr(pre, pos - pre);
 	*idx = pos;
 	return key;
@@ -136,12 +136,12 @@ std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string
 		{
 			if (str_is_num(tmp[0])) {
 				if (!server::assign_port(value, port))			
-					throw ConfigException("error: incorrect PORT value", "");
+					throw ConfigException("incorrect PORT value");
 			}
 			else if (inet_addr(tmp[0].c_str()) != (in_addr_t) -1 ) 
 				address = tmp[0];
 			else
-				throw ConfigException("error: invalid IP address", "");
+				throw ConfigException("invalid IP address");
 		}
 		else if (tmp.size() == 2 && ( tmp[0].empty() || inet_addr(tmp[0].c_str()) != (in_addr_t) -1) && str_is_num(tmp[1]) && server::assign_port(tmp[1], port))
 		{
@@ -149,14 +149,12 @@ std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string
 				address = tmp[0];
 		}
 		else
-			throw ConfigException("error: listen", "");
+			throw ConfigException("invalid listen: " + value);
 		return 	std::make_pair(address, port); 
 }
 
-
 void Config::server::set_values(const std::string key, const std::string value)
 {
-	
 	if (key == "server_name" && !this->is_location)
 		this->server_name = value;
 	else if (key == "root")
@@ -169,7 +167,7 @@ void Config::server::set_values(const std::string key, const std::string value)
 		this->listens.push_back(handle_listen(value));
 	else if (key == "client_max_body_size") {
 		if (!str_is_num(value) || (client_body_limit = strtoul(value.c_str(), NULL, 10) && false) || errno == ERANGE)
-			throw ConfigException("error: client_max_body_size", "");
+			throw ConfigException("invalid client_max_body_size: " + value);
 	}
 	else if (key == "index") {
 		std::vector<std::string> tmp = split(value, ' ');
@@ -179,7 +177,7 @@ void Config::server::set_values(const std::string key, const std::string value)
 		std::vector<std::string> tmp = split(value, ' ');
 		for (size_t i = 0; i != tmp.size(); i++) {
 			if  (!Request::is_method(tmp[i]))
-				throw ConfigException("error: allow_methods", "");
+				throw ConfigException("allow_methods: " + value);
 			this->allow_methods.push_back(tmp[i]);
 		}
 	}
@@ -187,22 +185,22 @@ void Config::server::set_values(const std::string key, const std::string value)
 		int status_code;
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() < 2)
-			throw ConfigException("error: error_page", "");
+			throw ConfigException("invalid error_page: " + value);
 		for (size_t i = 0; i != tmp.size() - 1; i++) {
 			if (!str_is_num(tmp[i]) || !(status_code = atoi(tmp[i].c_str())) || this->error_page.find(status_code) == this->error_page.end() )
-				throw ConfigException("error: error_page", "");
+				throw ConfigException("invalid error_page: " + tmp[i]);
 			this->error_page[status_code] = *(tmp.end() - 1);
 		}
 	}
 	else if (key == "cgi_info") {
 		std::vector<std::string> tmp = split(value, ' ');
 		if (tmp.size() != 2)
-			throw ConfigException("error: allow_methods", "");
-		this->cgi_info[tmp[0]] =  tmp[1];
+			throw ConfigException("invalid cgi_info: " + value);
+		this->cgi_info[tmp[0]] = tmp[1];
 	}
 	else {
 		std::cout << "key error: " << key << std::endl;
-		//throw ConfigException("key error" + key, strerror(errno));
+		//throw ConfigException("invalid key: " + key);
 	}
 }
 

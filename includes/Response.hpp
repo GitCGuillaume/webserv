@@ -1,9 +1,11 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
+#include <sys/stat.h>
 #include <iostream>
 #include <errno.h>
 #include "Request.hpp"
 #include <cstring>
+#include <cstdio>
 
 class Response
 {
@@ -26,7 +28,6 @@ public:
     ~Response();
 
     void get_method(void);
-    void handle_index(const std::string &url);
     void post_method(void);
     void delete_method (void);
     bool fill_body(std::string const &file);

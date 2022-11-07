@@ -13,91 +13,6 @@ Response::~Response()
 {
 }
 
-// void Response::get_method(void)
-// {
-//     Config::ptr_server s;
-//     const std::string &url = _req.getUrl();
-//     if (url.find("http://") == 0) // absolute
-//     {
-//         std::cout << "server name" << _conf->server_name <<std::endl;
-//         std::string file = url.substr(7 + _conf->server_name.length());
-//         size_t pos = file.rfind("/");
-
-//         if (pos == url.size() - 1) // go search index
-//         {
-
-//             std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(file);
-//             if (it != _conf->locations.end())
-//             {
-//                 s = &it->second;
-//                 std::vector<std::string>::const_iterator it_index;
-//                 for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
-//                 {
-//                     if (fill_body(s, s->root + file + *it_index))
-//                         break;
-//                 }
-//                 if (it_index == s->index.end())
-//                     std::cout << "404" << std::endl;
-//             }
-//         }
-//         else if (pos != std::string::npos) // no index
-//         {
-//             std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(file.substr(0, pos + 1));
-//             if (it != _conf->locations.end())
-//             {
-//                 s = &it->second;
-//                 if (!fill_body(s, s->root + file))
-//                     std::cout << "404" << std::endl;
-//             }
-//             else
-//             {
-//                 if (!fill_body(_conf,  _conf->root + file))
-//                     std::cout << "404" << std::endl;
-//             }
-//         }
-//         else // nerver happens
-//             std::cout << "404" << std::endl;
-//     }
-//     else
-//     {
-//         size_t pos = url.rfind("/");
-//         if (pos == url.size() - 1) // go search index
-//         {
-//             std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(url);
-//             if (it != _conf->locations.end())
-//             {
-//                 s = &it->second;
-//                 std::vector<std::string>::const_iterator it_index;
-//                 for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
-//                 {
-//                     if (fill_body(s, s->root + url + *it_index))
-//                         break;
-//                 }
-//                 if (it_index == s->index.end())
-//                     std::cout << "404" << std::endl;
-//             }
-//         }
-//         else if (pos != std::string::npos) // no index
-//         {
-//             std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(url.substr(0, pos + 1));
-//             if (it != _conf->locations.end())
-//             {
-//                 s = &it->second;
-//                 if (!fill_body(s, s->root + url))
-//                     std::cout << "404" << std::endl;
-//             }
-//             else
-//             {
-//                 if (!fill_body(_conf, _conf->root + url))
-//                     std::cout << "404" << std::endl;
-//             }
-//         }
-//         else // nerver happens
-//             std::cout << "404" << std::endl;
-
-//     }
-// }
-
 bool Response::fill_body(std::string const &file)
 {
     std::cout << "file to open " << file << std::endl;
@@ -216,9 +131,12 @@ void Response::post_method(void)
 
 void Response::delete_method(void)
 {
-    _status_code = 200;
-    _en_header.content_length = "17";
-    _bodyData << "Hey ! It's a test";
+    std::string url = _req.getUrl();
+    struct stat buffer;   
+    if (stat (url.c_str(), &buffer) == 0)
+	    _status_code = remove(url.c_str()) == 0 ? 204 : 403;
+	else
+        _status_code = 404;
 }
 
 std::string Response::seralize(void) const
