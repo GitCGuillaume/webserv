@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 		return (1);
 	}
 	std::cout << buffer << std::endl;
-	upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", ft_socket);
+	// upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", ft_socket);
 	ft_close(ft_socket);
 	return (0);
 }

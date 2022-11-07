@@ -79,12 +79,12 @@ bool use_cgi(std::string const url, std::string const type_cgi)
 
 void upload_file(std::string const &body, std::string const &boundary)
 {
-    std::ofstream    new_file;
+    std::ofstream new_file;
     std::string filename;
     std::string copy;
     size_t pos = 0;
     size_t pos_old = 0;
-    std::string separator("\n--" + boundary + "\r\n");
+    std::string separator("--" + boundary + "\r\n");
 
     // boucle
     // find first \r\n = pos_old
@@ -92,76 +92,94 @@ void upload_file(std::string const &body, std::string const &boundary)
     // compare boundary
     // seek content-disposition
     // check content type and if necessary MINE ?
-    if (body[pos] && body[pos] == '-' && body[pos + 1] && body[pos + 1] == '-')
+    // if (body[pos] && body[pos] == '-' && body[pos + 1] && body[pos + 1] == '-')
+    pos = body.find(separator);
+    while (pos != std::string::npos)
     {
-        pos += 2;
-        pos_old = pos;
-        pos = body.find("\r\n");
-        copy = body.substr(pos_old, pos - pos_old);
-        if (copy.compare(boundary) != 0)
+        //       pos = body.find("\r\n");
+        //       pos += 2;
+        //       pos_old = 0;
+        //       copy = body.substr(pos_old, pos - pos_old);
+        //       std::cout << "copy:::" << copy << "|" << std::endl;
+        //      if (separator.compare(copy) == 0)
+        //{
+        //  pos += separator.length();
+        //    pos_old = pos;
+        //  pos_old = pos;
+        pos = body.find("\"", pos_old);
+        if (pos == std::string::npos)
         {
             // err?
             return;
         }
-        pos_old = pos + 2;
-        pos = body.find("\"");
         copy = body.substr(pos_old, (pos + 1) - pos_old);
-        if (copy.compare("Content-Disposition: form-data; name=\"") != 0)
-        {
-            // err?
-            return;
-        }
-        // pos += 38;
+        std::cout << "POS_OLD2:" << pos << std::endl;
         std::cout << "start content_dispo: |" << copy << "|" << std::endl;
-        ++pos;
-        pos_old = pos;
-        pos = body.find("\"", pos);
-        if (pos == std::string::npos)
+        if (copy.compare(separator + "Content-Disposition: form-data; name=\"") == 0)
         {
             // err?
-            return;
-        }
-        pos = body.find("filename=\"");
-        if (pos == std::string::npos)
-        {
-            //?
+            // return;
+            //}
+            pos = 38 + separator.length();
+            pos_old = pos;
+            /*pos = body.find("\"", pos);
+            if (pos == std::string::npos)
+            {
+                // err?
+                return;
+            }*/
+            pos = body.find("\"; filename=\"", pos_old);
+            if (pos == std::string::npos)
+            {
+                //?
+            }
+            else
+            {
+                pos_old = pos + 13;
+                pos = body.find("\"", pos_old);
+                filename = body.substr(pos_old, pos - pos_old);
+                std::cout << "filename: |" << filename << "|" << std::endl;
+                pos_old = pos + 3;
+                pos = body.find(":", pos_old);
+                copy = body.substr(pos_old, (pos + 1) - pos_old);
+                std::cout << "content-type:|" << copy << "|" << std::endl;
+                if (copy.compare("Content-Type:") != 0)
+                {
+                    // Stop loop?
+                    return;
+                }
+                pos_old = pos + 2;
+                pos = body.find("\r\n\r\n", pos_old);
+                copy = body.substr(pos_old, pos - pos_old);
+                std::cout << "Content:|" << copy << "|" << std::endl;
+                pos += 4;
+                std::cout << "start body:" << body[pos] << std::endl;
+                pos_old = pos;
+                std::cout << "SEP:" << separator << "|" << std::endl;
+                pos = body.find("\r\n" + separator, pos_old);
+                if (pos == std::string::npos)
+                {
+                    // err / stop?
+                    return;
+                }
+                std::cout << "copy:" << body.substr(pos_old, pos - pos_old);
+                new_file.open(filename.c_str(), std::fstream::out);
+                if (new_file.is_open())
+                {
+                    new_file.write(body.substr(pos_old, pos - pos_old).c_str(), pos - pos_old);
+                    new_file.close();
+                    pos_old = pos; // + 1;
+                }
+                // else
+                //   break;
+            }
         }
         else
         {
-            pos_old = pos + 10;
-            pos = body.find("\"", pos_old);
-            filename = body.substr(pos_old, pos - pos_old);
-            std::cout << "filename: |" << filename << "|" << std::endl;
-            pos_old = pos + 3;
-            pos = body.find(":", pos_old);
-            copy = body.substr(pos_old, (pos + 1) - pos_old);
-            std::cout << "content-type:|" << copy << "|" << std::endl;
-            if (copy.compare("Content-Type:") != 0)
-            {
-                // Stop loop?
-                return;
-            }
-            pos_old = pos + 2;
-            pos = body.find("\r\n\r\n");
-            copy = body.substr(pos_old, pos - pos_old);
-            std::cout << "Content:|" << copy << "|" << std::endl;
-            pos += 4;
-            std::cout << "start body:" << body[pos] << std::endl;
-            pos_old = pos;
-            std::cout << "SEP:" << separator << "|" << std::endl;
-            pos = body.find(separator, pos_old);
-            if (pos == std::string::npos)
-            {
-                //err / stop?
-                return ;
-            }
-            new_file.open(filename.c_str(), std::fstream::out);
-            if (new_file.is_open())
-            {
-                new_file.write(body.substr(pos_old, (pos+1) - pos_old).c_str(), pos - pos_old);
-                new_file.close();
-            }
+            ++pos_old;
         }
+        std::cout << "POS_OLD1:" << pos_old << std::endl;
+        pos = body.find(separator, pos_old);
     }
 }
 

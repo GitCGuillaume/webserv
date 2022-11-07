@@ -29,6 +29,7 @@ private:
     std::string _server_port;*/
     std::vector<std::string> _vec;
     std::string const _body;
+    std::stringstream _iss;
 
 public:
     Cgi();
@@ -41,6 +42,7 @@ public:
     ~Cgi();
     Cgi(Cgi const &src);
     Cgi &operator=(Cgi const &src);
+    const std::stringstream &getStringStream() const;
     void start();
 };
 

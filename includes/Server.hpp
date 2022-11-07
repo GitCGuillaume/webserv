@@ -24,7 +24,6 @@
 
 #define MAX_EVENTS 1000
 
-
 class Server
 {
 
@@ -42,6 +41,8 @@ public:
     void loop(void);
     int const &getSocket() const;
     void setSocket(int const domain, int const type, int protocol);
+    Config const &getConfig() const;
+
 private:
     std::set<int> _sockets;
     int _socket;
@@ -49,9 +50,9 @@ private:
     int _epfd;
     epoll_event _curr_event;
     Config _config;
-    std::map<const std::pair<std::string, uint16_t>, Config::ptr_server> _map_config; 
+    std::map<const std::pair<std::string, uint16_t>, Config::ptr_server> _map_config;
 
-    class ServerException: public std::exception
+    class ServerException : public std::exception
     {
     private:
         std::string m_error;
@@ -61,8 +62,8 @@ private:
             : m_error(fun + ": " + error)
         {
         }
-        ~ServerException() throw(){}
-        const char *what() const throw() { return (m_error.c_str());}
+        ~ServerException() throw() {}
+        const char *what() const throw() { return (m_error.c_str()); }
     };
 };
 

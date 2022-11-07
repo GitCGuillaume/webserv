@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	if (ft_connect == 1)
 		return (1);
 	std::cout << "Sending message..." << std::endl;
-	/*upload_multiple_file(header);
+	upload_multiple_file(header);
 	msg = send(ft_socket, header.c_str(), header.size(), 0);
 	sleep(1);
 	if (msg < 0)
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
 		std::cerr << "Couldn't receive message." << std::endl;
 		return (1);
 	}
-	std::cout << buffer << std::endl;*/
+	std::cout << buffer << std::endl;
 	upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test.txt", ft_socket);
 	ft_close(ft_socket);
 	return (0);

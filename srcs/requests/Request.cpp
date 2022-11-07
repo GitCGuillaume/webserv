@@ -133,6 +133,42 @@ size_t Request::parse_header(size_t start)
 	return (pos + 2);
 }
 
+/*
+	BESOIN DE GET ROUTE + GET FICHIER pour path translated et path info
+	ex /route
+	index file.ext?
+	query string = method GET
+*/
+
+void	cgi_start(std::string const & body, std::string const & method, std::string const & url
+	, s_entity_header const & en_header)
+{
+	Cgi cgi;
+	
+	if (!method.compare("POST"))
+	{
+		std::cout << "URL:" << url << std::endl;
+		std::cout << "LENGTH" << en_header.content_length << std::endl;
+		Cgi cgi(body, "CONTENT_LENGTH=" + en_header.content_length, "CONTENT_TYPE=" + en_header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
+				"PATH_INFO=" + url, "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
+				"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + method,
+				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
+		cgi.start();
+	}
+	else if (!method.compare("GET"))
+	{
+		std::cout << "URL:" << url << std::endl;
+		std::cout << "LENGTH" << en_header.content_length << std::endl;
+		Cgi cgi2(body, "CONTENT_LENGTH=" + en_header.content_length, "CONTENT_TYPE=" + en_header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
+				"PATH_INFO=" + url, "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
+				"QUERY_STRING=name=val", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + method,
+				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
+		cgi2.start();
+	}
+	else
+		return;
+	
+}
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
@@ -148,16 +184,7 @@ size_t Request::parse_body(size_t start)
 	}
 	else // run cgi
 	{
-		/*std::ostringstream ss;
-		ss << _en_header.content_length;
-		std::string content_length(ss.str());
-		*/
-		std::cout<<"LENGTH"<<_en_header.content_length<<std::endl;
-		Cgi cgi(body, "CONTENT_LENGTH=" + _en_header.content_length, "CONTENT_TYPE=" + _en_header.content_type, "GATEWAY_INTERFACE=CGI/1.1",
-				"PATH_INFO=/website/cgi-bin/upload_file.php", "PATH_TRANSLATED=/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/upload_file.php",
-				"QUERY_STRING=", "REMOTE_ADDR=127.0.0.1", "REMOTE_HOST=127.0.0.1", "REQUEST_METHOD=" + _method,
-				"SCRIPT_NAME=", "SERVER_NAME=localhost", "SERVER_PORT=8003", "SERVER_PROTOCOL=HTTP/1.1");
-		cgi.start();
+		cgi_start(body, _method, _url, _en_header);
 	}
 	_is_ready = true;
 	return (0);
@@ -228,7 +255,6 @@ const s_entity_header &Request::getEntityHeader() const
 {
 	return (_en_header);
 }
-
 
 size_t Request::getContentLength() const
 {

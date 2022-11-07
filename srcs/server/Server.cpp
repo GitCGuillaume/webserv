@@ -156,3 +156,8 @@ void Server::setSocket(int const domain, int const type, int protocol)
 {
     _socket = socket(domain, type, protocol);
 }
+
+Config const &Server::getConfig() const
+{
+    return (_config);
+}

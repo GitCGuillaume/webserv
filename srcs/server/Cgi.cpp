@@ -66,7 +66,7 @@ void Cgi::start()
     }
     else if (pid == 0)
     {
-        char *ft_argv[3] = {const_cast<char *>("/home/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
+        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
                             const_cast<char *>(_vec[3].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
@@ -82,13 +82,16 @@ void Cgi::start()
     }
     int wstatus = 0;
     wait(&wstatus);
-    std::rewind(tmp_child_in); // need to read from start of stream
+    // std::rewind(tmp_child_in); // need to read from start of stream
     char c = 0;
-    for (int i = 0; i < 10000; ++i)
+    size_t length = lseek(fd_child_in, 0, SEEK_END);
+    std::rewind(tmp_child_in);
+    while (0 < length)
     {
         read(fd_child_in, &c, 1);
-        std::cout << c;
+        _iss.write(&c, 1);
         c = 0;
+        --length;
     }
     close(fd_parent_out);
     close(fd_child_in);
@@ -96,4 +99,10 @@ void Cgi::start()
     dup2(fds_save[1], STDOUT_FILENO);
     close(fds_save[0]);
     close(fds_save[1]);
+    std::cout << "iss:" << _iss.str() << std::endl;
+}
+
+const std::stringstream &Cgi::getStringStream() const
+{
+    return (_iss);
 }
