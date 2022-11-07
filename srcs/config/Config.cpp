@@ -199,8 +199,8 @@ void Config::server::set_values(const std::string key, const std::string value)
 		this->cgi_info[tmp[0]] = tmp[1];
 	}
 	else {
-		std::cout << "key error: " << key << std::endl;
-		//throw ConfigException("invalid key: " + key);
+		//std::cout << "key error: " << key << std::endl;
+		throw ConfigException("invalid key: " + key);
 	}
 }
 
