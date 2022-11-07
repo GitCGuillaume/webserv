@@ -68,7 +68,7 @@ void upload_single_file(std::string &header, std::string link)
 	std::istreambuf_iterator<char> it(file), ite;
 	std::string buf(it, ite);
 
-	header = "POST /website/ HTTP/1.1\r\n"
+	header = "POST / HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
 			 "Content-Type: multipart/form-data; boundary=myboundary\r\n"
 			 "Content-Length: 5685\r\n"

@@ -13,6 +13,15 @@ Response::~Response()
 {
 }
 
+Config::ptr_server Response::getConf(const size_t &pos_slash) const
+{
+    std::string url = _req.getUrl();
+    if (url.find("http://") == 0)
+        url = url.substr(7 + _conf->server_name.length());
+    std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(url.substr(0, pos_slash + 1));
+    return ((it != _conf->locations.end()) ? &it->second : _conf);
+}
+
 bool Response::fill_body(std::string const &file)
 {
     std::cout << "file to open " << file << std::endl;
@@ -43,17 +52,10 @@ bool Response::fill_body(std::string const &file)
     return false;
 }
 
-void Response::get_method(void)
+void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
 {
-    std::string url = _req.getUrl();
-    if (url.find("http://") == 0)
-        url = url.substr(7 + _conf->server_name.length());
-    size_t pos = url.rfind("/");
-    if (pos == std::string::npos)
-        std::cout << "404" << std::endl;
-    std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(url.substr(0, pos + 1));
-    Config::ptr_server s = (it != _conf->locations.end()) ? &it->second : _conf;
-    if (pos == url.size() - 1)
+    const std::string &url = _req.getUrl();
+    if (pos_slash == url.size() - 1)
     {
         std::vector<std::string>::const_iterator it_index;
         for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
@@ -68,37 +70,61 @@ void Response::get_method(void)
         std::cout << "404" << std::endl;
 }
 
-void Response::test(const std::string &s, size_t pos)
+void Response::get_method(void)
+{
+    size_t pos = _req.getUrl().rfind("/");
+    if (pos == std::string::npos)
+        std::cout << "404" << std::endl;
+    Config::ptr_server s = getConf(pos);
+    handle_get(s, pos);
+}
+
+std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
 {
     size_t end_pos;
-    while ((end_pos = s.find(": ", pos)) != std::string::npos)
+    std::string file;
+    while ((end_pos = body.find(": ", pos)) != std::string::npos)
     {
-        std::string field_name = s.substr(pos, end_pos - pos);
+        std::string field_name = body.substr(pos, end_pos - pos);
         transform(field_name.begin(), field_name.end(), field_name.begin(), ::tolower);
         pos = end_pos + 2;
-        end_pos = s.find("\r\n", pos);
+        end_pos = body.find("\r\n", pos);
         if (end_pos == std::string::npos)
             std::cout << "bad body multipart" << std::endl;
-        std::string field_value = s.substr(pos, end_pos - pos);
-        std::cout << field_name << std::endl;
-        std::cout << field_value << std::endl;
+        std::string field_value = body.substr(pos, end_pos - pos);
+        std::cout << "field name " << field_name << std::endl;
+        std::cout << "field value " <<field_value << std::endl;
         if (field_name == "content-disposition")
         {
             pos = field_value.find("filename=\"");
             if (pos != std::string::npos) // file to upload
             {
                 pos += 10;
-                end_pos = field_value.find("\"", pos + 1);
-                std::string file = field_value.substr(pos, end_pos - pos);
-                //std::ofstream ofs (file, std::ofstream::out);
-                std::cout << "file: " << file << std::endl;
+                size_t end = field_value.find("\"", pos + 1);
+                if (end != std::string::npos)
+                {
+                    file = s->upload_path + field_value.substr(pos, end - pos);
+                    std::cout << "file: " << file << std::endl;
+                }
+                else
+                    std::cout << "error" << std::endl;
+                
             }
         }
+        pos = end_pos + 2;
+        if (body.find("\r\n", pos) == pos)
+            break;
+
     }
+    return file;
 }
 void Response::post_method(void)
 {
-    get_method();
+    int debug = 0;
+    size_t pos_slash = _req.getUrl().rfind("/");
+    if (pos_slash == std::string::npos)
+        std::cout << "404" << std::endl;
+    Config::ptr_server s = getConf(pos_slash);
     const s_entity_header &en_header = _req.getEntityHeader();
     if (en_header.content_type.find("multipart/form-data") == 0)
     {
@@ -114,28 +140,48 @@ void Response::post_method(void)
                 std::cout << "boundary " << boundary << std::endl;
             }
         }
-        const std::string &s = _req.getBody();
+        const std::string &body = _req.getBody();
         pos = 0;
         size_t end_pos;
         // std::cout << "here" << s << std::endl;
-        while (s.find("--" + boundary + "\r\n", pos) == pos)
+        while (body.find("--" + boundary + "\r\n", pos) == pos)
         {
+            debug++;
             pos += 4 + boundary.size();
-            test(s, pos);
-            end_pos = s.find("--" + boundary + "\r\n", pos);
-            // std::cout << s.substr(pos, end_pos - pos) << std::endl;
-            pos = end_pos + 1;
+            end_pos = body.find("--" + boundary + "\r\n", pos);
+            if (end_pos == std::string::npos)
+            {
+                std::cout << "777777777777777777777777777777777777777777777777777777\n";
+                break;
+            }
+            std::cout << "BODY: " << std::endl;
+            std::cout << body.substr(pos, end_pos - pos) << std::endl;
+            std::string file = test(body, pos, s);
+            
+            if (!file.empty())
+            {
+                std::ofstream ofs (file.c_str());
+                //std::cout << "IMAGE:" << std::endl;
+                //std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
+                ofs << body.substr(pos + 2, end_pos - pos - 4);
+                ofs.close();
+
+            }
+            pos = end_pos;
+
+            //std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
         }
     }
+    handle_get(s, pos_slash);
 }
 
 void Response::delete_method(void)
 {
     std::string url = _req.getUrl();
-    struct stat buffer;   
-    if (stat (url.c_str(), &buffer) == 0)
-	    _status_code = remove(url.c_str()) == 0 ? 204 : 403;
-	else
+    struct stat buffer;
+    if (stat(url.c_str(), &buffer) == 0)
+        _status_code = remove(url.c_str()) == 0 ? 204 : 403;
+    else
         _status_code = 404;
 }
 

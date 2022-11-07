@@ -6,6 +6,7 @@
 #include "Request.hpp"
 #include <cstring>
 #include <cstdio>
+#include <fstream>
 
 class Response
 {
@@ -27,11 +28,13 @@ public:
     Response(const Response &src);
     ~Response();
 
+    Config::ptr_server getConf(const size_t &pos_slash) const;
+    void handle_get(Config::ptr_server s, const size_t &pos_slash);
     void get_method(void);
     void post_method(void);
     void delete_method (void);
     bool fill_body(std::string const &file);
-    void test(const std::string &s, size_t pos);
+    std::string test(const std::string &body, size_t &pos, Config::ptr_server s);
     std::string seralize(void) const;
     static void init_map_method(void);
 
