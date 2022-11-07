@@ -1,23 +1,28 @@
-body{
+body {
 	margin: 0;
 	padding: 0;
-	background: brown;
 	font-family: Arial, sans-serif;
+	background-image: url(pictures/alliance_background.jpg);
+	background-size: cover;
 }
 
-section{
-	margin-top:50px;
-	margin-left:50px;
-	margin-right: auto;
+
+h1 {
+	font-size: 4em;
+	color: black;
 }
 
-img{
-	width: 250px;
-	padding-right 50px;
-	margin: auto;
-	padding-left: auto;
+h2 {
+	color: black;
 }
 
-h1,h2,h3,h4,h5,h6{
-	font-size: 1em;
+
+#title {
+	display: flex;
+	justify-content: center;
+}
+
+
+.content {
+ margin-left: 20vw;;
 }
