@@ -90,7 +90,7 @@ void Response::test(const std::string &s, size_t pos)
                 pos += 10;
                 end_pos = field_value.find("\"", pos + 1);
                 std::string file = field_value.substr(pos, end_pos - pos);
-                //std::ofstream ofs (file, std::ofstream::out);
+                // std::ofstream ofs (file, std::ofstream::out);
                 std::cout << "file: " << file << std::endl;
             }
         }
@@ -132,10 +132,10 @@ void Response::post_method(void)
 void Response::delete_method(void)
 {
     std::string url = _req.getUrl();
-    struct stat buffer;   
-    if (stat (url.c_str(), &buffer) == 0)
-	    _status_code = remove(url.c_str()) == 0 ? 204 : 403;
-	else
+    struct stat buffer;
+    if (stat(url.c_str(), &buffer) == 0)
+        _status_code = remove(url.c_str()) == 0 ? 204 : 403;
+    else
         _status_code = 404;
 }
 
@@ -159,3 +159,65 @@ void Response::init_map_method(void)
     _map_method_ptr["POST"] = &Response::post_method;
     _map_method_ptr["DELETE"] = &Response::delete_method;
 }
+
+std::string Response::display_error(int status_code, std::string const &error_page) {
+
+    std::ostringstream res;
+    res << "<html> <head> <title>";
+    res << status_code << " " << __map_error[status_code];
+    res << "</title> </head>";
+    res << "<body>";
+    res<< status_code << " "<<__map_error[status_code];
+    res << "</body> </html>";
+    return res.str();
+}
+
+std::map<int, std::string> Response::__map_error;
+void Response::init_map_error()
+{
+    {
+        __map_error[100] = "Continue";
+        __map_error[101] = "Switching Protocols";
+
+        __map_error[200] = "OK";
+        __map_error[201] = "Created";
+        __map_error[202] = "Accepted";
+        __map_error[203] = "Non-Authoritative Information";
+        __map_error[204] = "No Content";
+        __map_error[205] = "Reset Content";
+        __map_error[206] = "Partial Content";
+
+        __map_error[300] = "Multiple Choices";
+        __map_error[301] = "Moved Permanently";
+        __map_error[302] = "Found";
+        __map_error[303] = "See Other";
+        __map_error[304] = "Not Modified";
+        __map_error[305] = "Use Proxy";
+        __map_error[307] = "Temporary Redirect";
+
+        __map_error[400] = "Bad Request";
+        __map_error[401] = "Unauthorized";
+        __map_error[402] = "Payment Required";
+        __map_error[403] = "Forbidden";
+        __map_error[404] = "Not Found";
+        __map_error[405] = "Method Not Allowed";
+        __map_error[406] = "Not Acceptable";
+        __map_error[407] = "Proxy Authentication Required";
+        __map_error[408] = "Request Time-out";
+        __map_error[409] = "Conflict";
+        __map_error[410] = "Gone";
+        __map_error[411] = "Length Required";
+        __map_error[412] = "Precondition Failed";
+        __map_error[413] = "Request Entity Too Large";
+        __map_error[414] = "Request-URI Too Large";
+        __map_error[415] = "Unsupported Media Type";
+        __map_error[416] = "Requested range not satisfiable";
+        __map_error[417] = "Expectation Failed";
+
+        __map_error[500] = "Internal Server Error";
+        __map_error[501] = "Not Implemented";
+        __map_error[502] = "Bad Gateway";
+        __map_error[503] = "Service Unavailable";
+        __map_error[504] = "Gateway Time-out";
+        __map_error[505] = "HTTP Version Not Supported";
+    }

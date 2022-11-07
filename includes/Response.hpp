@@ -18,8 +18,7 @@ private:
     s_entity_header _en_header;
     std::ostringstream _bodyData;
     Config::ptr_server _conf;
-
-
+    static std::map<int, std::string> __map_error;
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
 
 public:
@@ -29,13 +28,13 @@ public:
 
     void get_method(void);
     void post_method(void);
-    void delete_method (void);
+    void delete_method(void);
     bool fill_body(std::string const &file);
     void test(const std::string &s, size_t pos);
     std::string seralize(void) const;
     static void init_map_method(void);
-
-
+    void init_map_error(void);
+    static std::string display_error(int status_code, std::string const &error_page);
 };
 
 #endif
