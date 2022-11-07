@@ -1,6 +1,7 @@
 #
 server {
 	listen 127.0.0.1:8003;
+
 	#listen [::]:80 default_server;
 
 	# SSL configuration

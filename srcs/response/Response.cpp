@@ -81,6 +81,8 @@ void Response::get_method(void)
 
 std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
 {
+    std::cout << "upload: " << s->upload_path << std::endl;
+
     size_t end_pos;
     std::string file;
     while ((end_pos = body.find(": ", pos)) != std::string::npos)
@@ -105,6 +107,7 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 {
                     file = s->upload_path + field_value.substr(pos, end - pos);
                     std::cout << "file: " << file << std::endl;
+                    std::cout << "upload: " << s->upload_path << std::endl;
                 }
                 else
                     std::cout << "error" << std::endl;
