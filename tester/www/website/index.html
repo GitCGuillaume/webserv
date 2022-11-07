@@ -4,41 +4,33 @@
 <head>
 	<title>Webserv</title>
 	<link rel="icon" href="42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png" />
-	<link rel="shortcut icon" href="42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png" />
+	<link rel="shortcut icon"
+		href="42_logo_black-684989d43d629b3c0ff6fd7e1157ee04db9bb7a73fba8ec4e01543d650a1c607.png" />
 	<link rel="stylesheet" href="stylesheet.css">
 	<meta name="author" content="gchopin">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-</html>
 
 <body>
 	<section>
-		<h1>Webserv test1</h1>
-		<article>
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-			<img src="./pictures/logo_42.jpg">
-		</article>
-		<article>
-			<p>Static website for webserv project, 42 School</p>
-		</article>
-		<article>
-			<form action="cgi-bin/post.php" method="post">
-				<label>POST :</label>
-				</br><input type="text" name="test1" />
-				</br><input type="text" name="test2" />
-				</br><input type="text" name="test3" />
-				<input type="submit" name="submit">
-			</form>
+		<div id="title">
+			<div>
+				<h1>Webserv</h1>
+				<h2>A Static website for webserv project, 42 School</h2>
+			</div>
+			<div><img src="./pictures/logo_42.jpg"></div>
+		</div>
+
+		<div class="forn">
 			<form action="cgi-bin/get.php" method="get">
 				<label>GET :</label>
 				</br><input type="text" name="test1" />
-				</br><input type="text" name="test2" />
-				</br><input type="text" name="test3" />
+				<input type="submit" name="submit">
+			</form>
+			<form action="cgi-bin/post.php" method="post">
+				<label>POST :</label>
+				</br><input type="text" name="test1" />
 				<input type="submit" name="submit">
 			</form>
 			<form action="http://localhost:8003/" method="post" enctype="multipart/form-data">
@@ -46,14 +38,16 @@
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
 			</form>
-		</article>
-		<article>
+		</div>
+		<div>
 			<h2>LINKS</h2>
 			<ul>
 				<li><a href="list_codes.html">TESTS CODES</a></li>
 				<li><a href="pictures">IMG FOLDER</a></li>
 				<li><a href="upload">UPLOAD FOLDER</a></li>
 			</ul>
-		</article>
+		</div>
 	</section>
 </body>
+
+</html>

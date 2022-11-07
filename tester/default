@@ -34,7 +34,7 @@ server {
 	}
 	location /upload/
 	{
-		method POST GET;
+		allow_methods POST GET;
 		
 		autoindex on;
 	}
