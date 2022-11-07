@@ -52,7 +52,7 @@ void upload_single_file(std::string &header, std::string link)
 	std::istreambuf_iterator<char> it(file), ite;
 	std::string buf(it, ite);
 
-	//header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+	// header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
 	header = "POST /website/upload/ HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
 			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
@@ -62,21 +62,21 @@ void upload_single_file(std::string &header, std::string link)
 			 "--myboundary\r\n"; // 14
 	header.insert(header.size(),
 				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary2.txt\"\r\n"); // 86
-	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											  // 28
-	header.insert(header.size(), buf);																			  // 198
-	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");													  // 18
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											   // 28
+	header.insert(header.size(), buf);																			   // 57
+	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");													   // 18
 }
 
 void upload_multiple_file(std::string &header)
 {
-	std::ifstream file("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file2("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file2("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", std::ifstream::in | std::ifstream::binary);
 	std::istreambuf_iterator<char> it(file), ite;
 	std::istreambuf_iterator<char> it2(file2), ite2;
 	std::string buf(it, ite);
 	std::string buf2(it2, ite2);
 
-	//header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
+	// header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
 	header = "POST /website/upload/ HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
 			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
@@ -98,10 +98,10 @@ void upload_multiple_file(std::string &header)
 
 void upload_multiple_file_wrong(std::string &header)
 {
-	std::ifstream file("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file2("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file3("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary3.txt", std::ifstream::in | std::ifstream::binary);
-	std::ifstream file4("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary4.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file2("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file3("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary3.txt", std::ifstream::in | std::ifstream::binary);
+	std::ifstream file4("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary4.txt", std::ifstream::in | std::ifstream::binary);
 	std::istreambuf_iterator<char> it(file), ite;
 	std::istreambuf_iterator<char> it2(file2), ite2;
 	std::istreambuf_iterator<char> it3(file3), ite3;
@@ -111,7 +111,7 @@ void upload_multiple_file_wrong(std::string &header)
 	std::string buf3(it3, ite3);
 	std::string buf4(it4, ite4);
 
-	//header = "POST /website/upload/ HTTP/1.1\r\n"
+	// header = "POST /website/upload/ HTTP/1.1\r\n"
 	header = "POST /website/cgi-bin/upload_file.php HTTP/1.1\r\n"
 			 "Host: 127.0.0.1\r\n"
 			 "Content-Type: multipart/form-data; boundary=\"myboundary\"\r\n"
@@ -128,16 +128,16 @@ void upload_multiple_file_wrong(std::string &header)
 				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary2.txt\"\r\n"); // 86
 	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											   // 28
 	header.insert(header.size(), buf2);																			   // 57
-	header.insert(header.size(), "\r\n--myboundary\r\n");		//16
+	header.insert(header.size(), "\r\n--myboundary\r\n");														   // 16
 	header.insert(header.size(),
 				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary3.txt\"\r\n"); // 86
-	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											  // 28
-	header.insert(header.size(), buf3); //195
-	header.insert(header.size(), "\r\n--myboundary\r\n");		//16
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											   // 28
+	header.insert(header.size(), buf3);																			   // 195
+	header.insert(header.size(), "\r\n--myboundary\r\n");														   // 16
 	header.insert(header.size(),
 				  "Content-Disposition: form-data; name=\"upload_files[]\"; filename=\"test_boundary4.txt\"\r\n"); // 86
-	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											  // 28
-	header.insert(header.size(), buf4); //198
+	header.insert(header.size(), "Content-Type: text/plain\r\n\r\n");											   // 28
+	header.insert(header.size(), buf4);																			   // 198
 	header.insert(header.size(), "\r\n--myboundary\r\n\r\n");													   // 18
 }
 
@@ -200,8 +200,7 @@ int main(int argc, char **argv)
 		return (1);
 	}
 	std::cout << buffer << std::endl;
-	
-	upload_single_all("/home/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", ft_socket);
+	upload_single_all("/mnt/nfs/homes/gchopin/Documents/webserv/tester/test_upload/files/test_boundary2.txt", ft_socket);
 	ft_close(ft_socket);
 	return (0);
 }
