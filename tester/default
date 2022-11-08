@@ -33,10 +33,10 @@ server {
 	location / {
 		
 	}
-	location /upload/
+	location /cgi-bin/php/
 	{
 		allow_methods POST GET;
-		
+		cgi_info .php ./tester/www/website/cgi-bin/php-bin;
 		autoindex on;
 	}
 	

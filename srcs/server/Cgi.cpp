@@ -66,8 +66,8 @@ void Cgi::start()
     }
     else if (pid == 0)
     {
-        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/webserv/tester/www/website/cgi-bin/php-cgi"),
-                            const_cast<char *>(_vec[3].c_str()), 0};
+        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php-cgi"),
+                            const_cast<char *>(_vec[2].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
@@ -79,6 +79,7 @@ void Cgi::start()
         close(fd_child_in);
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
+        exit(0);
     }
     int wstatus = 0;
     wait(&wstatus);
@@ -99,7 +100,7 @@ void Cgi::start()
     dup2(fds_save[1], STDOUT_FILENO);
     close(fds_save[0]);
     close(fds_save[1]);
-    std::cout << "iss:" << _iss.str() << std::endl;
+    // std::cout << "iss:" << _iss.str() << std::endl;
 }
 
 const std::stringstream &Cgi::getStringStream() const

@@ -1,6 +1,10 @@
 #include "Request.hpp"
 
-Request::Request() : _is_ready(false), _code(0)
+Request::Request(host_type ip) : _is_ready(false), _ip(ip), _code(0)
+{
+}
+
+Request::Request() : _is_ready(false), _ip(std::make_pair("127.0.0.1", 80)), _code(0)
 {
 }
 
@@ -8,7 +12,7 @@ Request::Request(const std::string &req) : _req(req), _is_ready(false), _code(0)
 {
 }
 
-Request::Request(const Request &src) : _req(src._req), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header)
+Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _ip(src._ip)
 {
 }
 
@@ -135,16 +139,16 @@ size_t Request::parse_header(size_t start)
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
-	//ss.seekg(start);
+	// ss.seekg(start);
 	_body = ss.str().substr(start);
-	//std::cout << body;
+	// std::cout << body;
 	_is_ready = true;
 	return (0);
 }
 
 void Request::reset(void)
 {
-	new (this) Request;
+	new (this) Request(_ip);
 }
 
 void Request::append_data(const char *data, size_t n)
@@ -230,4 +234,9 @@ size_t Request::size()
 		ss.seekg(old);
 	}
 	return (size);
+}
+
+Request::host_type Request::getIp(void) const
+{
+	return (_ip);
 }

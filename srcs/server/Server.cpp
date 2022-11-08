@@ -115,10 +115,10 @@ void Server::loop()
                 std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
                 epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
                 if (_map_config.find(host) != _map_config.end())
-                    _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, _map_config[host])));
+                    _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, _map_config[host])));
                 else
                 {
-                    _clients.insert(std::pair<int, Client>(sockClient, Client(ntohs(cli_addr.sin_port), sockClient, NULL)));
+                    _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, NULL)));
                 }
             }
 

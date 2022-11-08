@@ -13,6 +13,7 @@ class Request
 {
 
 public:
+    typedef std::pair<std::string, uint16_t> host_type;
     // typedef struct s_header
     // {
     //     std::string content_type;
@@ -21,6 +22,7 @@ public:
     //     std::string host;
     //     std::string transfer_encoding;
     // } t_header;
+    Request(host_type ip);
     Request();
     Request(const std::string &req);
     Request(const Request &src);
@@ -47,9 +49,10 @@ public:
     const std::string &getVersion(void) const;
     bool is_ready() const;
     const s_entity_header &getEntityHeader() const;
-    //const t_header &getHeader() const;
+    // const t_header &getHeader() const;
     size_t getContentLength() const;
     const std::string &getBody() const;
+    host_type getIp(void) const;
     size_t size();
 
 private:
@@ -60,12 +63,13 @@ private:
     std::string _url;
     std::string _version;
 
-    //t_header _header;
+    // t_header _header;
     s_general_header _ge_header;
     s_request_header _re_header;
     s_entity_header _en_header;
     std::string _body;
     bool _is_ready;
+    host_type _ip;
     int _code;
 };
 #endif

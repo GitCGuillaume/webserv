@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cstdio>
 #include <fstream>
+#include <Cgi.hpp>
 
 class Response
 {
@@ -20,7 +21,6 @@ private:
     std::ostringstream _bodyData;
     Config::ptr_server _conf;
 
-
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
 
 public:
@@ -32,13 +32,14 @@ public:
     void handle_get(Config::ptr_server s, const size_t &pos_slash);
     void get_method(void);
     void post_method(void);
-    void delete_method (void);
+    void delete_method(void);
     bool fill_body(std::string const &file);
     std::string test(const std::string &body, size_t &pos, Config::ptr_server s);
     std::string seralize(void) const;
     static void init_map_method(void);
-
-
+    void run_cgi_post(Config::ptr_server conf);
+    void run_cgi_get(Config::ptr_server conf);
+    void fillResponse(const std::string &body, int status_code, const std::string &content_type);
 };
 
 #endif

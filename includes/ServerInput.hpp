@@ -9,25 +9,23 @@
 
 #define BUFFER_SIZE 1
 
-class Client;
 class ServerInput
 {
 private:
-    Request _req;
-    Client &_handler;
     int _socket;
     size_t _pos_end_header;
+    Request _req;
+
 public:
-    ServerInput(Client &handler, int sock);
+    typedef std::pair<std::string, uint16_t> host_type;
+    ServerInput(host_type ip, int sock);
     ServerInput(const ServerInput &src);
     ~ServerInput();
 
     void readData();
     void reset();
 
-    const  Request &getReq(void);
+    const Request &getReq(void);
 };
-
-
 
 #endif

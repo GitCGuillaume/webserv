@@ -1,5 +1,5 @@
 #ifndef CLIENT_HPP
-# define CLIENT_HPP
+#define CLIENT_HPP
 
 #include <iostream>
 #include <stdint.h>
@@ -9,21 +9,24 @@
 
 class Client
 {
-    private:
-        uint16_t _port;
-        Config::ptr_server _conf;
-        ServerInput _si;
-        ServerOutput _so;
-    public:
-        Client(uint16_t port, int socket, Config::ptr_server conf);
-        Client(const Client &src);
-        ~Client();
+private:
+    std::pair<std::string, uint16_t> _ip;
+    Config::ptr_server _conf;
+    ServerInput _si;
+    ServerOutput _so;
 
-        Client &operator=(const Client &rhs);
+public:
+    typedef std::pair<std::string, uint16_t> host_type;
 
-        void    epoll_in(void);
-        void    epoll_out(void);
+    Client(host_type ip, int socket, Config::ptr_server conf);
+    Client(const Client &src);
+    ~Client();
 
-        int getPort(void) const;
+    Client &operator=(const Client &rhs);
+
+    void epoll_in(void);
+    void epoll_out(void);
+
+    int getPort(void) const;
 };
 #endif

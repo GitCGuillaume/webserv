@@ -1,12 +1,12 @@
 #include "Client.hpp"
 
-Client::Client(uint16_t port, int socket, Config::ptr_server conf): _port(port), _conf(conf), _si(*this, socket), _so(socket)
+Client::Client(host_type ip, int socket, Config::ptr_server conf) : _ip(ip), _conf(conf), _si(ip, socket), _so(socket)
 {
 	if (_conf)
 		std::cout << "Client " << _conf->server_name << std::endl;
 }
 
-Client::Client(const Client &src): _port(src._port), _conf(src._conf), _si(src._si), _so(src._so)
+Client::Client(const Client &src) : _ip(src._ip), _conf(src._conf), _si(src._si), _so(src._so)
 {
 }
 
@@ -14,23 +14,23 @@ Client &Client::operator=(const Client &rhs)
 {
 	if (this != &rhs)
 	{
-		_port = rhs._port;
+		_ip = rhs._ip;
 	}
 	return (*this);
 }
-void    Client::epoll_in(void)
+void Client::epoll_in(void)
 {
 	_si.readData();
 }
 
-void    Client::epoll_out(void)
+void Client::epoll_out(void)
 {
 	if (_si.getReq().is_ready())
 	{
-		std:: cout << "-------request----------" << std::endl;
+		std::cout << "-------request----------" << std::endl;
 		std::cout << "Ready to send ..." << std::endl;
 		std::cout << _si.getReq();
-		Response rep (_si.getReq(), _conf);
+		Response rep(_si.getReq(), _conf);
 		_so.sendResponse(rep);
 		_si.reset();
 	}
@@ -38,10 +38,9 @@ void    Client::epoll_out(void)
 
 Client::~Client()
 {
-
 }
 
 int Client::getPort(void) const
 {
-	return (_port);
+	return (_ip.second);
 }
