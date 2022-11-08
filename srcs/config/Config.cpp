@@ -124,6 +124,7 @@ bool Config::server::str_is_num(const std::string &str)
 	while (it != str.end() && std::isdigit(*it))
 		++it;
 	return !str.empty() && it == str.end();
+	// return str.find_first_not_of("0123456789") == std::string::npos;
 }
 
 bool Config::server::assign_port(const std::string &str, uint16_t &val)
