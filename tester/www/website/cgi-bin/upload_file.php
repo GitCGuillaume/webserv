@@ -1,6 +1,7 @@
 <pre>
 <?php
 
+var_dump($_SERVER);
 var_dump($_FILES);
 foreach ($_FILES['upload_files']['name'] as $key => $val)
 {
