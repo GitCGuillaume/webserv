@@ -4,6 +4,7 @@ body {
 	font-family: Arial, sans-serif;
 	background-image: url(pictures/alliance_background.jpg);
 	background-size: cover;
+	height: 100vh;;
 }
 
 
