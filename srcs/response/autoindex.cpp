@@ -1,6 +1,6 @@
 #include "webserv.hpp"
 
-void    open_stream_autoindex(std::list<std::string> &lst, std::string &ret_html)
+void    open_stream_autoindex(std::list<std::string> &lst, const std::string &root,  std::string &ret_html)
 {
     std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
     std::list<std::string>::iterator it(lst.begin());
@@ -12,7 +12,15 @@ void    open_stream_autoindex(std::list<std::string> &lst, std::string &ret_html
     while (std::getline(ifs, str, '\n'))
     {
         ret_html += str + "\n";
-        if (str.find("<pre>") != std::string::npos)
+        if (str.find("<title>") != std::string::npos)
+        {
+            ret_html += "Index of f" + root + "\n";
+        }
+        else if (str.find("<h1>") != std::string::npos)
+        {
+            ret_html += "Index of " + root + "\n";
+        }
+        else if (str.find("<pre>") != std::string::npos)
         {
             for (; it != ite; ++it)
             {
@@ -23,11 +31,11 @@ void    open_stream_autoindex(std::list<std::string> &lst, std::string &ret_html
     ifs.close();
 }
 
-void    load_directory_autoindex(std::string &ret_html)
+void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
 {
     std::list<std::string> lst;
     struct dirent   *dire = NULL;
-    DIR*   dir = opendir("tester/www");
+    DIR*   dir = opendir(directory.c_str());
 
     if (!dir)
         throw std::runtime_error("Couldn't open autoindex directory.");
@@ -39,5 +47,5 @@ void    load_directory_autoindex(std::string &ret_html)
     }
     if (closedir(dir) < 0)
         throw std::runtime_error("Couldn't close autoindex directory.");
-    open_stream_autoindex(lst, ret_html);
+    open_stream_autoindex(lst, uri, ret_html);
 }

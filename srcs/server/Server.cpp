@@ -9,6 +9,7 @@ Server::Server(const char *conf) : _socket(0), _epfd(epoll_create(1)), _config(c
     s_entity_header::init_map_en_headers();
     s_entity_header::init_map_mime();
     Response::init_map_method();
+    Response::init_map_error();
     init_map_config();
 }
 

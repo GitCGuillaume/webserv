@@ -20,7 +20,7 @@ private:
     std::ostringstream _bodyData;
     Config::ptr_server _conf;
 
-
+    static std::map<int, std::string> __map_error;
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
 
 public:
@@ -37,8 +37,11 @@ public:
     std::string test(const std::string &body, size_t &pos, Config::ptr_server s);
     std::string seralize(void) const;
     static void init_map_method(void);
-
-
+    static void init_map_error();
+    void sendHtmlCode(int status_code, Config::ptr_server s);
+    void sendAutoIndex(const std::string &uri, const std::string &root);
 };
+void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
+
 
 #endif

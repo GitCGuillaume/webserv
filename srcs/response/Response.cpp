@@ -64,10 +64,15 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
                 break;
         }
         if (it_index == s->index.end())
-            std::cout << "404" << std::endl;
+        {
+            std::cout << "NOT FOUND\n";
+            if (s->autoindex)
+                sendAutoIndex(url, s->root + url);
+        }
+        sendHtmlCode(404, s);
     }
     else if (!fill_body(s->root + url))
-        std::cout << "404" << std::endl;
+        sendHtmlCode(404, s);
 }
 
 void Response::get_method(void)
@@ -95,7 +100,7 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
             std::cout << "bad body multipart" << std::endl;
         std::string field_value = body.substr(pos, end_pos - pos);
         std::cout << "field name " << field_name << std::endl;
-        std::cout << "field value " <<field_value << std::endl;
+        std::cout << "field value " << field_value << std::endl;
         if (field_name == "content-disposition")
         {
             pos = field_value.find("filename=\"");
@@ -111,13 +116,11 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 }
                 else
                     std::cout << "error" << std::endl;
-                
             }
         }
         pos = end_pos + 2;
         if (body.find("\r\n", pos) == pos)
             break;
-
     }
     return file;
 }
@@ -160,19 +163,18 @@ void Response::post_method(void)
             std::cout << "BODY: " << std::endl;
             std::cout << body.substr(pos, end_pos - pos) << std::endl;
             std::string file = test(body, pos, s);
-            
+
             if (!file.empty())
             {
-                std::ofstream ofs (file.c_str());
-                //std::cout << "IMAGE:" << std::endl;
-                //std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
+                std::ofstream ofs(file.c_str());
+                // std::cout << "IMAGE:" << std::endl;
+                // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
                 ofs << body.substr(pos + 2, end_pos - pos - 4);
                 ofs.close();
-
             }
             pos = end_pos;
 
-            //std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
+            // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
         }
     }
     handle_get(s, pos_slash);
@@ -207,4 +209,83 @@ void Response::init_map_method(void)
     _map_method_ptr["GET"] = &Response::get_method;
     _map_method_ptr["POST"] = &Response::post_method;
     _map_method_ptr["DELETE"] = &Response::delete_method;
+}
+
+void Response::sendHtmlCode(int status_code, Config::ptr_server s)
+{
+
+    _bodyData << "<html> <head> <title>";
+    _bodyData << status_code << " " << __map_error[status_code];
+    _bodyData << "</title> </head>";
+    _bodyData << "<body>";
+    _bodyData << status_code << " " << __map_error[status_code];
+    _bodyData << "</body> </html>";
+    std::ostringstream os;
+    os << _bodyData.str().size();
+    _en_header.content_length = os.str();
+    _en_header.content_type = s_entity_header::__map_ext_mime[".html"];
+    _status_code = status_code;
+}
+
+void Response::sendAutoIndex(const std::string &uri, const std::string &directory)
+{
+   std::string ret;
+    std::cout << "AUTOINDEX " << directory << std::endl;
+    load_directory_autoindex(ret, directory, uri);
+    _bodyData << ret; 
+    std::ostringstream os;
+    os << _bodyData.str().size();
+    _en_header.content_length = os.str();
+    _en_header.content_type = s_entity_header::__map_ext_mime[".html"];
+    _status_code = 200;
+}
+
+
+std::map<int, std::string> Response::__map_error;
+void Response::init_map_error()
+{
+    __map_error[100] = "Continue";
+    __map_error[101] = "Switching Protocols";
+
+    __map_error[200] = "OK";
+    __map_error[201] = "Created";
+    __map_error[202] = "Accepted";
+    __map_error[203] = "Non-Authoritative Information";
+    __map_error[204] = "No Content";
+    __map_error[205] = "Reset Content";
+    __map_error[206] = "Partial Content";
+
+    __map_error[300] = "Multiple Choices";
+    __map_error[301] = "Moved Permanently";
+    __map_error[302] = "Found";
+    __map_error[303] = "See Other";
+    __map_error[304] = "Not Modified";
+    __map_error[305] = "Use Proxy";
+    __map_error[307] = "Temporary Redirect";
+
+    __map_error[400] = "Bad Request";
+    __map_error[401] = "Unauthorized";
+    __map_error[402] = "Payment Required";
+    __map_error[403] = "Forbidden";
+    __map_error[404] = "Not Found";
+    __map_error[405] = "Method Not Allowed";
+    __map_error[406] = "Not Acceptable";
+    __map_error[407] = "Proxy Authentication Required";
+    __map_error[408] = "Request Time-out";
+    __map_error[409] = "Conflict";
+    __map_error[410] = "Gone";
+    __map_error[411] = "Length Required";
+    __map_error[412] = "Precondition Failed";
+    __map_error[413] = "Request Entity Too Large";
+    __map_error[414] = "Request-URI Too Large";
+    __map_error[415] = "Unsupported Media Type";
+    __map_error[416] = "Requested range not satisfiable";
+    __map_error[417] = "Expectation Failed";
+
+    __map_error[500] = "Internal Server Error";
+    __map_error[501] = "Not Implemented";
+    __map_error[502] = "Bad Gateway";
+    __map_error[503] = "Service Unavailable";
+    __map_error[504] = "Gateway Time-out";
+    __map_error[505] = "HTTP Version Not Supported";
 }
