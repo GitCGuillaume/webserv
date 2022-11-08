@@ -13,9 +13,10 @@ Config::Config(const char *conf)
 		throw ConfigException("failed to read file");
 	drop_comments();
 	parse_config();
-	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s) {
+	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s)
+	{
 		std::cout << "server_name: " << it_s->server_name << std::endl;
-		for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = it_s->listens.begin(); it != it_s->listens.end(); ++it)
+		for (std::vector<std::pair<std::string, uint16_t>>::const_iterator it = it_s->listens.begin(); it != it_s->listens.end(); ++it)
 			std::cout << "listen: " << it->first << ":" << it->second << std::endl;
 	}
 }
@@ -39,13 +40,13 @@ void Config::drop_comments()
 	size_t i = 0;
 	size_t line = 0;
 	while (i < _content.length())
-	{ 
+	{
 		if (_content[i] == '#')
 		{
 			line = _content.find_first_of("\n", i + 1);
 			if (line != std::string::npos)
 				_content.erase(i, line - i);
-			else 
+			else
 				_content.erase(i, _content.length() - i);
 		}
 		if (_content[i] == '\t' || _content[i] == '\n')
@@ -119,13 +120,12 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 
 bool Config::server::str_is_num(const std::string &str)
 {
-	if (str.empty())
-		return (false);
-	for (size_t i = 0; i < str.length(); ++i)
-		if (!std::isdigit(str[i]))
-			return false;
-	return true;
+	std::string::const_iterator it = str.begin();
+	while (it != str.end() && std::isdigit(*it))
+		++it;
+	return !str.empty() && it == str.end();
 }
+
 bool Config::server::assign_port(const std::string &str, uint16_t &val)
 {
 	long l = std::strtol(str.c_str(), NULL, 10);
@@ -164,6 +164,7 @@ std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string
 
 void Config::server::set_values(const std::string key, const std::string value)
 {
+	char *p;
 	std::vector<std::string> values = split(value, ' ');
 	if (key == "server_name" && !this->is_location)
 		this->server_name = values[0];
@@ -182,6 +183,18 @@ void Config::server::set_values(const std::string key, const std::string value)
 		this->client_body_limit = strtoul(value.c_str(), NULL, 10);
 		if (errno == ERANGE)
 			throw ConfigException("invalid client_max_body_size: " + value);
+	}
+	else if (key == "read_timeout")
+	{
+		this->read_timeout = strtoul(value.c_str(), &p, 10);
+		if (*p || errno == ERANGE)
+			throw ConfigException("invalid read_timeout: " + value);
+	}
+	else if (key == "send_timeout")
+	{
+		this->send_timeout = strtoul(value.c_str(), &p, 10);
+		if (*p || errno == ERANGE)
+			throw ConfigException("invalid send_timeout: " + value);
 	}
 	else if (key == "index")
 		this->index.insert(this->index.end(), values.begin(), values.end());
