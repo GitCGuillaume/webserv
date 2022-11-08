@@ -12,12 +12,11 @@ Config::Config(const char *conf)
 	else
 		throw ConfigException("failed to read file");
 	drop_comments();
+	std::cout << _content << std::endl;
+
 	parse_config();
-	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s) {
-		std::cout << "server_name: " << it_s->server_name << std::endl;
-		for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = it_s->listens.begin(); it != it_s->listens.end(); ++it)
-			std::cout << "listen: " << it->first << ":" << it->second << std::endl;
-	}
+	for (std::vector<server>::iterator it = _servers.begin(); it != _servers.end(); ++it)
+		std::cout << *it;
 }
 
 Config::Config(const Config &src) : _content(src._content), _servers(src._servers) {}
@@ -34,12 +33,33 @@ const std::vector<Config::server> &Config::getServers() const
 	return _servers;
 }
 
+// void Config::drop_comments()
+// {
+// 	size_t i = 0;
+// 	size_t line = 0;
+// 	while (i < _content.length())
+// 	{
+// 		if (_content[i] == '#')
+// 		{
+// 			line = _content.find_first_of("\n", i + 1);
+// 			if (line != std::string::npos)
+// 				_content.erase(i, line - i + 1);
+// 		}
+// 		else if (_content[i] == '\t' || _content[i] == '\n')
+// 			_content[i] = ' ';
+// 		else
+// 			i++;
+// 	}
+// }
+
+
 void Config::drop_comments()
 {
 	size_t i = 0;
 	size_t line = 0;
 	while (i < _content.length())
 	{ 
+		std::cout << "a"<< std::endl;
 		if (_content[i] == '#')
 		{
 			line = _content.find_first_of("\n", i + 1);
@@ -54,6 +74,7 @@ void Config::drop_comments()
 	}
 }
 
+
 void Config::parse_config()
 {
 	size_t pos = 0;
@@ -61,6 +82,7 @@ void Config::parse_config()
 	while (pos != std::string::npos)
 	{
 		key = get_key(&pos, " {");
+		std::cout << key << std::endl;
 		if (key == "server")
 			_servers.push_back(parse_server(&pos, "server", NULL));
 		else
@@ -76,17 +98,21 @@ Config::server Config::parse_server(size_t *idx, std::string type, server *paren
 	size_t pos = *idx;
 	Config::server res;
 
-	if ((pos = _content.find_first_not_of(" ", pos)) && _content[pos++] != '{')
+	if ((pos = _content.find_first_not_of(" ", pos)) && _content[pos] != '{')
 		throw ConfigException("open bracket missing in server block");
+
+	 pos = _content.find_first_of(" ", pos + 1);
 
 	if (parent)
 		res = *parent;
 
 	while (pos != std::string::npos)
 	{
-		key = get_key(&pos, " ");
-		if (key[0] == '}' && (*idx = _content.find_first_not_of(" ", pos + 1 - key.length())))
+		key = get_key(&pos, " }");
+		if (key[0] == '}') {
+			*idx = pos + 1;
 			break;
+		}
 		if (type == "server" && key == "location")
 		{
 			std::string name = get_key(&pos, " ");
@@ -114,6 +140,7 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 		throw ConfigException("no delimiter found");
 	std::string key = _content.substr(pre, pos - pre);
 	*idx = pos;
+	std::cout << "key:" << key << "/" <<  std::endl;
 	return key;
 }
 

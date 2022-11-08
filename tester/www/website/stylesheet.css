@@ -4,9 +4,8 @@ body {
 	font-family: Arial, sans-serif;
 	background-image: url(pictures/alliance_background.jpg);
 	background-size: cover;
-	height: 100vh;;
+	height: 100vh;
 }
-
 
 h1 {
 	font-size: 4em;
@@ -17,12 +16,10 @@ h2 {
 	color: black;
 }
 
-
 #title {
 	display: flex;
 	justify-content: center;
 }
-
 
 .content {
  margin-left: 20vw;;

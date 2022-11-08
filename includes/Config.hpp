@@ -32,12 +32,11 @@ class Config
 			std::map<std::string, std::string> cgi_info;
 			std::map<std::string, server> locations;
 			bool is_location;
-			void init_error_page();
 			bool str_is_num(const std::string &str);
 			void set_values(std::string key, std::string value);
 			static bool assign_port(const std::string &str, uint16_t &val);
 			std::pair<std::string, uint16_t> handle_listen(const std::string &value);
-			server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"),  autoindex(false), client_body_limit(0), is_location(false) {init_error_page();}
+			server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"),  autoindex(false), client_body_limit(0), is_location(false) {}
 			const server &operator=(const server &rhs)
 			{
 				server_name = rhs.server_name;
@@ -79,6 +78,7 @@ class Config
 			}
 
 		};
+		
 		typedef std::vector<server> vect_serv;
 		typedef std::vector<std::pair<std::string, uint16_t> > vect_listens;
 		typedef const server * ptr_server;
@@ -89,9 +89,8 @@ class Config
 		
 		const std::string &getContent() const;
 		const std::vector<server> &getServers() const;
-	private:
 
-		
+	private:
 
 		void drop_comments();
 		void parse_config();
