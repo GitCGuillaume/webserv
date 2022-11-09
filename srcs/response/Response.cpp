@@ -218,15 +218,17 @@ int parse_content_type_cgi(std::string const &content_type)
     std::cout << "cnt:" << content_type << std::endl;
     size_t pos_status = content_type.find("Status:");
     size_t pos_status2 = pos_status;
-    std::cout << "AV" << std::endl;
+    std::stringstream iss;
+    int err = 200;
     if (pos_status == std::string::npos)
-        return (0);
-    std::cout << "AP" << std::endl;
+        return (200);
     parse_cnt = content_type.substr(pos_status + 8, content_type.length());
     pos_status2 = parse_cnt.find(" ");
     parse_cnt.clear();
     parse_cnt = content_type.substr(pos_status + 8, pos_status2);
-    return (0);
+    std::cout << "parse_cnt:" << parse_cnt << std::endl;
+    std::istringstream(parse_cnt) >> err;
+    return (err);
 }
 
 void Response::run_cgi_post(Config::ptr_server conf)
@@ -249,10 +251,9 @@ void Response::run_cgi_post(Config::ptr_server conf)
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
     std::string content_type(ret_body.substr(0, pos));
-    if (parse_content_type_cgi(content_type) == 0)
-        ret_body.erase(0, pos + 4);
-    std::cout << "content_type:" << content_type << std::endl;
-    fillResponse(ret_body, 200, content_type);
+    int code = parse_content_type_cgi(content_type);
+    ret_body.erase(0, pos + 4);
+    fillResponse(ret_body, code, content_type);
 }
 
 void Response::post_method(void)

@@ -33,13 +33,21 @@ server {
 	location / {
 		
 	}
-	location /cgi-bin/php/
+	location /cgi-bin/
 	{
 		allow_methods POST GET;
-		cgi_info .php ./tester/www/website/cgi-bin/php-bin;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
 		autoindex on;
 	}
-	
+	location /cgi-bin/YoupiBanane/
+	{
+		allow_methods POST GET;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex on;
+	}
+
 	# pass PHP scripts to FastCGI server
 	#
 	#location ~ \.php$ {

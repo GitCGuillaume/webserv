@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <fstream>
 #include <Cgi.hpp>
+#include <sstream>
 
 class Response
 {
