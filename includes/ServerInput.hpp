@@ -14,11 +14,11 @@ class ServerInput
 {
 private:
     Request _req;
-    Client &_handler;
+    const Client &_handler;
     int _socket;
     size_t _pos_end_header;
 public:
-    ServerInput(Client &handler, int sock);
+    ServerInput(const Client &handler, int sock);
     ServerInput(const ServerInput &src);
     ~ServerInput();
 

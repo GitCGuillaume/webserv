@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "Response.hpp"
 
+class Response;
 class ServerOutput
 {
 private:

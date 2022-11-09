@@ -3,11 +3,17 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <errno.h>
-#include "Request.hpp"
+//#include "Request.hpp"
+#include "Cgi.hpp"
 #include <cstring>
 #include <cstdio>
 #include <fstream>
-
+#include "Header.hpp"
+#include "Config.hpp"
+//#include "Request.hpp"
+//#include "Client.hpp"
+class Client;
+class Request;
 class Response
 {
 private:
@@ -19,6 +25,7 @@ private:
     s_entity_header _en_header;
     std::ostringstream _bodyData;
     Config::ptr_server _conf;
+    std::string _cgi_path;
 
     static std::map<int, std::string> __map_error;
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
@@ -29,6 +36,7 @@ public:
     ~Response();
 
     Config::ptr_server getConf(const size_t &pos_slash) const;
+    std::string getFile(Config::ptr_server s, size_t pos_slash);
     void handle_get(Config::ptr_server s, const size_t &pos_slash);
     void get_method(void);
     void post_method(void);
@@ -40,6 +48,11 @@ public:
     static void init_map_error();
     void sendHtmlCode(int status_code, Config::ptr_server s);
     void sendAutoIndex(const std::string &uri, const std::string &root);
+    void run_cgi_get(Config::ptr_server conf, size_t pos_slash);
+    void run_cgi_post(Config::ptr_server conf, size_t pos_slash);
+    void fillResponse(const std::string &body, int status_code, const std::string &content_type);
+    bool is_cgi(void);
+    bool seek_cgi(Config::ptr_server conf, size_t pos_slash);
 };
 void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 

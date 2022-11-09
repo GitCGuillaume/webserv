@@ -1,7 +1,9 @@
 #include "Response.hpp"
+#include "Client.hpp"
 
 Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _version("HTTP/1.1"), _conf(conf)
 {
+
     (this->*_map_method_ptr[req.getMethod()])();
 }
 
@@ -13,12 +15,160 @@ Response::~Response()
 {
 }
 
+void parse_url(const std::string &url, std::string &parse)
+{
+    size_t i = 0;
+    size_t pos = url.find("?");
+    size_t start = 0;
+    size_t end = 0;
+    if (pos == std::string::npos)
+    {
+        // err?
+        return;
+    }
+    parse = url.substr(pos + 1, url.length());
+}
+
+bool Response::seek_cgi(Config::ptr_server conf, size_t pos_slash)
+{
+
+    if (!conf)
+        return (false);
+    std::map<std::string, std::string>::const_iterator it(conf->cgi_info.begin());
+    std::map<std::string, std::string>::const_iterator ite(conf->cgi_info.end());
+    std::string url = getFile(conf, pos_slash);
+    std::string parse;
+    std::string clean_url = url;
+    size_t i = url.length();
+    size_t pos = url.find("?");
+    // std::cout << "first:" << it->first << std::endl;
+    if (pos != std::string::npos)
+        clean_url = url.substr(0, pos);
+    while (it != ite)
+    {
+        std::cout << "++it" << std::endl;
+        // std::cout << "first:" << it->first << std::endl;
+        while (0 < i)
+        {
+            if (clean_url[i] && clean_url[i] == '.')
+            {
+                parse = clean_url.substr(i, clean_url.length());
+                if (!parse.compare(it->first))
+                {
+                    //   std::cout << "TRUEEEE" << std::endl;
+                    _cgi_path = it->second;
+                    // std::cout << "cgi_path:" << _cgi_path << std::endl;
+                    return (true);
+                }
+                // std::cout << "FALSE" << std::endl;
+            }
+            --i;
+        }
+        i = url.length();
+        ++it;
+    }
+    return (false);
+}
+
+void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
+{
+    if (!conf)
+        return;
+    const std::string &body = _req.getBody();
+    std::string url = getFile(conf, pos_slash);
+    std::string clean_url = url;
+    size_t pos2 = url.find("?");
+    if (pos2 != std::string::npos)
+        clean_url = url.substr(0, pos2);
+    const std::string path_info = clean_url;
+    std::string str;
+    std::stringstream ss;
+    parse_url(_req.getUrl(), str);
+    ss << _req.getIp().second;
+    std::cout << "CGI GET" << std::endl;
+    std::cout << "PATH_info:" << path_info << std::endl;
+    Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
+            "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
+            "GATEWAY_INTERFACE=CGI/1.1",
+            "PATH_INFO=" + clean_url, "PATH_TRANSLATED=" + path_info,
+            "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
+            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
+    /*Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
+            "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
+            "GATEWAY_INTERFACE=CGI/1.1",
+            "PATH_INFO=./tester/www/website/cgi-bin/php/get.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/get.php",
+            "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
+            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
+    */
+    cgi.start(_cgi_path);
+    std::string ret_body(cgi.getStringStream().str());
+    size_t pos = ret_body.find("\r\n\r\n");
+    std::string content_type(ret_body.substr(0, pos));
+    ret_body.erase(0, pos + 4);
+    fillResponse(ret_body, 200, content_type);
+}
+
+/*
+    check if content type contain error code + parse it
+*/
+int parse_content_type_cgi(std::string const &content_type)
+{
+    std::string parse_cnt;
+    std::cout << "cnt:" << content_type << std::endl;
+    size_t pos_status = content_type.find("Status:");
+    size_t pos_status2 = pos_status;
+    std::cout << "AV" << std::endl;
+    if (pos_status == std::string::npos)
+        return (0);
+    std::cout << "AP" << std::endl;
+    parse_cnt = content_type.substr(pos_status + 8, content_type.length());
+    pos_status2 = parse_cnt.find(" ");
+    parse_cnt.clear();
+    parse_cnt = content_type.substr(pos_status + 8, pos_status2);
+    return (0);
+}
+
+void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
+{
+    if (!conf)
+        return;
+    std::string url = getFile(conf, pos_slash);
+    const std::string &body = _req.getBody();
+    const std::string path_info = url;
+    std::stringstream ss;
+    std::cout << "CGI POST" << std::endl;
+    std::cout << "ADDR CLIENT:" << _req.getIp().first << std::endl;
+    std::cout << "url:" << url << std::endl;
+    std::cout << "path_info:" << path_info << std::endl;
+    ss << _req.getIp().second;
+    Cgi cgi(body, "CONTENT_LENGTH=" + _req.getEntityHeader().content_length,
+            "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
+            "GATEWAY_INTERFACE=CGI/1.1",
+            "PATH_INFO=" + url, "PATH_TRANSLATED=" + path_info,
+            "QUERY_STRING=", "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=POST",
+            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
+    cgi.start(_cgi_path);
+    std::string ret_body(cgi.getStringStream().str());
+    size_t pos = ret_body.find("\r\n\r\n");
+    std::string content_type(ret_body.substr(0, pos));
+    if (parse_content_type_cgi(content_type) == 0)
+        ret_body.erase(0, pos + 4);
+    std::cout << "content_type:" << content_type << std::endl;
+    fillResponse(ret_body, 200, content_type);
+}
+
 Config::ptr_server Response::getConf(const size_t &pos_slash) const
 {
     std::string url = _req.getUrl();
     if (url.find("http://") == 0)
         url = url.substr(7 + _conf->server_name.length());
-    std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(url.substr(0, pos_slash + 1));
+    std::cout << "pos slash " << pos_slash << std::endl;
+    std::cout << "sustring " << url.substr(0, pos_slash + 1) << std::endl;
+    std::cout << "server " << _conf->server_name << std::endl;
+
+    std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(
+        url.substr(0, pos_slash + 1));
+
     return ((it != _conf->locations.end()) ? &it->second : _conf);
 }
 
@@ -52,6 +202,19 @@ bool Response::fill_body(std::string const &file)
     return false;
 }
 
+std::string Response::getFile(Config::ptr_server s, size_t pos_slash)
+{
+    const std::string &url = _req.getUrl();
+    if (pos_slash == url.size() - 1)
+    {
+        std::vector<std::string>::const_iterator it_index;
+        for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
+        {
+            return (s->root + url + *it_index);
+        }
+    }
+    return (s->root + url);
+}
 void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
 {
     const std::string &url = _req.getUrl();
@@ -68,8 +231,9 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
             std::cout << "NOT FOUND\n";
             if (s->autoindex)
                 sendAutoIndex(url, s->root + url);
+            else
+                sendHtmlCode(404, s);
         }
-        sendHtmlCode(404, s);
     }
     else if (!fill_body(s->root + url))
         sendHtmlCode(404, s);
@@ -77,11 +241,20 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
 
 void Response::get_method(void)
 {
+    bool is_cgi = false;
     size_t pos = _req.getUrl().rfind("/");
     if (pos == std::string::npos)
         std::cout << "404" << std::endl;
     Config::ptr_server s = getConf(pos);
-    handle_get(s, pos);
+    is_cgi = seek_cgi(s, pos);
+    if (is_cgi == true)
+    {
+        std::stringstream _iss;
+        run_cgi_get(s, pos);
+        std::cout << "iss:" << _iss.str() << std::endl;
+    }
+    else
+        handle_get(s, pos);
 }
 
 std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
@@ -111,6 +284,9 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 if (end != std::string::npos)
                 {
                     file = s->upload_path + field_value.substr(pos, end - pos);
+                    std::cout << "end " << end << std::endl;
+                    std::cout << "pos " << pos << std::endl;
+                    std::cout << field_value.substr(pos, end - pos) << std::endl;
                     std::cout << "file: " << file << std::endl;
                     std::cout << "upload: " << s->upload_path << std::endl;
                 }
@@ -126,58 +302,66 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
 }
 void Response::post_method(void)
 {
-    int debug = 0;
+    bool is_cgi = false;
     size_t pos_slash = _req.getUrl().rfind("/");
     if (pos_slash == std::string::npos)
         std::cout << "404" << std::endl;
     Config::ptr_server s = getConf(pos_slash);
+    is_cgi = seek_cgi(s, pos_slash);
     const s_entity_header &en_header = _req.getEntityHeader();
-    if (en_header.content_type.find("multipart/form-data") == 0)
+    if (is_cgi == false)
     {
-        std::string boundary;
-        size_t pos = en_header.content_type.find_first_not_of(" \t", 19);
-        if (pos != std::string::npos && en_header.content_type[pos] == ';')
+        if (en_header.content_type.find("multipart/form-data") == 0)
         {
-            pos = en_header.content_type.find_first_not_of(" \t", pos + 1);
-            if (pos != std::string::npos && en_header.content_type.find("boundary=", pos) == pos)
+            std::string boundary;
+            size_t pos = en_header.content_type.find_first_not_of(" \t", 19);
+            if (pos != std::string::npos && en_header.content_type[pos] == ';')
             {
-                size_t end_pos = en_header.content_type.find(" \t", pos + 1);
-                boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
-                std::cout << "boundary " << boundary << std::endl;
+                pos = en_header.content_type.find_first_not_of(" \t", pos + 1);
+                if (pos != std::string::npos && en_header.content_type.find("boundary=", pos) == pos)
+                {
+                    size_t end_pos = en_header.content_type.find(" \t", pos + 1);
+                    boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
+                    std::cout << "boundary " << boundary << std::endl;
+                }
+            }
+            const std::string &body = _req.getBody();
+            pos = 0;
+            size_t end_pos;
+            // std::cout << "here" << s << std::endl;
+            while (body.find("--" + boundary + "\r\n", pos) == pos)
+            {
+                pos += 4 + boundary.size();
+                end_pos = body.find("--" + boundary + "\r\n", pos);
+                if (end_pos == std::string::npos)
+                {
+                    std::cout << "777777777777777777777777777777777777777777777777777777\n";
+                    break;
+                }
+                std::cout << "BODY: " << std::endl;
+                std::cout << body.substr(pos, end_pos - pos) << std::endl;
+                std::string file = test(body, pos, s);
+
+                if (!file.empty())
+                {
+                    std::ofstream ofs(file.c_str());
+                    std::cout << "IMAGE:" << file << std::endl;
+                    // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
+                    ofs << body.substr(pos + 2, end_pos - pos - 4);
+                    ofs.close();
+                }
+                pos = end_pos;
+
+                // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
             }
         }
-        const std::string &body = _req.getBody();
-        pos = 0;
-        size_t end_pos;
-        // std::cout << "here" << s << std::endl;
-        while (body.find("--" + boundary + "\r\n", pos) == pos)
-        {
-            debug++;
-            pos += 4 + boundary.size();
-            end_pos = body.find("--" + boundary + "\r\n", pos);
-            if (end_pos == std::string::npos)
-            {
-                std::cout << "777777777777777777777777777777777777777777777777777777\n";
-                break;
-            }
-            std::cout << "BODY: " << std::endl;
-            std::cout << body.substr(pos, end_pos - pos) << std::endl;
-            std::string file = test(body, pos, s);
-
-            if (!file.empty())
-            {
-                std::ofstream ofs(file.c_str());
-                // std::cout << "IMAGE:" << std::endl;
-                // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
-                ofs << body.substr(pos + 2, end_pos - pos - 4);
-                ofs.close();
-            }
-            pos = end_pos;
-
-            // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
-        }
+        handle_get(s, pos_slash);
     }
-    handle_get(s, pos_slash);
+    else if (is_cgi == true)
+    {
+        run_cgi_post(s, pos_slash);
+        // std::cout << "iss:" << _iss.str() << std::endl;
+    }
 }
 
 void Response::delete_method(void)
@@ -229,10 +413,10 @@ void Response::sendHtmlCode(int status_code, Config::ptr_server s)
 
 void Response::sendAutoIndex(const std::string &uri, const std::string &directory)
 {
-   std::string ret;
+    std::string ret;
     std::cout << "AUTOINDEX " << directory << std::endl;
     load_directory_autoindex(ret, directory, uri);
-    _bodyData << ret; 
+    _bodyData << ret;
     std::ostringstream os;
     os << _bodyData.str().size();
     _en_header.content_length = os.str();
@@ -240,6 +424,15 @@ void Response::sendAutoIndex(const std::string &uri, const std::string &director
     _status_code = 200;
 }
 
+void Response::fillResponse(const std::string &body, int status_code, const std::string &content_type)
+{
+    _status_code = status_code;
+    _bodyData << body;
+    std::stringstream out;
+    out << body.size();
+    _en_header.content_length = out.str();
+    _en_header.content_type = content_type;
+}
 
 std::map<int, std::string> Response::__map_error;
 void Response::init_map_error()

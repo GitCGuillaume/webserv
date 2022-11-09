@@ -22,7 +22,7 @@
 #include <fcntl.h>
 #include "Config.hpp"
 
-#define MAX_EVENTS 1000
+#define MAX_EVENTS 10000
 
 
 class Server

@@ -8,7 +8,9 @@
 #include <sstream>
 #include "Header.hpp"
 #include "Config.hpp"
+//#include "Client.hpp" //ERROR
 
+class Client;
 class Request
 {
 
@@ -21,8 +23,7 @@ public:
     //     std::string host;
     //     std::string transfer_encoding;
     // } t_header;
-    Request();
-    Request(const std::string &req);
+    Request(const Client &Client);
     Request(const Request &src);
     ~Request();
 
@@ -50,6 +51,8 @@ public:
     //const t_header &getHeader() const;
     size_t getContentLength() const;
     const std::string &getBody() const;
+    const Client &getClient() const;
+    const std::pair<std::string,uint16_t> &getIp() const;
     size_t size();
 
 private:
@@ -67,5 +70,6 @@ private:
     std::string _body;
     bool _is_ready;
     int _code;
+    const Client &_client;
 };
 #endif

@@ -1,10 +1,10 @@
 #include "ServerInput.hpp"
 
-ServerInput::ServerInput(Client &handler, int sock) : _handler(handler), _socket(sock), _pos_end_header(0)
+ServerInput::ServerInput(const Client &handler, int sock) : _req(handler), _handler(handler), _socket(sock), _pos_end_header(0)
 {
 }
 
-ServerInput::ServerInput(const ServerInput &src) : _handler(src._handler), _socket(src._socket), _pos_end_header(src._pos_end_header)
+ServerInput::ServerInput(const ServerInput &src) : _req(src._req), _handler(src._handler), _socket(src._socket), _pos_end_header(src._pos_end_header)
 {
 }
 
