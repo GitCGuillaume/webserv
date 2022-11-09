@@ -40,6 +40,7 @@ public:
     void run_cgi_post(Config::ptr_server conf);
     void run_cgi_get(Config::ptr_server conf);
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
+    bool seek_cgi(Config::ptr_server conf);
 };
 
 #endif

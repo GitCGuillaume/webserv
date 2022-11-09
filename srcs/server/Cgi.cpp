@@ -79,7 +79,7 @@ void Cgi::start()
         close(fd_child_in);
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
-        exit(0);
+        exit(500);
     }
     int wstatus = 0;
     wait(&wstatus);

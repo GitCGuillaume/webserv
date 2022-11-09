@@ -70,7 +70,7 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
         std::cout << "404" << std::endl;
 }
 
-bool seek_cgi(Config::ptr_server conf)
+bool Response::seek_cgi(Config::ptr_server conf)
 {
     if (!conf)
         return (false);
@@ -166,7 +166,7 @@ void Response::run_cgi_get(Config::ptr_server conf)
     Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
-            "PATH_INFO=/website/cgi-bin/php/get.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/get.php",
+            "PATH_INFO=./tester/www/website/cgi-bin/php/get.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/get.php",
             "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     cgi.start();
@@ -180,16 +180,19 @@ void Response::run_cgi_post(Config::ptr_server conf)
     const std::string &url = _req.getUrl();
     const std::string &body = _req.getBody();
     std::cout << "FILE:" << conf->root + url << std::endl;
+    const std::string path_info = url;
+    std::cout << "path_info:" << path_info << std::endl;
     std::stringstream ss;
     ss << _req.getIp().second;
     std::cout << conf->server_name << std::endl;
     Cgi cgi(body, "CONTENT_LENGTH=" + _req.getEntityHeader().content_length,
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
-            "PATH_INFO=./tester/www/website/cgi-bin/php/post.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/post.php",
+            "PATH_INFO=" + path_info, "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/post.php",
             "QUERY_STRING=", "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=POST",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     cgi.start();
+    std::cout << "stream:" << cgi.getStringStream().str() << std::endl;
     fillResponse(cgi.getStringStream().str(), 200, "text/html; charset=UTF-8");
 }
 
@@ -250,13 +253,13 @@ void Response::post_method(void)
                 // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
             }
         }
+        handle_get(s, pos_slash);
     }
     else if (is_cgi == true)
     {
         run_cgi_post(s);
-        //std::cout << "iss:" << _iss.str() << std::endl;
+        // std::cout << "iss:" << _iss.str() << std::endl;
     }
-    handle_get(s, pos_slash);
 }
 
 void Response::delete_method(void)
