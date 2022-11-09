@@ -41,7 +41,7 @@ Cgi &Cgi::operator=(Cgi const &src)
 
 /* use tmpfile, because fd alone have a limit of size
     65KB on linux ? */
-void Cgi::start()
+void Cgi::start(std::string const &_cgi_path)
 {
     pid_t pid = 0;
     // int fds_child[2];
@@ -66,8 +66,8 @@ void Cgi::start()
     }
     else if (pid == 0)
     {
-        char *ft_argv[3] = {const_cast<char *>("/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php-cgi"),
-                            const_cast<char *>(_vec[2].c_str()), 0};
+        char *ft_argv[3] = {const_cast<char *>(_cgi_path.c_str()),
+                            const_cast<char *>(_vec[4].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
             ft_envp[i] = const_cast<char *>(_vec[i].c_str());
@@ -79,10 +79,12 @@ void Cgi::start()
         close(fd_child_in);
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
-        exit(500);
+        exit(1);
     }
     int wstatus = 0;
     wait(&wstatus);
+    std::cout << "wstatus:" << wstatus << std::endl;
+    std::cout << "wstatus >> 8" << (wstatus >> 8) << std::endl;
     // std::rewind(tmp_child_in); // need to read from start of stream
     char c = 0;
     size_t length = lseek(fd_child_in, 0, SEEK_END);

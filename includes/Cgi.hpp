@@ -14,19 +14,6 @@
 class Cgi
 {
 private:
-    /*std::string _content_type;
-    std::string _gateway_interface;
-    std::string _path_info;
-    std::string _path_translated;
-    std::string _query_string;
-    std::string _remote_addr;
-    std::string _remote_host;
-    std::string _request_method;
-    std::string _script_name;
-    std::string _server_name;
-    std::string _server_protocol;
-    std::string _content_length;
-    std::string _server_port;*/
     std::vector<std::string> _vec;
     std::string const _body;
     std::stringstream _iss;
@@ -43,7 +30,7 @@ public:
     Cgi(Cgi const &src);
     Cgi &operator=(Cgi const &src);
     const std::stringstream &getStringStream() const;
-    void start();
+    void start(std::string const &_cgi_path);
 };
 
 #endif

@@ -20,7 +20,7 @@ private:
     s_entity_header _en_header;
     std::ostringstream _bodyData;
     Config::ptr_server _conf;
-
+    std::string _cgi_path;
     static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
 
 public:
