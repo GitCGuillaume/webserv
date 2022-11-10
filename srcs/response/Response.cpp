@@ -3,8 +3,17 @@
 
 Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _version("HTTP/1.1"), _conf(conf)
 {
-
-    (this->*_map_method_ptr[req.getMethod()])();
+    try
+    {
+        /* code */
+        (this->*_map_method_ptr[req.getMethod()])();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        sendHtmlCode(500);
+    }
+    
 }
 
 Response::Response(const Response &src) : _req(src._req)
@@ -162,9 +171,6 @@ Config::ptr_server Response::getConf(const size_t &pos_slash) const
     std::string url = _req.getUrl();
     if (url.find("http://") == 0)
         url = url.substr(7 + _conf->server_name.length());
-    std::cout << "pos slash " << pos_slash << std::endl;
-    std::cout << "sustring " << url.substr(0, pos_slash + 1) << std::endl;
-    std::cout << "server " << _conf->server_name << std::endl;
 
     std::map<std::string, Config::server>::const_iterator it = _conf->locations.find(
         url.substr(0, pos_slash + 1));
@@ -215,7 +221,7 @@ std::string Response::getFile(Config::ptr_server s, size_t pos_slash)
     }
     return (s->root + url);
 }
-void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
+bool Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
 {
     const std::string &url = _req.getUrl();
     if (pos_slash == url.size() - 1)
@@ -232,20 +238,21 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
             if (s->autoindex)
                 sendAutoIndex(url, s->root + url);
             else
-                sendHtmlCode(404, s);
+                return sendHtmlCode(404);
         }
     }
     else if (!fill_body(s->root + url))
-        sendHtmlCode(404, s);
+        return sendHtmlCode(404);
+    return (true);
 }
 
-void Response::get_method(void)
+bool Response::get_method(void)
 {
     bool is_cgi = false;
     size_t pos = _req.getUrl().rfind("/");
-    if (pos == std::string::npos)
-        std::cout << "404" << std::endl;
     Config::ptr_server s = getConf(pos);
+    if (pos == std::string::npos)
+        return sendHtmlCode(404);
     is_cgi = seek_cgi(s, pos);
     if (is_cgi == true)
     {
@@ -255,6 +262,7 @@ void Response::get_method(void)
     }
     else
         handle_get(s, pos);
+    return (true);
 }
 
 std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
@@ -270,7 +278,7 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
         pos = end_pos + 2;
         end_pos = body.find("\r\n", pos);
         if (end_pos == std::string::npos)
-            std::cout << "bad body multipart" << std::endl;
+            return ("");
         std::string field_value = body.substr(pos, end_pos - pos);
         std::cout << "field name " << field_name << std::endl;
         std::cout << "field value " << field_value << std::endl;
@@ -290,8 +298,6 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                     std::cout << "file: " << file << std::endl;
                     std::cout << "upload: " << s->upload_path << std::endl;
                 }
-                else
-                    std::cout << "error" << std::endl;
             }
         }
         pos = end_pos + 2;
@@ -300,84 +306,100 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
     }
     return file;
 }
-void Response::post_method(void)
+bool Response::post_method(void)
 {
     bool is_cgi = false;
     size_t pos_slash = _req.getUrl().rfind("/");
-    if (pos_slash == std::string::npos)
-        std::cout << "404" << std::endl;
     Config::ptr_server s = getConf(pos_slash);
-    is_cgi = seek_cgi(s, pos_slash);
-    const s_entity_header &en_header = _req.getEntityHeader();
-    if (is_cgi == false)
+    if (pos_slash == std::string::npos)
+        sendHtmlCode(404);
+    else
+
     {
-        if (en_header.content_type.find("multipart/form-data") == 0)
+        is_cgi = seek_cgi(s, pos_slash);
+        const s_entity_header &en_header = _req.getEntityHeader();
+        if (is_cgi == false)
         {
-            std::string boundary;
-            size_t pos = en_header.content_type.find_first_not_of(" \t", 19);
-            if (pos != std::string::npos && en_header.content_type[pos] == ';')
+            if (en_header.content_type.find("multipart/form-data") == 0)
             {
-                pos = en_header.content_type.find_first_not_of(" \t", pos + 1);
-                if (pos != std::string::npos && en_header.content_type.find("boundary=", pos) == pos)
+                std::string boundary;
+                size_t pos = en_header.content_type.find_first_not_of(" \t", 19);
+                if (pos != std::string::npos && en_header.content_type[pos] == ';')
                 {
-                    size_t end_pos = en_header.content_type.find(" \t", pos + 1);
-                    boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
-                    std::cout << "boundary " << boundary << std::endl;
+                    pos = en_header.content_type.find_first_not_of(" \t", pos + 1);
+                    if (pos != std::string::npos && en_header.content_type.find("boundary=", pos) == pos)
+                    {
+                        size_t end_pos = en_header.content_type.find(" \t", pos + 1);
+                        boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
+                        std::cout << "boundary " << boundary << std::endl;
+                    }
+                }
+                const std::string &body = _req.getBody();
+                pos = 0;
+                size_t end_pos;
+                // std::cout << "here" << s << std::endl;
+                while (body.find("--" + boundary + "\r\n", pos) == pos)
+                {
+                    pos += 4 + boundary.size();
+                    end_pos = body.find("--" + boundary + "\r\n", pos);
+                    if (end_pos == std::string::npos)
+                    {
+                        std::cout << "777777777777777777777777777777777777777777777777777777\n";
+                        break;
+                    }
+                    std::cout << "BODY: " << std::endl;
+                    std::cout << body.substr(pos, end_pos - pos) << std::endl;
+                    std::string file = test(body, pos, s);
+
+                    if (!file.empty())
+                    {
+                        std::ofstream ofs(file.c_str());
+                        std::cout << "IMAGE:" << file << std::endl;
+                        // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
+                        ofs << body.substr(pos + 2, end_pos - pos - 4);
+                        ofs.close();
+                    }
+                    else
+                        return (sendHtmlCode(400));
+
+                    pos = end_pos;
+
+                    // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
                 }
             }
-            const std::string &body = _req.getBody();
-            pos = 0;
-            size_t end_pos;
-            // std::cout << "here" << s << std::endl;
-            while (body.find("--" + boundary + "\r\n", pos) == pos)
-            {
-                pos += 4 + boundary.size();
-                end_pos = body.find("--" + boundary + "\r\n", pos);
-                if (end_pos == std::string::npos)
-                {
-                    std::cout << "777777777777777777777777777777777777777777777777777777\n";
-                    break;
-                }
-                std::cout << "BODY: " << std::endl;
-                std::cout << body.substr(pos, end_pos - pos) << std::endl;
-                std::string file = test(body, pos, s);
-
-                if (!file.empty())
-                {
-                    std::ofstream ofs(file.c_str());
-                    std::cout << "IMAGE:" << file << std::endl;
-                    // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
-                    ofs << body.substr(pos + 2, end_pos - pos - 4);
-                    ofs.close();
-                }
-                pos = end_pos;
-
-                // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
-            }
+            handle_get(s, pos_slash);
         }
-        handle_get(s, pos_slash);
+        else if (is_cgi == true)
+        {
+            run_cgi_post(s, pos_slash);
+            // std::cout << "iss:" << _iss.str() << std::endl;
+        }
     }
-    else if (is_cgi == true)
-    {
-        run_cgi_post(s, pos_slash);
-        // std::cout << "iss:" << _iss.str() << std::endl;
-    }
+    return (true);
 }
 
-void Response::delete_method(void)
+bool Response::delete_method(void)
 {
     std::string url = _req.getUrl();
     struct stat buffer;
     if (stat(url.c_str(), &buffer) == 0)
-        _status_code = remove(url.c_str()) == 0 ? 204 : 403;
+    {
+        if (remove(url.c_str()) == 0)
+        {
+            _status_code = 204;
+        }
+        else
+            return (sendHtmlCode(403));
+    }
     else
-        _status_code = 404;
+        return (sendHtmlCode(404));
+    return (true);
 }
 
 std::string Response::seralize(void) const
 {
     std::ostringstream oss;
-    oss << _version << " " << _status_code << " OK\r\n";
+    oss << _version << " " << _status_code << __map_status[_status_code] << "\r\n";
     oss << _ge_header.toString();
     oss << _re_header.toString();
     oss << _en_header.toString();
@@ -386,7 +408,7 @@ std::string Response::seralize(void) const
     return (oss.str());
 }
 
-std::map<std::string, void (Response::*)(void)> Response::_map_method_ptr;
+std::map<std::string, bool (Response::*)(void)> Response::_map_method_ptr;
 
 void Response::init_map_method(void)
 {
@@ -395,20 +417,20 @@ void Response::init_map_method(void)
     _map_method_ptr["DELETE"] = &Response::delete_method;
 }
 
-void Response::sendHtmlCode(int status_code, Config::ptr_server s)
+bool Response::sendHtmlCode(int status_code)
 {
-
     _bodyData << "<html> <head> <title>";
-    _bodyData << status_code << " " << __map_error[status_code];
+    _bodyData << status_code << " " << __map_status[status_code];
     _bodyData << "</title> </head>";
-    _bodyData << "<body>";
-    _bodyData << status_code << " " << __map_error[status_code];
-    _bodyData << "</body> </html>";
+    _bodyData << "<body><center><h1>";
+    _bodyData << status_code << " " << __map_status[status_code];
+    _bodyData << "</h1></center><hr><center>webserv/1.0</center></body> </html>";
     std::ostringstream os;
     os << _bodyData.str().size();
     _en_header.content_length = os.str();
     _en_header.content_type = s_entity_header::__map_ext_mime[".html"];
     _status_code = status_code;
+    return (false);
 }
 
 void Response::sendAutoIndex(const std::string &uri, const std::string &directory)
@@ -434,51 +456,51 @@ void Response::fillResponse(const std::string &body, int status_code, const std:
     _en_header.content_type = content_type;
 }
 
-std::map<int, std::string> Response::__map_error;
+std::map<int, std::string> Response::__map_status;
 void Response::init_map_error()
 {
-    __map_error[100] = "Continue";
-    __map_error[101] = "Switching Protocols";
+    __map_status[100] = "Continue";
+    __map_status[101] = "Switching Protocols";
 
-    __map_error[200] = "OK";
-    __map_error[201] = "Created";
-    __map_error[202] = "Accepted";
-    __map_error[203] = "Non-Authoritative Information";
-    __map_error[204] = "No Content";
-    __map_error[205] = "Reset Content";
-    __map_error[206] = "Partial Content";
+    __map_status[200] = "OK";
+    __map_status[201] = "Created";
+    __map_status[202] = "Accepted";
+    __map_status[203] = "Non-Authoritative Information";
+    __map_status[204] = "No Content";
+    __map_status[205] = "Reset Content";
+    __map_status[206] = "Partial Content";
 
-    __map_error[300] = "Multiple Choices";
-    __map_error[301] = "Moved Permanently";
-    __map_error[302] = "Found";
-    __map_error[303] = "See Other";
-    __map_error[304] = "Not Modified";
-    __map_error[305] = "Use Proxy";
-    __map_error[307] = "Temporary Redirect";
+    __map_status[300] = "Multiple Choices";
+    __map_status[301] = "Moved Permanently";
+    __map_status[302] = "Found";
+    __map_status[303] = "See Other";
+    __map_status[304] = "Not Modified";
+    __map_status[305] = "Use Proxy";
+    __map_status[307] = "Temporary Redirect";
 
-    __map_error[400] = "Bad Request";
-    __map_error[401] = "Unauthorized";
-    __map_error[402] = "Payment Required";
-    __map_error[403] = "Forbidden";
-    __map_error[404] = "Not Found";
-    __map_error[405] = "Method Not Allowed";
-    __map_error[406] = "Not Acceptable";
-    __map_error[407] = "Proxy Authentication Required";
-    __map_error[408] = "Request Time-out";
-    __map_error[409] = "Conflict";
-    __map_error[410] = "Gone";
-    __map_error[411] = "Length Required";
-    __map_error[412] = "Precondition Failed";
-    __map_error[413] = "Request Entity Too Large";
-    __map_error[414] = "Request-URI Too Large";
-    __map_error[415] = "Unsupported Media Type";
-    __map_error[416] = "Requested range not satisfiable";
-    __map_error[417] = "Expectation Failed";
+    __map_status[400] = "Bad Request";
+    __map_status[401] = "Unauthorized";
+    __map_status[402] = "Payment Required";
+    __map_status[403] = "Forbidden";
+    __map_status[404] = "Not Found";
+    __map_status[405] = "Method Not Allowed";
+    __map_status[406] = "Not Acceptable";
+    __map_status[407] = "Proxy Authentication Required";
+    __map_status[408] = "Request Time-out";
+    __map_status[409] = "Conflict";
+    __map_status[410] = "Gone";
+    __map_status[411] = "Length Required";
+    __map_status[412] = "Precondition Failed";
+    __map_status[413] = "Request Entity Too Large";
+    __map_status[414] = "Request-URI Too Large";
+    __map_status[415] = "Unsupported Media Type";
+    __map_status[416] = "Requested range not satisfiable";
+    __map_status[417] = "Expectation Failed";
 
-    __map_error[500] = "Internal Server Error";
-    __map_error[501] = "Not Implemented";
-    __map_error[502] = "Bad Gateway";
-    __map_error[503] = "Service Unavailable";
-    __map_error[504] = "Gateway Time-out";
-    __map_error[505] = "HTTP Version Not Supported";
+    __map_status[500] = "Internal Server Error";
+    __map_status[501] = "Not Implemented";
+    __map_status[502] = "Bad Gateway";
+    __map_status[503] = "Service Unavailable";
+    __map_status[504] = "Gateway Time-out";
+    __map_status[505] = "HTTP Version Not Supported";
 }

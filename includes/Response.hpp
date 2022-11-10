@@ -27,8 +27,8 @@ private:
     Config::ptr_server _conf;
     std::string _cgi_path;
 
-    static std::map<int, std::string> __map_error;
-    static std::map<std::string, void (Response::*)(void)> _map_method_ptr;
+    static std::map<int, std::string> __map_status;
+    static std::map<std::string, bool (Response::*)(void)> _map_method_ptr;
 
 public:
     Response(const Request &req, Config::ptr_server conf);
@@ -37,16 +37,16 @@ public:
 
     Config::ptr_server getConf(const size_t &pos_slash) const;
     std::string getFile(Config::ptr_server s, size_t pos_slash);
-    void handle_get(Config::ptr_server s, const size_t &pos_slash);
-    void get_method(void);
-    void post_method(void);
-    void delete_method (void);
+    bool handle_get(Config::ptr_server s, const size_t &pos_slash);
+    bool get_method(void);
+    bool post_method(void);
+    bool delete_method(void);
     bool fill_body(std::string const &file);
     std::string test(const std::string &body, size_t &pos, Config::ptr_server s);
     std::string seralize(void) const;
     static void init_map_method(void);
     static void init_map_error();
-    void sendHtmlCode(int status_code, Config::ptr_server s);
+    bool sendHtmlCode(int status_code);
     void sendAutoIndex(const std::string &uri, const std::string &root);
     void run_cgi_get(Config::ptr_server conf, size_t pos_slash);
     void run_cgi_post(Config::ptr_server conf, size_t pos_slash);
@@ -54,7 +54,6 @@ public:
     bool is_cgi(void);
     bool seek_cgi(Config::ptr_server conf, size_t pos_slash);
 };
-void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
-
+void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 
 #endif
