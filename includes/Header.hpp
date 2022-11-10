@@ -32,6 +32,7 @@ struct s_response_header : public s_header
 
     std::string etag;
     std::string server;
+    std::string location;
 };
 struct s_entity_header : public s_header
 {

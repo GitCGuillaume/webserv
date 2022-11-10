@@ -38,6 +38,8 @@ std::string s_response_header::toString(void) const
         s += "ETag: " + etag + "\r\n";
     if (!server.empty())
         s += "Server: " + server + "\r\n";
+    if (!location.empty())
+        s += "Location: " + location + "\r\n";
     return (s);
 }
 

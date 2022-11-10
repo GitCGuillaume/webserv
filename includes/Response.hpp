@@ -35,9 +35,11 @@ public:
     Response(const Response &src);
     ~Response();
 
+    std::string get_redirection(void);
+    void do_redirection(const std::string &redir);
     Config::ptr_server getConf(const size_t &pos_slash) const;
-    std::string getFile(Config::ptr_server s, size_t pos_slash);
-    bool handle_get(Config::ptr_server s, const size_t &pos_slash);
+    std::string getFile(size_t pos_slash);
+    bool handle_get(const size_t &pos_slash);
     bool get_method(void);
     bool post_method(void);
     bool delete_method(void);
@@ -48,11 +50,11 @@ public:
     static void init_map_error();
     bool sendHtmlCode(int status_code);
     void sendAutoIndex(const std::string &uri, const std::string &root);
-    void run_cgi_get(Config::ptr_server conf, size_t pos_slash);
-    void run_cgi_post(Config::ptr_server conf, size_t pos_slash);
+    void run_cgi_get(size_t pos_slash);
+    void run_cgi_post(size_t pos_slash);
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
     bool is_cgi(void);
-    bool seek_cgi(Config::ptr_server conf, size_t pos_slash);
+    bool seek_cgi(size_t pos_slash);
     friend std::ostream &operator<<(std::ostream &os, const Response &rhs);
 };
 void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);

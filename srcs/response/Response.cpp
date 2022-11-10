@@ -5,7 +5,8 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
 {
     try
     {
-        /* code */
+        size_t pos_slash = _req.getUrl().rfind("/");
+        _conf = getConf(pos_slash);
         (this->*_map_method_ptr[req.getMethod()])();
     }
     catch (const std::exception &e)
@@ -23,6 +24,25 @@ Response::~Response()
 {
 }
 
+std::string Response::get_redirection(void)
+{
+    const std::string &url = _req.getUrl();
+    const std::map<std::string, std::string> &rewrite = _conf->rewrite;
+    const std::map<std::string, std::string>::const_iterator it = rewrite.find(url);
+    if(it != rewrite.end())
+    {
+        return (it->second);
+    }
+    return "";
+}
+
+void Response::do_redirection(const std::string &redir)
+{
+    _re_header.location = redir;
+    _status_code = 301;
+}
+
+
 void parse_url(const std::string &url, std::string &parse)
 {
     size_t i = 0;
@@ -37,14 +57,14 @@ void parse_url(const std::string &url, std::string &parse)
     parse = url.substr(pos + 1, url.length());
 }
 
-bool Response::seek_cgi(Config::ptr_server conf, size_t pos_slash)
+bool Response::seek_cgi(size_t pos_slash)
 {
 
-    if (!conf)
+    if (!_conf)
         return (false);
-    std::map<std::string, std::string>::const_iterator it(conf->cgi_info.begin());
-    std::map<std::string, std::string>::const_iterator ite(conf->cgi_info.end());
-    std::string url = getFile(conf, pos_slash);
+    std::map<std::string, std::string>::const_iterator it(_conf->cgi_info.begin());
+    std::map<std::string, std::string>::const_iterator ite(_conf->cgi_info.end());
+    std::string url = getFile(pos_slash);
     std::string parse;
     std::string clean_url = url;
     size_t i = url.length();
@@ -78,12 +98,12 @@ bool Response::seek_cgi(Config::ptr_server conf, size_t pos_slash)
     return (false);
 }
 
-void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
+void Response::run_cgi_get(size_t pos_slash)
 {
-    if (!conf)
+    if (!_conf)
         return;
     const std::string &body = _req.getBody();
-    std::string url = getFile(conf, pos_slash);
+    std::string url = getFile(pos_slash);
     std::string clean_url = url;
     size_t pos2 = url.find("?");
     if (pos2 != std::string::npos)
@@ -100,7 +120,7 @@ void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
             "GATEWAY_INTERFACE=CGI/1.1",
             "PATH_INFO=" + clean_url, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
-            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
+            "SCRIPT_NAME=", "SERVER_NAME=" + _conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     /*Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
@@ -136,11 +156,11 @@ int parse_content_type_cgi(std::string const &content_type)
     return (0);
 }
 
-void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
+void Response::run_cgi_post(size_t pos_slash)
 {
-    if (!conf)
+    if (!_conf)
         return;
-    std::string url = getFile(conf, pos_slash);
+    std::string url = getFile(pos_slash);
     const std::string &body = _req.getBody();
     const std::string path_info = url;
     std::stringstream ss;
@@ -154,7 +174,7 @@ void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
             "GATEWAY_INTERFACE=CGI/1.1",
             "PATH_INFO=" + url, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=", "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=POST",
-            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
+            "SCRIPT_NAME=", "SERVER_NAME=" + _conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     cgi.start(_cgi_path);
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
@@ -207,40 +227,40 @@ bool Response::fill_body(std::string const &file)
     return false;
 }
 
-std::string Response::getFile(Config::ptr_server s, size_t pos_slash)
+std::string Response::getFile(size_t pos_slash)
 {
     const std::string &url = _req.getUrl();
     if (pos_slash == url.size() - 1)
     {
         std::vector<std::string>::const_iterator it_index;
-        for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
+        for (it_index = _conf->index.begin(); it_index != _conf->index.end(); ++it_index)
         {
-            return (s->root + url + *it_index);
+            return (_conf->root + url + *it_index);
         }
     }
-    return (s->root + url);
+    return (_conf->root + url);
 }
-bool Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
+bool Response::handle_get(const size_t &pos_slash)
 {
     const std::string &url = _req.getUrl();
     if (pos_slash == url.size() - 1)
     {
         std::vector<std::string>::const_iterator it_index;
-        for (it_index = s->index.begin(); it_index != s->index.end(); ++it_index)
+        for (it_index = _conf->index.begin(); it_index != _conf->index.end(); ++it_index)
         {
-            if (fill_body(s->root + url + *it_index))
+            if (fill_body(_conf->root + url + *it_index))
                 break;
         }
-        if (it_index == s->index.end())
+        if (it_index == _conf->index.end())
         {
             std::cout << "NOT FOUND\n";
-            if (s->autoindex)
-                sendAutoIndex(url, s->root + url);
+            if (_conf->autoindex)
+                sendAutoIndex(url, _conf->root + url);
             else
                 return sendHtmlCode(404);
         }
     }
-    else if (!fill_body(s->root + url))
+    else if (!fill_body(_conf->root + url))
         return sendHtmlCode(404);
     return (true);
 }
@@ -249,18 +269,17 @@ bool Response::get_method(void)
 {
     bool is_cgi = false;
     size_t pos = _req.getUrl().rfind("/");
-    Config::ptr_server s = getConf(pos);
     if (pos == std::string::npos)
         return sendHtmlCode(404);
-    is_cgi = seek_cgi(s, pos);
+    is_cgi = seek_cgi(pos);
     if (is_cgi == true)
     {
         std::stringstream _iss;
-        run_cgi_get(s, pos);
+        run_cgi_get(pos);
         std::cout << "iss:" << _iss.str() << std::endl;
     }
     else
-        handle_get(s, pos);
+        handle_get(pos);
     return (true);
 }
 
@@ -309,13 +328,12 @@ bool Response::post_method(void)
 {
     bool is_cgi = false;
     size_t pos_slash = _req.getUrl().rfind("/");
-    Config::ptr_server s = getConf(pos_slash);
     if (pos_slash == std::string::npos)
         sendHtmlCode(404);
     else
 
     {
-        is_cgi = seek_cgi(s, pos_slash);
+        is_cgi = seek_cgi(pos_slash);
         const s_entity_header &en_header = _req.getEntityHeader();
         if (is_cgi == false)
         {
@@ -348,7 +366,7 @@ bool Response::post_method(void)
                     }
                     std::cout << "BODY: " << std::endl;
                     std::cout << body.substr(pos, end_pos - pos) << std::endl;
-                    std::string file = test(body, pos, s);
+                    std::string file = test(body, pos, _conf);
 
                     if (!file.empty())
                     {
@@ -366,11 +384,11 @@ bool Response::post_method(void)
                     // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
                 }
             }
-            handle_get(s, pos_slash);
+            handle_get(pos_slash);
         }
         else if (is_cgi == true)
         {
-            run_cgi_post(s, pos_slash);
+            run_cgi_post(pos_slash);
             // std::cout << "iss:" << _iss.str() << std::endl;
         }
     }
@@ -380,8 +398,7 @@ bool Response::post_method(void)
 bool Response::delete_method(void)
 {
     size_t pos_slash = _req.getUrl().rfind("/");
-    Config::ptr_server s = getConf(pos_slash);
-    std::string url = getFile(s, pos_slash);
+    std::string url = getFile(pos_slash);
     struct stat buffer;
     std::cout << "to delete " << url << std::endl;
     if (stat(url.c_str(), &buffer) == 0)
@@ -518,3 +535,6 @@ std::ostream &operator<<(std::ostream &os, const Response &rhs)
     os << "---response----\n";
     return (os);
 }
+
+
+
