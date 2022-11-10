@@ -1,4 +1,5 @@
 #include "ServerInput.hpp"
+#include "Client.hpp"
 
 ServerInput::ServerInput(const Client &handler, int sock) : _req(handler), _handler(handler), _socket(sock), _pos_end_header(0)
 {
@@ -60,7 +61,19 @@ void ServerInput::reset()
     _req.reset();
 }
 
-const Request &ServerInput::getReq(void)
+const Request &ServerInput::getReq(void) const
 {
     return (_req);
+}
+
+
+bool ServerInput::is_timeout(Request &req)
+{
+	static timeval tv;
+	
+	gettimeofday(&tv, NULL);
+	if (tv.tv_sec - req.get_time().tv_sec > _handler.get_conf()->read_timeout.tv_sec)
+		return true;
+	req.set_time(tv);
+	return false;
 }

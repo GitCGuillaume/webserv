@@ -45,3 +45,8 @@ const Client::host_type &Client::getIp(void) const
 {
 	return (_ip);
 }
+
+Config::ptr_server Client::get_conf() 
+{
+	return _conf;
+}

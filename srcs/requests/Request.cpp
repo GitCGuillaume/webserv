@@ -1,12 +1,9 @@
 #include "Request.hpp"
 #include "Client.hpp"
 
-
 Request::Request(const Client &client) : _is_ready(false), _code(0), _client(client)
 {
 }
-
-
 
 Request::Request(const Request &src) : _req(src._req), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _client(src._client)
 {
@@ -135,9 +132,9 @@ size_t Request::parse_header(size_t start)
 size_t Request::parse_body(size_t start)
 {
 	// std::cout << _req << std::endl;
-	//ss.seekg(start);
+	// ss.seekg(start);
 	_body = ss.str().substr(start);
-	//std::cout << body;
+	// std::cout << body;
 	_is_ready = true;
 	return (0);
 }
@@ -237,7 +234,18 @@ const Client &Request::getClient() const
 	return (_client);
 }
 
-const std::pair<std::string,uint16_t> &Request::getIp() const
+const std::pair<std::string, uint16_t> &Request::getIp() const
 {
 	return (_client.getIp());
+}
+
+timeval Request::get_time() const
+{
+	return _time;
+}
+
+
+void Request::set_time(timeval &tv)
+{
+	_time = tv;	
 }
