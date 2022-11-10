@@ -146,7 +146,7 @@ void Server::loop()
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
                 {
-                    if (it->second.getReq().is_timeout())
+                    if (it->second.getReq().is_ready() &&  it->second.getReq().is_timeout())
                     {
                         it->second.epoll_out();
                         std::cout << "[+] connection closed by timeout" << std::endl;
