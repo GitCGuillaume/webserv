@@ -129,7 +129,7 @@ void Server::loop()
                 }
             }
 
-            else if (_curr_event.events & EPOLLIN)
+            if (_curr_event.events & EPOLLIN)
             {
                 // if (setnonblocking(_curr_event.data.fd) < 0)
                 //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
@@ -137,7 +137,7 @@ void Server::loop()
                 if (it != _clients.end())
                     it->second.epoll_in();
             }
-            else if (_curr_event.events & EPOLLOUT)
+            if (_curr_event.events & EPOLLOUT)
             {
                 // if (setnonblocking(_curr_event.data.fd) < 0)
                 //     throw ServerException("setnonblocking createNewSocket", strerror(errno));

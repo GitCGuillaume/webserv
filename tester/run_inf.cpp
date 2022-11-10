@@ -93,9 +93,9 @@ int main(int argc, char **argv)
 	while (true)
 	{
 		std::cout << "jhkhjkhk\n";
-		std::string message("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		std::string message("xxx");
 		msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
-		usleep(100000);
+		usleep(1000000000);
 		// std::cout << message;
 		if (msg < 0)
 		{

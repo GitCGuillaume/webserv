@@ -17,10 +17,11 @@ void ServerInput::readData()
 {
     if (_req.is_timeout())
     {
+        std::cout << "READYYY\n";
         _req.setReady();
         return ;
     }
-    _req.set_time();
+    //_req.set_time();
     size_t readBytes = _req.size();
     char buf[BUFFER_SIZE + 1];
     ssize_t n;
