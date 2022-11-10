@@ -14,7 +14,7 @@ void    open_stream_autoindex(std::list<std::string> &lst, const std::string &ro
         ret_html += str + "\n";
         if (str.find("<title>") != std::string::npos)
         {
-            ret_html += "Index of f" + root + "\n";
+            ret_html += "Index of " + root + "\n";
         }
         else if (str.find("<h1>") != std::string::npos)
         {
@@ -36,13 +36,18 @@ void    load_directory_autoindex(std::string &ret_html, const std::string &direc
     std::list<std::string> lst;
     struct dirent   *dire = NULL;
     DIR*   dir = opendir(directory.c_str());
+    std::string str;
 
     if (!dir)
         throw std::runtime_error("Couldn't open autoindex directory.");
     dire = readdir(dir);
     while (dire)
     {
-        lst.push_back(dire->d_name);
+        str = std::string(dire->d_name);
+        if (dire->d_type == DT_DIR && str != ".." && str != ".")
+            lst.push_back(str + "/");
+        else
+            lst.push_back(dire->d_name);
         dire = readdir(dir);
     }
     if (closedir(dir) < 0)
