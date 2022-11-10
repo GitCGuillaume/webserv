@@ -25,7 +25,7 @@ void    Client::epoll_in(void)
 
 void    Client::epoll_out(void)
 {
-	if (!_si.getReq().getMethod().empty())
+	if (!_si.getReq().getMethod().empty() || _si.getReq().is_ready())
 	{
 		std:: cout << "-------request----------" << std::endl;
 		std::cout << "Ready to send ..." << std::endl;
@@ -46,7 +46,7 @@ const Client::host_type &Client::getIp(void) const
 	return (_ip);
 }
 
-Config::ptr_server Client::get_conf() 
+Config::ptr_server Client::get_conf() const
 {
 	return _conf;
 }

@@ -58,6 +58,7 @@ public:
     timeval get_time() const;
     void set_time(timeval &tv);
     bool is_timeout(void);
+    void setReady();
 
 
 private:
@@ -74,9 +75,7 @@ private:
     s_entity_header _en_header;
     std::string _body;
     bool _is_ready;
-    int _code;
     const Client &_client;
-
 	timeval _time;
 
 

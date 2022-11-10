@@ -19,6 +19,14 @@ Config::Config(const char *conf)
 		for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = it_s->listens.begin(); it != it_s->listens.end(); ++it)
 			std::cout << "listen: " << it->first << ":" << it->second << std::endl;
 	}
+	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s)
+	{
+		std::cout << *it_s ;
+	}
+
+
+
+
 }
 
 Config::Config(const Config &src) : _content(src._content), _servers(src._servers) {}

@@ -15,6 +15,11 @@ ServerInput::~ServerInput()
 
 void ServerInput::readData()
 {
+    if (_req.is_timeout())
+    {
+        _req.setReady();
+        return ;
+    }
     size_t readBytes = _req.size();
     char buf[BUFFER_SIZE + 1];
     ssize_t n;
@@ -26,7 +31,7 @@ void ServerInput::readData()
         perror(0);
         exit(1);
     }
-    
+
     _req.append_data(buf, n);
     if (_req.getEntityHeader().content_length.empty())
     {
@@ -49,7 +54,7 @@ void ServerInput::readData()
     readBytes += n;
     if (!_req.getEntityHeader().content_length.empty() && _req.getContentLength() <= (readBytes - _pos_end_header))
     {
-        //std::cout << "LA" << std::endl;
+        // std::cout << "LA" << std::endl;
         _req.parse_body(_pos_end_header);
         _pos_end_header = 0;
         readBytes = 0;

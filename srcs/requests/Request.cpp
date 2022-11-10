@@ -1,11 +1,16 @@
 #include "Request.hpp"
 #include "Client.hpp"
 
-Request::Request(const Client &client) : _is_ready(false), _code(0), _client(client)
+Request::Request(const Client &client) : _is_ready(false), _client(client)
 {
+	static timeval tv;
+	
+	gettimeofday(&tv, NULL);
+	set_time(tv);
+
 }
 
-Request::Request(const Request &src) : _req(src._req), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _client(src._client)
+Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time)
 {
 }
 
@@ -71,7 +76,6 @@ size_t Request::parse(void)
 	size_t prec = 0;
 	if ((start = parse_request_line()) == std::string::npos)
 	{
-		_code = 400;
 		return 0;
 	}
 	while (start != std::string::npos)
@@ -96,7 +100,6 @@ size_t Request::parse_request_line(void)
 	_method = _req.substr(0, pos);
 	if (!is_method(_method))
 	{
-		_code = 400;
 		return (pos);
 	}
 	size_t pos2 = _req.find(" ", pos + 1);
@@ -251,14 +254,18 @@ void Request::set_time(timeval &tv)
 }
 
 
-
 bool Request::is_timeout()
 {
 	static timeval tv;
 	
 	gettimeofday(&tv, NULL);
-	if (tv.tv_sec - get_time().tv_sec > _client.get_conf()->read_timeout.tv_sec)
+	if (static_cast<size_t>(tv.tv_sec - get_time().tv_sec) > _client.get_conf()->read_timeout)
 		return true;
 	set_time(tv);
 	return false;
+}
+
+void Request::setReady()
+{
+	_is_ready = true;
 }
