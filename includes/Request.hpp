@@ -6,6 +6,7 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <sys/time.h>
 #include "Header.hpp"
 #include "Config.hpp"
 //#include "Client.hpp" //ERROR
@@ -54,11 +55,15 @@ public:
     const Client &getClient() const;
     const std::pair<std::string,uint16_t> &getIp() const;
     size_t size();
+    timeval get_time() const;
+    void set_time(timeval &tv);
+    bool is_timeout(void);
+
 
 private:
     std::string _req;
     std::stringstream ss;
-
+    
     std::string _method;
     std::string _url;
     std::string _version;
@@ -71,5 +76,10 @@ private:
     bool _is_ready;
     int _code;
     const Client &_client;
+
+	timeval _time;
+
+
+
 };
 #endif

@@ -1,4 +1,5 @@
 #include "ServerInput.hpp"
+#include "Client.hpp"
 
 ServerInput::ServerInput(const Client &handler, int sock) : _req(handler), _handler(handler), _socket(sock), _pos_end_header(0)
 {
@@ -60,7 +61,7 @@ void ServerInput::reset()
     _req.reset();
 }
 
-const Request &ServerInput::getReq(void)
+const Request &ServerInput::getReq(void) const
 {
     return (_req);
 }

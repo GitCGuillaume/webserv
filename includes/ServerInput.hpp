@@ -25,7 +25,8 @@ public:
     void readData();
     void reset();
 
-    const  Request &getReq(void);
+    const  Request &getReq(void) const;
+
 };
 
 

@@ -24,6 +24,8 @@ class Client
         void    epoll_out(void);
 
         const host_type &getIp(void) const;
+
+        Config::ptr_server get_conf();
     
     private:
         host_type _ip;
