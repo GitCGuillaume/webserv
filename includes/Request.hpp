@@ -56,8 +56,8 @@ public:
     const std::pair<std::string,uint16_t> &getIp() const;
     size_t size();
     timeval get_time() const;
-    void set_time(timeval &tv);
-    bool is_timeout(void);
+    void set_time();
+    bool is_timeout(void) const;
     void setReady();
 
 

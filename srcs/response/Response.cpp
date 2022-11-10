@@ -5,9 +5,15 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
 {
     try
     {
-        size_t pos_slash = _req.getUrl().rfind("/");
-        _conf = getConf(pos_slash);
-        (this->*_map_method_ptr[req.getMethod()])();
+        if (_req.is_timeout())
+            sendHtmlCode(408);
+        else
+        {
+
+            size_t pos_slash = _req.getUrl().rfind("/");
+            _conf = getConf(pos_slash);
+            (this->*_map_method_ptr[req.getMethod()])();
+        }
     }
     catch (const std::exception &e)
     {

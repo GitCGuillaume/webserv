@@ -3,11 +3,7 @@
 
 Request::Request(const Client &client) : _is_ready(false), _client(client)
 {
-	static timeval tv;
-	
-	gettimeofday(&tv, NULL);
-	set_time(tv);
-
+	set_time();
 }
 
 Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time)
@@ -248,20 +244,25 @@ timeval Request::get_time() const
 }
 
 
-void Request::set_time(timeval &tv)
+void Request::set_time()
 {
+	static timeval tv;
+	gettimeofday(&tv, NULL);
 	_time = tv;	
 }
 
 
-bool Request::is_timeout()
+bool Request::is_timeout() const
 {
-	static timeval tv;
-	
+	timeval tv;
 	gettimeofday(&tv, NULL);
-	if (static_cast<size_t>(tv.tv_sec - get_time().tv_sec) > _client.get_conf()->read_timeout)
+
+	std::cout << "time response " << (static_cast<double>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 )))) << std::endl;
+	if (static_cast<size_t>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 ))) > _client.get_conf()->read_timeout)
+	{
+		std::cout << "TRUE\n";
 		return true;
-	set_time(tv);
+	}
 	return false;
 }
 

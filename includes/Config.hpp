@@ -39,7 +39,7 @@ public:
 		void set_values(std::string key, std::string value);
 		static bool assign_port(const std::string &str, uint16_t &val);
 		std::pair<std::string, uint16_t> handle_listen(const std::string &value);
-		server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"), autoindex(false), client_body_limit(0), read_timeout(300), send_timeout(300), is_location(false) {}
+		server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"), autoindex(false), client_body_limit(0), read_timeout(1), send_timeout(1), is_location(false) {}
 		const server &operator=(const server &rhs)
 		{
 			server_name = rhs.server_name;

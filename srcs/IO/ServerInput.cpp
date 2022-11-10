@@ -20,6 +20,7 @@ void ServerInput::readData()
         _req.setReady();
         return ;
     }
+    _req.set_time();
     size_t readBytes = _req.size();
     char buf[BUFFER_SIZE + 1];
     ssize_t n;

@@ -7,6 +7,8 @@
 #include <cstring>
 #include <sstream>
 #include <sys/epoll.h>
+#include <unistd.h>
+#include <fcntl.h>
 /* man 7 ip */
 
 typedef struct s_message
@@ -58,7 +60,12 @@ static int epoll_ctl_add(int epfd, int fd, uint32_t events)
 	ev.data.fd = fd;
 	return (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev));
 }
-
+static int setnonblocking(int sockfd)
+{
+	if (fcntl(sockfd, F_SETFD, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) == -1)
+		return -1;
+	return 0;
+}
 int main(int argc, char **argv)
 {
 	ssize_t msg = 0;
@@ -71,6 +78,7 @@ int main(int argc, char **argv)
 		std::cerr << "Error socket : " << ft_socket << std::endl;
 		return (1);
 	}
+	setnonblocking(ft_socket);
 	if (argc < 2)
 	{
 		ft_close(ft_socket);
@@ -82,15 +90,20 @@ int main(int argc, char **argv)
 	if (ft_connect == 1)
 		return (1);
 	std::cout << "Sending message..." << std::endl;
-	std::string message("GET /phpver/ HTTP/1.1\r\n\
-Host: localhost:79\r\n\r\n");
-	msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
-	sleep(1);
-	// std::cout << message;
-	if (msg < 0)
-		std::cerr << "Couldn't send message." << std::endl;
+	while (true)
+	{
+		std::cout << "jhkhjkhk\n";
+		std::string message("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
+		usleep(100000);
+		// std::cout << message;
+		if (msg < 0)
+		{
+			std::cerr << "Couldn't send message." << std::endl;
+			throw std::runtime_error("oups");
+		}
+	}
 	char buffer[1000000];
-
 	msg = recv(ft_socket, buffer, sizeof(char) * 1000000, 0);
 	if (msg < 0)
 	{
@@ -98,7 +111,6 @@ Host: localhost:79\r\n\r\n");
 		std::cerr << "Couldn't receive message." << std::endl;
 		return (1);
 	}
-	std::cout << buffer << std::endl;
 	// for (unsigned int i = 0; i < 50; ++i)
 	//	std::cout << buffer[i];
 	std::cout << std::endl;
@@ -157,4 +169,3 @@ Host: localhost:79\r\n\r\n");
 // 	ft_close(cli_sock);
 // 	return (0);
 // }
-
