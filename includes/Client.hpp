@@ -26,6 +26,7 @@ class Client
         const host_type &getIp(void) const;
 
         Config::ptr_server get_conf() const;
+        const Request &getReq() const;
     
     private:
         host_type _ip;

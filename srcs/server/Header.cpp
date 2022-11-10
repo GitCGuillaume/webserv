@@ -14,6 +14,8 @@ std::string s_general_header::toString(void) const
         s += "Date: " + date + "\r\n";
     if (!transfer_encoding.empty())
         s += "Transfer-Encoding: " + transfer_encoding + "\r\n";
+    if (!connection.empty())
+        s += "Connection: " + connection + "\r\n";
     return (s);
 }
 

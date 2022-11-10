@@ -6,7 +6,10 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
     try
     {
         if (_req.is_timeout())
+        {
+            _ge_header.connection = "close";
             sendHtmlCode(408);
+        }
         else
         {
 

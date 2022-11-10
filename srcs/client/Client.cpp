@@ -50,3 +50,9 @@ Config::ptr_server Client::get_conf() const
 {
 	return _conf;
 }
+
+const Request &Client::getReq() const
+{
+	return (_si.getReq());
+}
+

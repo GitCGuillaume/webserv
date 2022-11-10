@@ -106,11 +106,11 @@ void Server::loop()
             _curr_event = events[i];
             if (_sockets.find(_curr_event.data.fd) != _sockets.end())
             {
-                
+
                 int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
                 if (sockClient < 0)
                 {
-                    throw ServerException("accept",strerror(errno));
+                    throw ServerException("accept", strerror(errno));
                 }
                 if (setnonblocking(sockClient) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
@@ -135,7 +135,9 @@ void Server::loop()
                 //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
+                {
                     it->second.epoll_in();
+                }
             }
             if (_curr_event.events & EPOLLOUT)
             {
@@ -143,7 +145,18 @@ void Server::loop()
                 //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
-                    it->second.epoll_out();
+                {
+                    if (it->second.getReq().is_timeout())
+                    {
+                        it->second.epoll_out();
+                        std::cout << "[+] connection closed by timeout" << std::endl;
+                        epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
+                        close(_curr_event.data.fd);
+                        _clients.erase(it);
+                    }
+                    else
+                        it->second.epoll_out();
+                }
             }
 
             if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP))
