@@ -29,7 +29,7 @@ public:
 		size_t send_timeout;
 		std::vector<std::string> index;
 		std::vector<std::string> allow_methods;
-		std::vector<std::pair<std::string, uint16_t>> listens;
+		std::vector<std::pair<std::string, uint16_t> > listens;
 		std::map<int, std::string> error_page;
 		std::map<std::string, std::string> cgi_info;
 		std::map<std::string, server> locations;
@@ -59,7 +59,7 @@ public:
 	};
 
 	typedef std::vector<server> vect_serv;
-	typedef std::vector<std::pair<std::string, uint16_t>> vect_listens;
+	typedef std::vector<std::pair<std::string, uint16_t> > vect_listens;
 	typedef const server *ptr_server;
 
 	Config(const char *conf);
