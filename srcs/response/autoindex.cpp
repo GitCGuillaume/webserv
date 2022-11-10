@@ -1,10 +1,11 @@
 #include "webserv.hpp"
+#include <set>
 
-void    open_stream_autoindex(std::list<std::string> &lst, const std::string &root,  std::string &ret_html)
+void    open_stream_autoindex(std::set<std::string> &lst, const std::string &root,  std::string &ret_html)
 {
     std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
-    std::list<std::string>::iterator it(lst.begin());
-    std::list<std::string>::iterator ite(lst.end());
+    std::set<std::string>::iterator it(lst.begin());
+    std::set<std::string>::iterator ite(lst.end());
     std::string str;
 
     if (ifs.good() == false)
@@ -33,7 +34,7 @@ void    open_stream_autoindex(std::list<std::string> &lst, const std::string &ro
 
 void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
 {
-    std::list<std::string> lst;
+    std::set<std::string> lst;
     struct dirent   *dire = NULL;
     DIR*   dir = opendir(directory.c_str());
     std::string str;
@@ -45,9 +46,9 @@ void    load_directory_autoindex(std::string &ret_html, const std::string &direc
     {
         str = std::string(dire->d_name);
         if (dire->d_type == DT_DIR && str != ".." && str != ".")
-            lst.push_back(str + "/");
+            lst.insert(str + "/");
         else
-            lst.push_back(dire->d_name);
+            lst.insert(str);
         dire = readdir(dir);
     }
     if (closedir(dir) < 0)
