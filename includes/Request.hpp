@@ -57,7 +57,7 @@ public:
     size_t size();
     timeval get_time() const;
     void set_time(timeval &tv);
-
+    bool is_timeout(void);
 
 
 private:
@@ -78,5 +78,8 @@ private:
     const Client &_client;
 
 	timeval _time;
+
+
+
 };
 #endif

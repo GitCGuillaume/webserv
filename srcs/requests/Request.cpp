@@ -249,3 +249,16 @@ void Request::set_time(timeval &tv)
 {
 	_time = tv;	
 }
+
+
+
+bool Request::is_timeout()
+{
+	static timeval tv;
+	
+	gettimeofday(&tv, NULL);
+	if (tv.tv_sec - get_time().tv_sec > _client.get_conf()->read_timeout.tv_sec)
+		return true;
+	set_time(tv);
+	return false;
+}

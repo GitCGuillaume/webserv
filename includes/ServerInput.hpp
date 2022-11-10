@@ -26,7 +26,6 @@ public:
     void reset();
 
     const  Request &getReq(void) const;
-    bool is_timeout(Request &req);
 
 };
 
