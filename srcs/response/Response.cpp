@@ -23,7 +23,6 @@ void parse_url(const std::string &url, std::string &parse)
     size_t end = 0;
     if (pos == std::string::npos)
     {
-        // err?
         return;
     }
     parse = url.substr(pos + 1, url.length());
@@ -41,13 +40,10 @@ bool Response::seek_cgi(Config::ptr_server conf, size_t pos_slash)
     std::string clean_url = url;
     size_t i = url.length();
     size_t pos = url.find("?");
-    // std::cout << "first:" << it->first << std::endl;
     if (pos != std::string::npos)
         clean_url = url.substr(0, pos);
     while (it != ite)
     {
-        std::cout << "++it" << std::endl;
-        // std::cout << "first:" << it->first << std::endl;
         while (0 < i)
         {
             if (clean_url[i] && clean_url[i] == '.')
@@ -55,12 +51,9 @@ bool Response::seek_cgi(Config::ptr_server conf, size_t pos_slash)
                 parse = clean_url.substr(i, clean_url.length());
                 if (!parse.compare(it->first))
                 {
-                    //   std::cout << "TRUEEEE" << std::endl;
                     _cgi_path = it->second;
-                    // std::cout << "cgi_path:" << _cgi_path << std::endl;
                     return (true);
                 }
-                // std::cout << "FALSE" << std::endl;
             }
             --i;
         }
@@ -93,13 +86,6 @@ void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
             "PATH_INFO=" + clean_url, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
-    /*Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
-            "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
-            "GATEWAY_INTERFACE=CGI/1.1",
-            "PATH_INFO=./tester/www/website/cgi-bin/php/get.php", "PATH_TRANSLATED=/mnt/nfs/homes/gchopin/Documents/web1/tester/www/website/cgi-bin/php/get.php",
-            "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
-            "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
-    */
     cgi.start(_cgi_path);
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
@@ -117,15 +103,16 @@ int parse_content_type_cgi(std::string const &content_type)
     std::cout << "cnt:" << content_type << std::endl;
     size_t pos_status = content_type.find("Status:");
     size_t pos_status2 = pos_status;
-    std::cout << "AV" << std::endl;
+    std::stringstream iss;
+    int err = 200;
     if (pos_status == std::string::npos)
-        return (0);
-    std::cout << "AP" << std::endl;
+        return (200);
     parse_cnt = content_type.substr(pos_status + 8, content_type.length());
     pos_status2 = parse_cnt.find(" ");
     parse_cnt.clear();
     parse_cnt = content_type.substr(pos_status + 8, pos_status2);
-    return (0);
+    std::istringstream(parse_cnt) >> err;
+    return (err);
 }
 
 void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
@@ -136,10 +123,6 @@ void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
     const std::string &body = _req.getBody();
     const std::string path_info = url;
     std::stringstream ss;
-    std::cout << "CGI POST" << std::endl;
-    std::cout << "ADDR CLIENT:" << _req.getIp().first << std::endl;
-    std::cout << "url:" << url << std::endl;
-    std::cout << "path_info:" << path_info << std::endl;
     ss << _req.getIp().second;
     Cgi cgi(body, "CONTENT_LENGTH=" + _req.getEntityHeader().content_length,
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
@@ -151,10 +134,9 @@ void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
     std::string content_type(ret_body.substr(0, pos));
-    if (parse_content_type_cgi(content_type) == 0)
-        ret_body.erase(0, pos + 4);
-    std::cout << "content_type:" << content_type << std::endl;
-    fillResponse(ret_body, 200, content_type);
+    int code = parse_content_type_cgi(content_type);
+    ret_body.erase(0, pos + 4);
+    fillResponse(ret_body, code, content_type);
 }
 
 Config::ptr_server Response::getConf(const size_t &pos_slash) const
