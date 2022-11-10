@@ -3,71 +3,40 @@
 
 <head>
 	<title>Webserv</title>
+	<meta charset="utf-8">
 	<link href="42.png" rel="icon" type="image/png">
 	<link href="42.png" rel="shortcut icon" type="image/png">
 	<link rel="stylesheet" href="stylesheet.css">
 	<meta name="author" content="gchopin">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
-
 <body>
 	<div id="title">
 		<div>
 			<h1>Webserv</h1>
 			<h2>A Static website for webserv project, 42 School</h2>
 		</div>
-		<div><img src="./pictures/logo_42.jpg"></div>
+		<div><img class="logo" src="./pictures/logo_42.jpg"></div>
 	</div>
-	<div class="content">
-		<div>
+	<section class="content">
+		<article>
 			<h2>Links</h2>
 			<ul>
 				<li><a href="list_codes.html">http error codes</a></li>
-				<li><a href="./upload/">Uploads</a></li>
+				<li><a href="./upload/">List upload files</a></li>
 			</ul>
-		</div>
-
-		<article>
-			<h2>Upload</h2>
-			<form action="/cgi-bin/upload_file.php" method="post" enctype="multipart/form-data">
-				<label>Upload a file with CGI (press Shift for multiple files)</label>
-				<input type="file" name="upload_files[]" multiple>
-				</br><input type="submit" name="submit">
-			</form>
-			<form action="./upload/" method="post" enctype="multipart/form-data">
-				<label>Upload a file without CGI (press Shift for multiple files)</label>
-				<input type="file" name="upload_files[]" multiple>
-				</br><input type="submit" name="submit">
-			</form>
 		</article>
-
 		<article>
 			<h2>CGI</h2>
 			<ul>
+				<li><a href="./php_form/">CGI PHP FORM</li>
+				<li><a href="./ubuntu_cgi_form/">CGI Ubuntu_cgi FORM</li>
 				<li><a href="../phpver/">PHP info</a></li>
-				<li><a href="">test.py</a></li>
+				<li><a href="./cgi-bin/python/file.py">Python CGI get</a></li>
 			</ul>
-
 		</article>
 		<article>
-			<form action="/website/cgi-bin/php/post.php" method="post">
-				<label>POST :</label>
-				</br><input type="text" name="test1" />
-				</br><input type="text" name="test2" />
-				</br><input type="text" name="test3" />
-				<input type="submit" name="submit">
-			</form>
-			<form action="/website/cgi-bin/php/get.php" method="get">
-				<label>GET :</label>
-				</br><input type="text" name="test1" />
-				</br><input type="text" name="test2" />
-				</br><input type="text" name="test3" />
-				<input type="submit" name="submit">
-			</form>
-		</article>
-		<article>
-			<h2>Multiple upload</h2>
+			<h2>Upload</h2>
 			<form action="/website/cgi-bin/php/upload_file.php" method="post" enctype="multipart/form-data">
 				<label>Upload a file with CGI (Shift + move_key for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
@@ -79,23 +48,7 @@
 				</br><input type="submit" name="submit">
 			</form>
 		</article>
-		<article>
-			<h3>Single upload</h3>
-			<form action="/website/cgi-bin/php/upload_file.php" method="post" enctype="multipart/form-data">
-				<label>Upload a file with CGI</label>
-				<input type="file" name="upload_files[]">
-				</br><input type="submit" name="submit">
-			</form>
-			<form action="/website/upload/" method="post" enctype="multipart/form-data">
-				<label>Upload a file without CGI</label>
-				<input type="file" name="upload_files[]">
-				</br><input type="submit" name="submit">
-			</form>
-		</article>
-
-
-
-	</div>
+	</section>
 </body>
 
 </html>

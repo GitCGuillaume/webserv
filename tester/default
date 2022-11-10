@@ -34,7 +34,6 @@ server {
 	autoindex on;
 
 	location / {
-		
 	}
 	location /website/cgi-bin/php/
 	{
@@ -43,11 +42,29 @@ server {
 		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
 		autoindex on;
 	}
+	location /website/cgi-bin/python/
+	{
+		allow_methods GET;
+		cgi_info .py ./tester/www/website/cgi-bin/python3;
+	}
+	location /website/cgi-bin/YoupiBanane/
+	{
+		allow_methods POST GET;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex on;
+	}
+
 	location /phpver/
 	{
 		allow_methods GET;
 		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
 		autoindex off;
+	}
+	location /YoupiBanane/
+	{
+		allow_methods GET POST;
+		cgi_info .bla ./tester/www/;
 	}
 	# pass PHP scripts to FastCGI server
 	#

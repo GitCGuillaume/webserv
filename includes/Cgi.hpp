@@ -30,7 +30,7 @@ public:
     Cgi(Cgi const &src);
     Cgi &operator=(Cgi const &src);
     const std::stringstream &getStringStream() const;
-    void start(std::string const &_cgi_path);
+    int start(std::string const &_cgi_path);
 };
 
 #endif

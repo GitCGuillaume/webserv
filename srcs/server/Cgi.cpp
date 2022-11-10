@@ -41,11 +41,10 @@ Cgi &Cgi::operator=(Cgi const &src)
 
 /* use tmpfile, because fd alone have a limit of size
     65KB on linux ? */
-void Cgi::start(std::string const &_cgi_path)
+int Cgi::start(std::string const &_cgi_path)
 {
     pid_t pid = 0;
-    // int fds_child[2];
-    // int fds_parent[2];
+    int wstatus = 0;
     int fds_save[2];
     std::FILE *tmp_child_in = std::tmpfile();
     std::FILE *tmp_parent_out = std::tmpfile();
@@ -66,8 +65,9 @@ void Cgi::start(std::string const &_cgi_path)
     }
     else if (pid == 0)
     {
-        std::cout << "cgi path:" << _cgi_path << std::endl;
-        char *ft_argv[3] = {const_cast<char *>(_cgi_path.c_str()),
+        size_t pos = _vec[3].find("=");
+        std::string path_info = _vec[3].substr(pos + 1, _vec[3].length());
+        char *ft_argv[3] = {const_cast<char *>(path_info.c_str()),
                             const_cast<char *>(_vec[4].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
@@ -80,13 +80,9 @@ void Cgi::start(std::string const &_cgi_path)
         close(fd_child_in);
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
-        exit(1);
+        exit(-1);
     }
-    int wstatus = 0;
     wait(&wstatus);
-    std::cout << "wstatus:" << wstatus << std::endl;
-    std::cout << "wstatus >> 8" << (wstatus >> 8) << std::endl;
-    // std::rewind(tmp_child_in); // need to read from start of stream
     char c = 0;
     size_t length = lseek(fd_child_in, 0, SEEK_END);
     std::rewind(tmp_child_in);
@@ -103,7 +99,7 @@ void Cgi::start(std::string const &_cgi_path)
     dup2(fds_save[1], STDOUT_FILENO);
     close(fds_save[0]);
     close(fds_save[1]);
-    // std::cout << "iss:" << _iss.str() << std::endl;
+    return (wstatus >> 8);
 }
 
 const std::stringstream &Cgi::getStringStream() const
