@@ -18,7 +18,7 @@ void ServerOutput::sendResponse(const Response &response)
 
     // std::cout << response << std::endl;
     std::string resp = response.seralize();
-    std::cout << resp;
+    std::cout << response;
 
     send(_socket, resp.c_str(),resp.size() + 1, 0);
 }

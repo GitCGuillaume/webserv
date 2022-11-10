@@ -53,6 +53,7 @@ public:
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
     bool is_cgi(void);
     bool seek_cgi(Config::ptr_server conf, size_t pos_slash);
+    friend std::ostream &operator<<(std::ostream &os, const Response &rhs);
 };
 void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 

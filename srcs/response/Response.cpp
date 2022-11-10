@@ -8,12 +8,11 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
         /* code */
         (this->*_map_method_ptr[req.getMethod()])();
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';
         sendHtmlCode(500);
     }
-    
 }
 
 Response::Response(const Response &src) : _req(src._req)
@@ -506,4 +505,16 @@ void Response::init_map_error()
     __map_status[503] = "Service Unavailable";
     __map_status[504] = "Gateway Time-out";
     __map_status[505] = "HTTP Version Not Supported";
+}
+
+std::ostream &operator<<(std::ostream &os, const Response &rhs)
+{
+    os << "----response---\n";
+    os << "version: " << rhs._version << std::endl;
+    os << "status code: " << rhs._status_code << " " << Response::__map_status[rhs._status_code] << std::endl;
+    os << rhs._ge_header.toString();
+    os << rhs._re_header.toString();
+    os << rhs._en_header.toString();
+    os << "---response----\n";
+    return (os);
 }
