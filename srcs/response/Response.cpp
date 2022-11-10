@@ -102,25 +102,19 @@ void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
     parse_url(_req.getUrl(), str);
     ss << _req.getIp().second;
     std::cout << "CGI GET" << std::endl;
-    Cgi cgi("", "CONTENT_LENGTH=" + body.length(),
+    Cgi cgi(str, "CONTENT_LENGTH=" + body.length(),
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
             "PATH_INFO=" + _cgi_path, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     int code = cgi.start(_cgi_path);
-    /*if (cgi.start(_cgi_path) == -1)
-    {
-        fillResponse("", 500, "text/html; charset=UTF-8");
-        return;
-    }*/
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
     std::string content_type(ret_body.substr(0, pos));
     code = parse_content_type_cgi(content_type, code);
     std::cout << "code: " << code << std::endl;
     ret_body.erase(0, pos + 4);
-    // if (code)
     fillResponse(ret_body, code, content_type);
 }
 
@@ -140,12 +134,6 @@ void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
             "QUERY_STRING=", "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=POST",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     int code = cgi.start(_cgi_path);
-    /*if (cgi.start(_cgi_path) == -1)
-    {
-        fillResponse(cgi.getStringStream().str(),
-                     500, "text/html; charset=UTF-8");
-        return;
-    }*/
     std::string ret_body(cgi.getStringStream().str());
     size_t pos = ret_body.find("\r\n\r\n");
     std::string content_type(ret_body.substr(0, pos));

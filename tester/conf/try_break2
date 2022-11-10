@@ -1,0 +1,65 @@
+#jsp si on peut faire ca 2x port 8003
+#et aussi on doit pas pouvoir lancer 2x le serveur sur le meme port
+server {
+	listen 127.0.0.1:8003;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+}
+
+server {
+	listen 127.0.0.1:8003;
+	root ./tester/www/breaking_the_conf;
+	index index.htm;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+}
+#OK?
+server {
+	listen 127.0.0.1:8004;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	location / {
+		client_max_body_size 0;
+	}
+}
+#OK?
+server {
+	listen 127.0.0.1:8005;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	#client_max_body_size -1;
+	location / {
+	}
+}
+#KO
+#NOT FOUND
+#AUTOINDEX ./tester/www/website/website/
+#Couldn't open autoindex directory.
+#puis serveur se ferme
+#doit remplacer throw par std::cerr + return dans autoindex.cpp;
+#Doit ensuite envoyer error 404
+#Attendu : error 404 comme nginx on dirait
+server {
+	listen 127.0.0.1:8006;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+	location /website/
+	{
+		allow_methods GET;
+		root ./tester/www/website;
+	}
+}

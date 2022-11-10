@@ -8,8 +8,12 @@ void    open_stream_autoindex(std::list<std::string> &lst, const std::string &ro
     std::string str;
 
     if (ifs.good() == false)
-        throw std::runtime_error("Couldn't open autoindex.html");
-    while (std::getline(ifs, str, '\n'))
+    {
+	    std::cerr << "Couldn't open autoindex.html" << std::endl;
+	    //throw std::runtime_error("Couldn't open autoindex.html");
+    	return ;
+    }
+	while (std::getline(ifs, str, '\n'))
     {
         ret_html += str + "\n";
         if (str.find("<title>") != std::string::npos)
@@ -38,14 +42,22 @@ void    load_directory_autoindex(std::string &ret_html, const std::string &direc
     DIR*   dir = opendir(directory.c_str());
 
     if (!dir)
-        throw std::runtime_error("Couldn't open autoindex directory.");
-    dire = readdir(dir);
+    {
+	    std::cerr << "Couldn't open autoindex directory." << std::endl;
+	    return ;
+	    //       throw std::runtime_error("Couldn't open autoindex directory.");
+    }
+	    dire = readdir(dir);
     while (dire)
     {
         lst.push_back(dire->d_name);
         dire = readdir(dir);
     }
     if (closedir(dir) < 0)
-        throw std::runtime_error("Couldn't close autoindex directory.");
-    open_stream_autoindex(lst, uri, ret_html);
+	   {
+	    std::cerr << "Couldn't close autoindex directory." << std::endl;
+        	return ;
+	    //throw std::runtime_error("Couldn't close autoindex directory.");
+	   }
+	open_stream_autoindex(lst, uri, ret_html);
 }

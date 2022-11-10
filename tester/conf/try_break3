@@ -1,0 +1,44 @@
+server {
+	listen 127.0.0.1:8003;
+	root ./tester/www;
+	client_max_body_size 500;
+
+	# Add index.php to the list if you are using PHP
+	index index.html; #<<osef mais si on enleve le ; ca auto index et charge pas l'index.html
+	upload_path ./tester/www/website/upload/;
+
+	server_name localhost;
+
+	autoindex on;
+
+	location / {
+	}
+	#DEVRAIT PAS POUVOIR POST????
+	#je dois aussi voir pour index.php, ca devrait pas charger sans index index.php
+	location /website/cgi-bin/php/
+	{
+		allow_methods GET;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex on;
+	}
+	location /website/cgi-bin/YoupiBanane/
+	{
+		allow_methods POST GET;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex on;
+	}
+
+	location /phpver/
+	{
+		allow_methods GET;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex off;
+	}
+	location /YoupiBanane/
+	{
+		allow_methods GET POST;
+		cgi_info .bla ./tester/www/cgi-bin/ubuntu_cgi_tester;
+	}
+}

@@ -128,6 +128,7 @@ void s_entity_header::init_map_mime(void)
     __map_ext_mime[".3gp"] = "video/3gpp";
     __map_ext_mime[".3g2"] = "video/3gpp2";
     __map_ext_mime[".7z"] = "application/x-7z-compressed";
+    __map_ext_mime[".bla"] = "application/octet-stream";
     for (std::map<std::string, std::string>::const_iterator it = __map_ext_mime.begin(); it != __map_ext_mime.end(); ++it)
         __map_mime_ext.insert(std::make_pair(it->second, it->first));
     __map_mime_ext["audio/3gpp"] = ".3gp";

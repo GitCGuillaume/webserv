@@ -1,0 +1,45 @@
+server {
+	listen 127.0.0.1:8003;
+	root ./tester/www/YoupiBanane;
+	client_max_body_size 500;
+
+	# Add index.php to the list if you are using PHP
+	index youpi.bla;
+
+	upload_path ./tester/www/website/upload/;
+
+	server_name localhost;
+
+	autoindex off;
+
+	location / {
+		allow_methods GET;
+	}
+	location /website/cgi-bin/php/
+	{
+		allow_methods POST GET;
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
+		autoindex on;
+	}
+	#location /put_test/*
+	#{
+	#	allow_methods PUT;
+	#}
+	location *.bla
+	{
+		allow_methods POST;
+		cgi_info .bla ./tester/www/cgi-bin/ubuntu_cgi_tester;
+	}
+	location /post_body
+	{
+		allow_methods POST;
+		client_max_body_size 100;
+	}
+	location /directory/
+	{
+		allow_methods GET;
+		root ./tester/www/YoupiBanane;
+		index youpi.bad_extension;
+	}
+}

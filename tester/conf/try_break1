@@ -1,0 +1,69 @@
+#OK
+server {
+	listen 127.0.0.1:8004;
+	root ./tester/www/breaking_the_conf;
+	index youpi.htm;
+	server_name htm;
+	autoindex on;
+	location / {
+	}
+}
+#OK
+server {
+	listen 127.0.0.1:8005;
+	root ./tester/www/breaking_the_conf;
+	index youpi.html;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+}
+#OK
+server {
+	listen 127.0.0.1:8006;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+}
+#KO
+#ne dois pas telechager la page, mais afficher le contenu j'imagine, ou alors code d'erreur ?
+#(Voir response.cpp doit forcement renvoyer quelque chose)
+#voir ubuntu_tester (qui ne semble pas etre a jour car test method PUT + *)
+server {
+	listen 127.0.0.1:8007;
+	root ./tester/www/breaking_the_conf;
+	index youpi.bla;
+	server_name html;
+	autoindex on;
+	location / {
+	}
+}
+
+#OK
+server {
+	listen 127.0.0.1:8008;
+	root ./tester/www/breaking_the_conf;
+	index youpi.bla;
+	server_name html;
+	autoindex on;
+	location / {
+		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
+	}
+}
+
+#KO
+server {
+	listen 127.0.0.1:8009;
+	root ./tester/www/breaking_the_conf;
+	index index.html;
+	server_name html;
+	autoindex on;
+	location / {
+		#N'est pas cense pouvoir GET,
+		#	+ doit envoyer error 403 Forbidden (nginx le fait limit_except POST { deny all; })
+		allow_methods POST;
+	}
+}
