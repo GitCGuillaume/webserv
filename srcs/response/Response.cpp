@@ -380,8 +380,11 @@ bool Response::post_method(void)
 
 bool Response::delete_method(void)
 {
-    std::string url = _req.getUrl();
+    size_t pos_slash = _req.getUrl().rfind("/");
+    Config::ptr_server s = getConf(pos_slash);
+    std::string url = getFile(s, pos_slash);
     struct stat buffer;
+    std::cout << "to delete " << url << std::endl;
     if (stat(url.c_str(), &buffer) == 0)
     {
         if (remove(url.c_str()) == 0)
@@ -399,7 +402,7 @@ bool Response::delete_method(void)
 std::string Response::seralize(void) const
 {
     std::ostringstream oss;
-    oss << _version << " " << _status_code << __map_status[_status_code] << "\r\n";
+    oss << _version << " " << _status_code << " " << __map_status[_status_code] << "\r\n";
     oss << _ge_header.toString();
     oss << _re_header.toString();
     oss << _en_header.toString();
