@@ -25,7 +25,7 @@ void    Client::epoll_in(void)
 
 void    Client::epoll_out(void)
 {
-	if (!_si.getReq().getMethod().empty() || _si.getReq().is_ready())
+	if (_si.getReq().is_ready())
 	{
 		std:: cout << "-------request----------" << std::endl;
 		std::cout << "Ready to send ..." << std::endl;
