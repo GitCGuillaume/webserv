@@ -58,6 +58,7 @@ public:
     timeval get_time() const;
     void set_time();
     bool is_timeout(void) const;
+    void set_timeout();
     void setReady();
 
 
@@ -77,6 +78,7 @@ private:
     bool _is_ready;
     const Client &_client;
 	timeval _time;
+    bool _is_timeout;
 
 
 

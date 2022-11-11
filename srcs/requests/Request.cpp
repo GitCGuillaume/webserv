@@ -1,12 +1,12 @@
 #include "Request.hpp"
 #include "Client.hpp"
 
-Request::Request(const Client &client) : _is_ready(false), _client(client)
+Request::Request(const Client &client) : _is_ready(false), _client(client), _is_timeout(false)
 {
 	set_time();
 }
 
-Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time)
+Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time), _is_timeout(src._is_timeout)
 {
 	set_time();
 }
@@ -142,7 +142,6 @@ size_t Request::parse_body(size_t start)
 void Request::reset(void)
 {
 	new (this) Request(_client);
-	set_time();
 }
 
 void Request::append_data(const char *data, size_t n)
@@ -248,23 +247,26 @@ timeval Request::get_time() const
 
 void Request::set_time()
 {
-	static timeval tv;
-	gettimeofday(&tv, NULL);
-	_time = tv;	
+	gettimeofday(&_time, NULL);
 }
 
 
 bool Request::is_timeout() const
 {
+	return _is_timeout;
+}
+
+void Request::set_timeout() {
 	timeval tv;
 	gettimeofday(&tv, NULL);
 
-	if (static_cast<size_t>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 ))) > _client.get_conf()->read_timeout)
+	std::cout << "time " << (static_cast<double>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 )))) << "\n";
+	if (static_cast<double>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 ))) > _client.get_conf()->read_timeout)
 	{
+		_is_timeout = true;
 		//std::cout << "TRUE\n";
-		return true;
 	}
-	return false;
+
 }
 
 void Request::setReady()

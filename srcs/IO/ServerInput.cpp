@@ -15,6 +15,10 @@ ServerInput::~ServerInput()
 
 void ServerInput::readData()
 {
+    size_t readBytes = _req.size();
+    if (readBytes == 0)
+        _req.set_time();
+    _req.set_timeout();
     if (_req.is_timeout())
     {
         std::cout << "READYYY\n";
@@ -22,7 +26,6 @@ void ServerInput::readData()
         return ;
     }
     //_req.set_time();
-    size_t readBytes = _req.size();
     char buf[BUFFER_SIZE + 1];
     ssize_t n;
     int found = 0;
