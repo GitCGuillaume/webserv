@@ -54,13 +54,9 @@ void Response::do_redirection(const std::string &redir)
 
 void parse_url(const std::string &url, std::string &parse)
 {
-    size_t i = 0;
     size_t pos = url.find("?");
-    size_t start = 0;
-    size_t end = 0;
     if (pos == std::string::npos)
     {
-        // err?
         return;
     }
     parse = url.substr(pos + 1, url.length());
