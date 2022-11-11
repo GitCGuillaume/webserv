@@ -21,12 +21,8 @@ Config::Config(const char *conf)
 	}
 	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s)
 	{
-		std::cout << *it_s ;
+		std::cout << *it_s;
 	}
-
-
-
-
 }
 
 Config::Config(const Config &src) : _content(src._content), _servers(src._servers) {}
