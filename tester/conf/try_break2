@@ -41,7 +41,7 @@ server {
 	location / {
 	}
 }
-#KO
+#OK SUR MA BRANCHE
 #NOT FOUND
 #AUTOINDEX ./tester/www/website/website/
 #Couldn't open autoindex directory.
