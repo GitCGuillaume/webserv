@@ -10,6 +10,8 @@
 #include <sys/wait.h>
 #include <sstream>
 #include <fstream>
+#include <fcntl.h>
+#include <cstdio>
 
 class Cgi
 {

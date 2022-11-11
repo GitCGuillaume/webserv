@@ -1,6 +1,4 @@
 #include <Cgi.hpp>
-#include <fcntl.h>
-#include <cstdio>
 
 Cgi::Cgi() {}
 Cgi::Cgi(std::string const body, std::string const content_type, std::string const gateway_interface,
