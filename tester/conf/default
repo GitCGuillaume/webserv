@@ -4,7 +4,7 @@ server {
 	client_max_body_size 500;
 
 	# Add index.php to the list if you are using PHP
-	index index.html index.php;
+	index index.php index.html;
 
 	upload_path ./tester/www/website/upload/;
 
@@ -21,11 +21,6 @@ server {
 		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
 		autoindex on;
 	}
-	location /website/cgi-bin/python/
-	{
-		allow_methods GET;
-		cgi_info .py ./tester/www/website/cgi-bin/python3;
-	}
 	location /website/cgi-bin/YoupiBanane/
 	{
 		allow_methods POST GET;
@@ -38,12 +33,7 @@ server {
 	{
 		allow_methods GET;
 		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
-		autoindex off;
-	}
-	location /YoupiBanane/
-	{
-		allow_methods GET POST;
-		cgi_info .bla ./tester/www/cgi-bin/ubuntu_cgi_tester;
+		autoindex on;
 	}
 }
 

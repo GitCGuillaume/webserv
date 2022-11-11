@@ -16,14 +16,6 @@ class Request
 {
 
 public:
-    // typedef struct s_header
-    // {
-    //     std::string content_type;
-    //     std::string content_length;
-    //     std::string date;
-    //     std::string host;
-    //     std::string transfer_encoding;
-    // } t_header;
     Request(const Client &Client);
     Request(const Request &src);
     ~Request();
@@ -40,7 +32,7 @@ public:
 
     Request &operator=(const Request &rhs);
     Request &operator=(const std::string &rhs);
-    Request &operator+=(const char *rhs);
+    //Request &operator+=(const char *rhs);
     friend std::ostream &operator<<(std::ostream &os, const Request &rhs);
 
     const std::string &getReq(void);
@@ -49,7 +41,6 @@ public:
     const std::string &getVersion(void) const;
     bool is_ready() const;
     const s_entity_header &getEntityHeader() const;
-    //const t_header &getHeader() const;
     size_t getContentLength() const;
     const std::string &getBody() const;
     const Client &getClient() const;
@@ -70,7 +61,6 @@ private:
     std::string _url;
     std::string _version;
 
-    //t_header _header;
     s_general_header _ge_header;
     s_request_header _re_header;
     s_entity_header _en_header;

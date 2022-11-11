@@ -64,7 +64,6 @@ void parse_url(const std::string &url, std::string &parse)
 
 bool Response::seek_cgi(size_t pos_slash)
 {
-
     if (!_conf)
         return (false);
     std::map<std::string, std::string>::const_iterator it(_conf->cgi_info.begin());
@@ -253,7 +252,6 @@ bool Response::handle_get(const size_t &pos_slash)
     }
     else if (!fill_body(_conf->root + url))
     {
-        std::cout << "HERE\n";
         do_redirection(url + "/");
     }
     return (true);
@@ -284,8 +282,7 @@ bool Response::get_method(void)
 
 std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
 {
-    std::cout << "upload: " << s->upload_path << std::endl;
-
+    std::cout << "Upload: " << s->upload_path << std::endl;
     size_t end_pos;
     std::string file;
     while ((end_pos = body.find(": ", pos)) != std::string::npos)
@@ -309,11 +306,7 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 if (end != std::string::npos)
                 {
                     file = s->upload_path + field_value.substr(pos, end - pos);
-                    std::cout << "end " << end << std::endl;
-                    std::cout << "pos " << pos << std::endl;
                     std::cout << field_value.substr(pos, end - pos) << std::endl;
-                    std::cout << "file: " << file << std::endl;
-                    std::cout << "upload: " << s->upload_path << std::endl;
                 }
             }
         }
@@ -347,30 +340,25 @@ bool Response::post_method(void)
                     {
                         size_t end_pos = en_header.content_type.find(" \t", pos + 1);
                         boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
-                        std::cout << "boundary " << boundary << std::endl;
                     }
                 }
                 const std::string &body = _req.getBody();
                 pos = 0;
                 size_t end_pos;
-                // std::cout << "here" << s << std::endl;
                 while (body.find("--" + boundary + "\r\n", pos) == pos)
                 {
                     pos += 4 + boundary.size();
                     end_pos = body.find("--" + boundary + "\r\n", pos);
                     if (end_pos == std::string::npos)
                     {
-                        std::cout << "777777777777777777777777777777777777777777777777777777\n";
                         break;
                     }
-                    std::cout << "BODY: " << std::endl;
                     std::cout << body.substr(pos, end_pos - pos) << std::endl;
                     std::string file = test(body, pos, _conf);
 
                     if (!file.empty())
                     {
                         std::ofstream ofs(file.c_str());
-                        std::cout << "IMAGE:" << file << std::endl;
                         // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
                         ofs << body.substr(pos + 2, end_pos - pos - 4);
                         ofs.close();
@@ -379,7 +367,6 @@ bool Response::post_method(void)
                         return (sendHtmlCode(400));
 
                     pos = end_pos;
-
                     // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
                 }
             }
@@ -398,7 +385,7 @@ bool Response::delete_method(void)
     size_t pos_slash = _req.getUrl().rfind("/");
     std::string url = getFile(pos_slash);
     struct stat buffer;
-    std::cout << "to delete " << url << std::endl;
+    std::cout << "To delete: " << url << std::endl;
     if (stat(url.c_str(), &buffer) == 0)
     {
         if (remove(url.c_str()) == 0)
@@ -453,7 +440,7 @@ bool Response::sendHtmlCode(int status_code)
 bool Response::sendAutoIndex(const std::string &uri, const std::string &directory)
 {
     std::string ret;
-    std::cout << "AUTOINDEX " << directory << std::endl;
+    std::cout << "AUTOINDEX: " << directory << std::endl;
     if (load_directory_autoindex(ret, directory, uri) == false)
         return (false);
     _bodyData << ret;

@@ -37,7 +37,7 @@ Cgi &Cgi::operator=(Cgi const &src)
     return (*this);
 }
 
-/* use tmpfile, because fd alone have a limit of size
+/* use std::tmpfile, because fd alone have a limit of size
     65KB on linux ? */
 int Cgi::start(std::string const &_cgi_path)
 {
