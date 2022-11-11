@@ -49,7 +49,7 @@ public:
     static void init_map_method(void);
     static void init_map_error();
     bool sendHtmlCode(int status_code);
-    void sendAutoIndex(const std::string &uri, const std::string &root);
+    bool sendAutoIndex(const std::string &uri, const std::string &root);
     void run_cgi_get(size_t pos_slash);
     void run_cgi_post(size_t pos_slash);
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
