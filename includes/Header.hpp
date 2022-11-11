@@ -6,7 +6,6 @@
 struct s_header
 {
 };
-
 struct s_general_header : public s_header
 {
     std::string date;
@@ -18,7 +17,6 @@ struct s_general_header : public s_header
     static std::map<std::string, std::string s_general_header::*> __map_ge_headers_ptr;
     static void init_map_ge_headers(void);
 };
-
 struct s_request_header : public s_header
 {
     std::string host;
@@ -36,8 +34,8 @@ struct s_response_header : public s_header
     std::string etag;
     std::string server;
     std::string location;
-};
 
+};
 struct s_entity_header : public s_header
 {
     std::string content_type;

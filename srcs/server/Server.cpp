@@ -120,6 +120,7 @@ void Server::loop()
                 if (_map_config.find(host) != _map_config.end())
                 {
                     std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
+                    std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
                     epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
                     _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, _map_config[host])));
                 }
