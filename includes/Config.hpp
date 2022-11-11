@@ -14,6 +14,7 @@
 #include <limits>
 #include <ctype.h>
 #include "Request.hpp"
+#include <cerrno>
 
 class Config
 {

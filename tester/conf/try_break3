@@ -1,11 +1,22 @@
+#OK
+server {
+	listen 127.0.0.1:8004;
+	root ./tester/www/breaking_the_conf;
+	index index.php;#existe pas
+	server_name html;
+	autoindex on;
+	location / {
+		client_max_body_size 0;
+	}
+}
+
 server {
 	listen 127.0.0.1:8003;
 	root ./tester/www;
 	client_max_body_size 500;
 
 	# Add index.php to the list if you are using PHP
-	index index.html index.php;
-
+	index index.html; #<<osef mais si on enleve le ; ca auto index et charge pas l'index.html
 	upload_path ./tester/www/website/upload/;
 
 	server_name localhost;
@@ -14,17 +25,14 @@ server {
 
 	location / {
 	}
-	location /website/cgi-bin/php
+	#DEVRAIT PAS POUVOIR POST????
+	#je dois aussi voir pour index.php, ca devrait pas charger sans index index.php
+	location /website/cgi-bin/php/
 	{
-		allow_methods POST GET;
+		allow_methods GET;
 		cgi_info .bla ./tester/www/website/cgi-bin/ubuntu_cgi_tester;
 		cgi_info .php ./tester/www/website/cgi-bin/php-cgi;
 		autoindex on;
-	}
-	location /website/cgi-bin/python/
-	{
-		allow_methods GET;
-		cgi_info .py ./tester/www/website/cgi-bin/python3;
 	}
 	location /website/cgi-bin/YoupiBanane/
 	{
@@ -46,23 +54,3 @@ server {
 		cgi_info .bla ./tester/www/cgi-bin/ubuntu_cgi_tester;
 	}
 }
-
-
-# Virtual Host configuration for example.com
-#
-# You can move that to a different file under sites-available/ and symlink that
-# to sites-enabled/ to enable it.
-#
-#server {
-#	listen 80;
-#	listen [::]:80;
-#
-#	server_name example.com;
-#
-#	root /var/www/example.com;
-#	index index.html;
-#
-#	location / {
-#		try_files $uri $uri/ =404;
-#	}
-#}
