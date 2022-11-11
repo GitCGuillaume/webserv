@@ -1,7 +1,13 @@
 #include "webserv.hpp"
+#include <set>
+#include <iostream>
+#include <ctime>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <cerrno>
+#include <cstring>
 
-
-void open_stream_autoindex(std::set<std::string> &lst, const std::string &directory, const std::string &root, std::string &ret_html)
+bool open_stream_autoindex(std::set<std::string> &lst, const std::string &directory, const std::string &root, std::string &ret_html)
 {
     std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
     std::set<std::string>::iterator it(lst.begin());
@@ -10,7 +16,10 @@ void open_stream_autoindex(std::set<std::string> &lst, const std::string &direct
     struct stat fileInfo;
 
     if (ifs.good() == false)
-        throw std::runtime_error("Couldn't open autoindex.html");
+    {
+        std::cerr << "Couldn't open autoindex.html" << std::endl;
+        return (false);
+    }
     while (std::getline(ifs, str, '\n'))
     {
         ret_html += str + "\n";
@@ -38,13 +47,16 @@ void open_stream_autoindex(std::set<std::string> &lst, const std::string &direct
                 std::ostringstream os;
                 os << fileInfo.st_size;
                 ret_html += os.str() + '\n';
+                //std::cout << "Created       : " << std::ctime(&fileInfo.st_ctime); // Creation time
+                //std::cout << "Modified      : " << std::ctime(&fileInfo.st_mtime);
             }
         }
     }
     ifs.close();
+    return (true);
 }
 
-void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
+bool load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
 {
     std::set<std::string> lst;
     struct dirent *dire = NULL;
@@ -52,7 +64,10 @@ void load_directory_autoindex(std::string &ret_html, const std::string &director
     std::string str;
 
     if (!dir)
-        throw std::runtime_error("Couldn't open autoindex directory.");
+    {
+        std::cerr << "Couldn't open autoindex.html" << std::endl;
+        return (false);
+    }
     dire = readdir(dir);
     while (dire)
     {
@@ -64,6 +79,12 @@ void load_directory_autoindex(std::string &ret_html, const std::string &director
         dire = readdir(dir);
     }
     if (closedir(dir) < 0)
-        throw std::runtime_error("Couldn't close autoindex directory.");
-    open_stream_autoindex(lst, directory, uri, ret_html);
+    {
+        std::cerr << "Couldn't close autoindex directory." << std::endl;
+        return (false);
+    }
+    bool ft_bool = open_stream_autoindex(lst, directory, uri, ret_html);
+    if (ft_bool == false)
+        return (ft_bool);
+    return (true);
 }

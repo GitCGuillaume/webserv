@@ -92,6 +92,7 @@ int main(int argc, char **argv)
 	std::cout << "Sending message..." << std::endl;
 	while (true)
 	{
+		std::cout << "jhkhjkhk\n";
 		std::string message("xxx");
 		msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
 		usleep(1000000000);
@@ -117,3 +118,54 @@ int main(int argc, char **argv)
 	return (0);
 }
 
+// int	main(int argc, char **argv)
+// {
+// 	ssize_t	msg = 0;
+// 	int epfd = epoll_create(1);
+// 	char buffer[50000];
+// 	struct sockaddr_in cli_addr;
+// 	int newSock = socket(AF_INET, SOCK_STREAM, 0);
+//     struct sockaddr_in addr;
+//     bzero(&addr, sizeof(sockaddr_in));
+//     addr.sin_family = AF_INET;
+//     addr.sin_port = htons(40000);
+//     addr.sin_addr.s_addr = htonl(INADDR_ANY);
+//     if (bind(newSock, (sockaddr *)&addr, sizeof(addr)) < 0)
+//         std::cout << "error\n";
+//     if (listen(newSock, 5) < 0)
+//         std::cout << "error\n";
+//     if (epoll_ctl_add(epfd, newSock, EPOLLIN | EPOLLOUT | EPOLLET) < 0)
+//         std::cout << "error\n";
+
+// 	socklen_t s_len (sizeof(cli_addr));
+// 	int cli_sock;
+// 	struct epoll_event events[20];
+// 	while (1)
+// 	{
+// 		int nb_fds = epoll_wait(epfd, events, 20, 5000);
+// 		for (int i = 0;i < nb_fds; ++i)
+// 		{
+// 			if (events[i].data.fd == newSock)
+// 			{
+// 				cli_sock = accept(events[i].data.fd, (sockaddr *)&cli_addr, &s_len);
+// 				epoll_ctl_add(epfd, cli_sock, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP);
+// 			}
+// 			if (events[i].events & EPOLLIN)
+// 			{
+// 				msg = recv(cli_sock, buffer, sizeof(buffer), 0);
+// 				if (msg < 0)
+// 				{
+// 					ft_close(cli_sock);
+// 					std::cerr << "Couldn't receive message." << std::endl;
+// 					return (1);
+// 				}
+// 				for (unsigned int i = 0; i < 50; ++i)
+// 					std::cout << buffer[i];
+// 			}
+
+// 		}
+
+// 	}
+// 	ft_close(cli_sock);
+// 	return (0);
+// }
