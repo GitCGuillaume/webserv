@@ -35,10 +35,11 @@ public:
     Response(const Response &src);
     ~Response();
 
+    bool is_valid_file(const std::string &file);
     std::string get_redirection(void);
     void do_redirection(const std::string &redir);
     Config::ptr_server getConf(const size_t &pos_slash) const;
-    std::string getFile(size_t pos_slash);
+    bool getFile(size_t pos_slash, std::string &file);
     bool handle_get(const size_t &pos_slash);
     bool get_method(void);
     bool post_method(void);
@@ -49,7 +50,7 @@ public:
     static void init_map_method(void);
     static void init_map_error();
     bool sendHtmlCode(int status_code);
-    bool sendAutoIndex(const std::string &uri, const std::string &root);
+    void sendAutoIndex(const std::string &uri, const std::string &root);
     void run_cgi_get(size_t pos_slash);
     void run_cgi_post(size_t pos_slash);
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
@@ -57,6 +58,6 @@ public:
     bool seek_cgi(size_t pos_slash);
     friend std::ostream &operator<<(std::ostream &os, const Response &rhs);
 };
-bool load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
+void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 
 #endif

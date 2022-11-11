@@ -8,6 +8,4 @@
 # include <fstream> /* autoindex.cpp*/
 # include <sstream> /* autoindex.cpp*/
 
-void load_directory_autoindex(std::string &ret_html);
-
 #endif

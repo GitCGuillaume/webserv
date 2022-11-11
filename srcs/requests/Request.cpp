@@ -1,12 +1,12 @@
 #include "Request.hpp"
 #include "Client.hpp"
 
-Request::Request(const Client &client) : _is_ready(false), _client(client), _is_timeout(false)
+Request::Request(const Client &client) : _is_ready(false), _client(client), _is_timeout(false), _size(0)
 {
 	set_time();
 }
 
-Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time), _is_timeout(src._is_timeout)
+Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time), _is_timeout(src._is_timeout), _size(src._size)
 {
 	set_time();
 }
@@ -25,11 +25,11 @@ Request &Request::operator=(const std::string &rhs)
 	_req = rhs;
 	return (*this);
 }
-/*
+
 Request &Request::operator+=(const char *rhs)
 {
 	return (*this);
-}*/
+}
 
 std::ostream &operator<<(std::ostream &os, const Request &rhs)
 {
@@ -115,6 +115,7 @@ size_t Request::parse_header(size_t start)
 	size_t pos = _req.find(": ", start);
 	if (pos == std::string::npos)
 		return (pos);
+	// std::cout<<"pos:"<<pos<<std::endl;
 	std::string field_name = _req.substr(start, pos - start);
 	transform(field_name.begin(), field_name.end(), field_name.begin(), ::tolower);
 	start = pos + 2;
@@ -122,13 +123,18 @@ size_t Request::parse_header(size_t start)
 	if (pos == std::string::npos)
 		return (pos);
 	std::string field_value = _req.substr(start, pos - start);
+	// std::cout << "here " << field_name << std::endl;
 	fillHeader(field_name, field_value); // else bad request
+
 	return (pos + 2);
 }
 
 size_t Request::parse_body(size_t start)
 {
+	// std::cout << _req << std::endl;
+	// ss.seekg(start);
 	_body = ss.str().substr(start);
+	// std::cout << body;
 	_is_ready = true;
 	return (0);
 }
@@ -141,6 +147,7 @@ void Request::reset(void)
 void Request::append_data(const char *data, size_t n)
 {
 	ss.write(data, n);
+	_size += n;
 }
 
 bool Request::fillHeader(const std::string &field_name, const std::string &field_value)
@@ -189,6 +196,11 @@ bool Request::is_ready() const
 	return (_is_ready);
 }
 
+// const Request::t_header &Request::getHeader() const
+// {
+// 	return (_header);
+// }
+
 const s_entity_header &Request::getEntityHeader() const
 {
 	return (_en_header);
@@ -204,18 +216,18 @@ const std::string &Request::getBody() const
 	return (_body);
 }
 
-size_t Request::size()
+size_t Request::size() const
 {
-	size_t size = 0;
-	if (ss)
-	{
-		// get length of file:
-		size_t old = ss.tellg();
-		ss.seekg(0, ss.end);
-		size = ss.tellg();
-		ss.seekg(old);
-	}
-	return (size);
+	// size_t size = 0;
+	// if (ss)
+	// {
+	// 	// get length of file:
+	// 	size_t old = ss.tellg();
+	// 	ss.seekg(0, ss.end);
+	// 	size = ss.tellg();
+	// 	ss.seekg(old);
+	// }
+	return (_size);
 }
 
 const Client &Request::getClient() const
@@ -253,6 +265,7 @@ void Request::set_timeout() {
 	if (static_cast<double>(tv.tv_sec + ( tv.tv_usec / 1000000.0 ) - (_time.tv_sec + ( _time.tv_usec / 1000000.0 ))) > _client.get_conf()->read_timeout)
 	{
 		_is_timeout = true;
+		//std::cout << "TRUE\n";
 	}
 
 }

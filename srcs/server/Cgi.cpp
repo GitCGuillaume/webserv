@@ -1,4 +1,6 @@
 #include <Cgi.hpp>
+#include <fcntl.h>
+#include <cstdio>
 
 Cgi::Cgi() {}
 Cgi::Cgi(std::string const body, std::string const content_type, std::string const gateway_interface,
@@ -37,12 +39,13 @@ Cgi &Cgi::operator=(Cgi const &src)
     return (*this);
 }
 
-/* use std::tmpfile, because fd alone have a limit of size
+/* use tmpfile, because fd alone have a limit of size
     65KB on linux ? */
-int Cgi::start(std::string const &_cgi_path)
+void Cgi::start(std::string const &_cgi_path)
 {
     pid_t pid = 0;
-    int wstatus = 0;
+    // int fds_child[2];
+    // int fds_parent[2];
     int fds_save[2];
     std::FILE *tmp_child_in = std::tmpfile();
     std::FILE *tmp_parent_out = std::tmpfile();
@@ -51,7 +54,7 @@ int Cgi::start(std::string const &_cgi_path)
 
     fds_save[0] = dup(STDIN_FILENO);
     fds_save[1] = dup(STDOUT_FILENO);
-    write(fd_parent_out, _body.c_str(), _body.length());
+    write(fd_parent_out, _body.c_str(), _body.length()); // PAS SÛR QUE CA REPONDE AU SUJET
     std::rewind(tmp_parent_out);                         // need to read from start of stream
     pid = fork();
     std::string request_method(_vec[8].substr(15, _vec[8].length()));
@@ -63,6 +66,7 @@ int Cgi::start(std::string const &_cgi_path)
     }
     else if (pid == 0)
     {
+        std::cout << "cgi path:" << _cgi_path << std::endl;
         char *ft_argv[3] = {const_cast<char *>(_cgi_path.c_str()),
                             const_cast<char *>(_vec[4].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
@@ -76,9 +80,13 @@ int Cgi::start(std::string const &_cgi_path)
         close(fd_child_in);
         if (execve(ft_argv[0], ft_argv, ft_envp) < 0)
             std::cerr << "Execve CGI failed" << std::endl;
-        exit(-1);
+        exit(1);
     }
+    int wstatus = 0;
     wait(&wstatus);
+    std::cout << "wstatus:" << wstatus << std::endl;
+    std::cout << "wstatus >> 8" << (wstatus >> 8) << std::endl;
+    // std::rewind(tmp_child_in); // need to read from start of stream
     char c = 0;
     size_t length = lseek(fd_child_in, 0, SEEK_END);
     std::rewind(tmp_child_in);
@@ -95,7 +103,7 @@ int Cgi::start(std::string const &_cgi_path)
     dup2(fds_save[1], STDOUT_FILENO);
     close(fds_save[0]);
     close(fds_save[1]);
-    return (wstatus >> 8);
+    // std::cout << "iss:" << _iss.str() << std::endl;
 }
 
 const std::stringstream &Cgi::getStringStream() const

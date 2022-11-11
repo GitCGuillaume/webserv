@@ -7,7 +7,7 @@
 #include <cerrno>
 #include <cstring>
 
-bool open_stream_autoindex(std::set<std::string> &lst, const std::string &directory, const std::string &root, std::string &ret_html)
+void open_stream_autoindex(std::set<std::string> &lst, const std::string &directory, const std::string &root, std::string &ret_html)
 {
     std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
     std::set<std::string>::iterator it(lst.begin());
@@ -16,10 +16,7 @@ bool open_stream_autoindex(std::set<std::string> &lst, const std::string &direct
     struct stat fileInfo;
 
     if (ifs.good() == false)
-    {
-        std::cerr << "Couldn't open autoindex.html" << std::endl;
-        return (false);
-    }
+        throw std::runtime_error("Couldn't open autoindex.html");
     while (std::getline(ifs, str, '\n'))
     {
         ret_html += str + "\n";
@@ -53,10 +50,9 @@ bool open_stream_autoindex(std::set<std::string> &lst, const std::string &direct
         }
     }
     ifs.close();
-    return (true);
 }
 
-bool load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
+void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
 {
     std::set<std::string> lst;
     struct dirent *dire = NULL;
@@ -64,10 +60,7 @@ bool load_directory_autoindex(std::string &ret_html, const std::string &director
     std::string str;
 
     if (!dir)
-    {
-        std::cerr << "Couldn't open autoindex.html" << std::endl;
-        return (false);
-    }
+        throw std::runtime_error("Couldn't open autoindex directory.");
     dire = readdir(dir);
     while (dire)
     {
@@ -79,12 +72,6 @@ bool load_directory_autoindex(std::string &ret_html, const std::string &director
         dire = readdir(dir);
     }
     if (closedir(dir) < 0)
-    {
-        std::cerr << "Couldn't close autoindex directory." << std::endl;
-        return (false);
-    }
-    bool ft_bool = open_stream_autoindex(lst, directory, uri, ret_html);
-    if (ft_bool == false)
-        return (ft_bool);
-    return (true);
+        throw std::runtime_error("Couldn't close autoindex directory.");
+    open_stream_autoindex(lst, directory, uri, ret_html);
 }
