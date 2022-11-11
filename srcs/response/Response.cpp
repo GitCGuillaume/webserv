@@ -12,7 +12,6 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
         }
         else
         {
-
             size_t pos_slash = _req.getUrl().rfind("/");
             _conf = getConf(pos_slash);
             (this->*_map_method_ptr[req.getMethod()])();
