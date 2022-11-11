@@ -1,11 +1,11 @@
 #include<stdio.h>	//printf
-#include<cstring>	//strlen
+#include<string.h>	//strlen
 #include<sys/socket.h>	//socket
 #include<arpa/inet.h>	//inet_addr
 #include<unistd.h>	//usleep
 #include<fcntl.h>	//fcntl
 #include <sys/time.h>
-
+//Size of each chunk of data received, try changing this
 #define CHUNK_SIZE 512
 
 //Receiving function
