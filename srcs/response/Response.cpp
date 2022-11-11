@@ -479,6 +479,11 @@ void Response::sendAutoIndex(const std::string &uri, const std::string &director
 
 void Response::fillResponse(const std::string &body, int status_code, const std::string &content_type)
 {
+    if (status_code != 200)
+    {
+        sendHtmlCode(status_code);
+        return;
+    }
     _status_code = status_code;
     _bodyData << body;
     std::stringstream out;
