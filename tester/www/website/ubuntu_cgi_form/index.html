@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+    <head>
+        <title>CGI PHP FORM</title>
+        <meta charset="utf-8">
+        <link href="42.png" rel="icon" type="image/png">
+        <link href="42.png" rel="shortcut icon" type="image/png">
+        <link rel="stylesheet" href="../stylesheet.css">
+        <meta name="author" content="gchopin">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <article>
+        <h2>Form Ubuntu_Cgi</h2>
+        <p>Sending data to server :</p>
+        <form action="/website/cgi-bin/YoupiBanane/youpi.bla" method="post">
+            <label>POST :</label>
+            </br><input type="text" name="test1" />
+            </br><input type="text" name="test2" />
+            <input type="submit" name="submit">
+        </form>
+        <p>Getting informations using URL :</p>
+        <form action="/website/cgi-bin/YoupiBanane/youpi.bla" method="get">
+            <label>GET :</label>
+            </br><input type="text" name="test1" />
+            </br><input type="text" name="test2" />
+            <input type="submit" name="submit">
+        </form>
+    </article>
+</html>

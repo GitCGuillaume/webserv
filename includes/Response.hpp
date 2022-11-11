@@ -57,6 +57,6 @@ public:
     bool seek_cgi(size_t pos_slash);
     friend std::ostream &operator<<(std::ostream &os, const Response &rhs);
 };
-void load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
+bool load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 
 #endif
