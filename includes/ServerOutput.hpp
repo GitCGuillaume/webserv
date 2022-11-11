@@ -10,6 +10,19 @@ class Response;
 class ServerOutput
 {
 private:
+    class ServerOutputException : public std::exception
+    {
+    private:
+        std::string m_error;
+
+    public:
+        ServerOutputException(const std::string &fun, const std::string &error)
+            : m_error(fun + ": " + error)
+        {
+        }
+        ~ServerOutputException() throw() {}
+        const char *what() const throw() { return (m_error.c_str()); }
+    };
     int _socket;
 
 public:

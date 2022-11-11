@@ -26,11 +26,6 @@ Request &Request::operator=(const std::string &rhs)
 	return (*this);
 }
 
-Request &Request::operator+=(const char *rhs)
-{
-	return (*this);
-}
-
 std::ostream &operator<<(std::ostream &os, const Request &rhs)
 {
 	os << rhs._req;

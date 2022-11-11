@@ -26,7 +26,6 @@ void ServerInput::readData()
     }
     char buf[BUFFER_SIZE + 1];
     ssize_t n;
-    int found = 0;
     n = recv(_socket, buf, BUFFER_SIZE, 0);
     if (n == -1)
         throw ServerInputException("readData recv", strerror(errno));

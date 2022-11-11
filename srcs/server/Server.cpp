@@ -79,7 +79,6 @@ void Server::init_map_config(void)
 {
     for (Config::vect_serv::const_iterator it = _config.getServers().begin(); it != _config.getServers().end(); ++it)
     {
-        Config::ptr_server ref(&*it);
         for (Config::vect_listens::const_iterator it2 = it->listens.begin(); it2 != it->listens.end(); ++it2)
         {
             if (_map_config.find(*it2) == _map_config.end())

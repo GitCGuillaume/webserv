@@ -31,7 +31,6 @@ public:
 
     Request &operator=(const Request &rhs);
     Request &operator=(const std::string &rhs);
-    Request &operator+=(const char *rhs);
     friend std::ostream &operator<<(std::ostream &os, const Request &rhs);
 
     const std::string &getReq(void);
