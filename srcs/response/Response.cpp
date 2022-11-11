@@ -74,13 +74,10 @@ bool Response::seek_cgi(size_t pos_slash)
     std::string clean_url = url;
     size_t i = url.length();
     size_t pos = url.find("?");
-    // std::cout << "first:" << it->first << std::endl;
     if (pos != std::string::npos)
         clean_url = url.substr(0, pos);
     while (it != ite)
     {
-        std::cout << "++it" << std::endl;
-        // std::cout << "first:" << it->first << std::endl;
         while (0 < i)
         {
             if (clean_url[i] && clean_url[i] == '.')
@@ -88,12 +85,9 @@ bool Response::seek_cgi(size_t pos_slash)
                 parse = clean_url.substr(i, clean_url.length());
                 if (!parse.compare(it->first))
                 {
-                    //   std::cout << "TRUEEEE" << std::endl;
                     _cgi_path = it->second;
-                    // std::cout << "cgi_path:" << _cgi_path << std::endl;
                     return (true);
                 }
-                // std::cout << "FALSE" << std::endl;
             }
             --i;
         }
@@ -200,7 +194,6 @@ bool Response::fill_body(std::string const &file)
     std::ifstream is(file.c_str());
     if (is && stat(file.c_str(), &s) == 0 && (s.st_mode & S_IFREG))
     {
-        std::cout << "MERDE\n";
         os << is.rdbuf();
         _status_code = 200;
         _bodyData << os.str();
@@ -282,7 +275,6 @@ bool Response::get_method(void)
         {
             std::stringstream _iss;
             run_cgi_get(pos);
-            std::cout << "iss:" << _iss.str() << std::endl;
         }
         else
             handle_get(pos);
@@ -396,7 +388,6 @@ bool Response::post_method(void)
         else if (is_cgi == true)
         {
             run_cgi_post(pos_slash);
-            // std::cout << "iss:" << _iss.str() << std::endl;
         }
     }
     return (true);
