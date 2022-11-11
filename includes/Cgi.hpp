@@ -12,10 +12,25 @@
 #include <fstream>
 #include <fcntl.h>
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
 
 class Cgi
 {
 private:
+    class CGIException : public std::exception
+    {
+    private:
+        std::string m_error;
+
+    public:
+        CGIException(const std::string &fun, const std::string &error)
+            : m_error(fun + ": " + error)
+        {
+        }
+        ~CGIException() throw() {}
+        const char *what() const throw() { return (m_error.c_str()); }
+    };
     std::vector<std::string> _vec;
     std::string const _body;
     std::stringstream _iss;

@@ -51,8 +51,12 @@ int Cgi::start(std::string const &_cgi_path)
 
     fds_save[0] = dup(STDIN_FILENO);
     fds_save[1] = dup(STDOUT_FILENO);
-    write(fd_parent_out, _body.c_str(), _body.length());
-    std::rewind(tmp_parent_out);                         // need to read from start of stream
+    ssize_t n = write(fd_parent_out, _body.c_str(), _body.length());
+    if (n == -1)
+        throw CGIException("start_read", strerror(errno));
+    else if (static_cast<size_t>(n) < _body.length())
+        throw CGIException("start_read", "write");
+    std::rewind(tmp_parent_out); // need to read from start of stream
     pid = fork();
     std::string request_method(_vec[8].substr(15, _vec[8].length()));
     if (pid < 0)
@@ -82,9 +86,14 @@ int Cgi::start(std::string const &_cgi_path)
     char c = 0;
     size_t length = lseek(fd_child_in, 0, SEEK_END);
     std::rewind(tmp_child_in);
+    ssize_t ret = 0;
     while (0 < length)
     {
-        read(fd_child_in, &c, 1);
+        ret = read(fd_child_in, &c, 1);
+        if (ret == -1)
+            throw CGIException("start_read", strerror(errno));
+        else if (ret == 0)
+            throw CGIException("start_read", "EOF");
         _iss.write(&c, 1);
         c = 0;
         --length;

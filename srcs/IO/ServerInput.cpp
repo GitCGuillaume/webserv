@@ -29,6 +29,8 @@ void ServerInput::readData()
     n = recv(_socket, buf, BUFFER_SIZE, 0);
     if (n == -1)
         throw ServerInputException("readData recv", strerror(errno));
+    if (n == 0)
+        return;
     _req.append_data(buf, n);
     if (_req.getEntityHeader().content_length.empty())
     {

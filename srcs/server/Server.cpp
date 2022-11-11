@@ -99,71 +99,74 @@ void Server::loop()
     std::pair<std::string, uint16_t> host;
     while (1)
     {
-        nb_fds = epoll_wait(_epfd, events, MAX_EVENTS, -1);
-        for (int i = 0; i < nb_fds; ++i)
+        try
         {
-            _curr_event = events[i];
-            if (_sockets.find(_curr_event.data.fd) != _sockets.end())
+            nb_fds = epoll_wait(_epfd, events, MAX_EVENTS, -1);
+            for (int i = 0; i < nb_fds; ++i)
             {
+                _curr_event = events[i];
+                if (_sockets.find(_curr_event.data.fd) != _sockets.end())
+                {
 
-                int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
-                if (sockClient < 0)
-                {
-                    throw ServerException("accept", strerror(errno));
-                }
-                if (setnonblocking(sockClient) < 0)
-                    throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                host.first = inet_ntoa(cli_addr.sin_addr);
-                getsockname(sockClient, reinterpret_cast<sockaddr *>(&cli_addr), &s_len);
-                host.second = ntohs(cli_addr.sin_port);
-                if (_map_config.find(host) != _map_config.end())
-                {
-                    std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
-                    epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
-                    _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, _map_config[host])));
-                }
-                else
-                {
-                }
-            }
-
-            if (_curr_event.events & EPOLLIN)
-            {
-                // if (setnonblocking(_curr_event.data.fd) < 0)
-                //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
-                if (it != _clients.end())
-                {
-                    it->second.epoll_in();
-                }
-            }
-            if (_curr_event.events & EPOLLOUT)
-            {
-                // if (setnonblocking(_curr_event.data.fd) < 0)
-                //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
-                std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
-                if (it != _clients.end())
-                {
-                    if (it->second.getReq().is_ready() &&  it->second.getReq().is_timeout())
+                    int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
+                    if (sockClient < 0)
                     {
-                        it->second.epoll_out();
-                        std::cout << "[+] connection closed by timeout" << std::endl;
-                        epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
-                        close(_curr_event.data.fd);
-                        _clients.erase(it);
+                        throw ServerException("accept", strerror(errno));
+                    }
+                    if (setnonblocking(sockClient) < 0)
+                        throw ServerException("setnonblocking createNewSocket", strerror(errno));
+                    host.first = inet_ntoa(cli_addr.sin_addr);
+                    getsockname(sockClient, reinterpret_cast<sockaddr *>(&cli_addr), &s_len);
+                    host.second = ntohs(cli_addr.sin_port);
+                    if (_map_config.find(host) != _map_config.end())
+                    {
+                        std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
+                        epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
+                        _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, _map_config[host])));
                     }
                     else
-                        it->second.epoll_out();
+                    {
+                    }
+                }
+
+                if (_curr_event.events & EPOLLIN)
+                {
+                    std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
+                    if (it != _clients.end())
+                    {
+                        it->second.epoll_in();
+                    }
+                }
+                if (_curr_event.events & EPOLLOUT)
+                {
+                    std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
+                    if (it != _clients.end())
+                    {
+                        if (it->second.getReq().is_ready() && it->second.getReq().is_timeout())
+                        {
+                            it->second.epoll_out();
+                            std::cout << "[+] connection closed by timeout" << std::endl;
+                            epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
+                            close(_curr_event.data.fd);
+                            _clients.erase(it);
+                        }
+                        else
+                            it->second.epoll_out();
+                    }
+                }
+
+                if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP))
+                {
+                    std::cout << "[+] connection closed" << std::endl;
+                    epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
+                    close(_curr_event.data.fd);
+                    _clients.erase(_curr_event.data.fd);
                 }
             }
-
-            if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP))
-            {
-                std::cout << "[+] connection closed" << std::endl;
-                epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
-                close(_curr_event.data.fd);
-                _clients.erase(_curr_event.data.fd);
-            }
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
         }
     }
 }
