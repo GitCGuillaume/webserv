@@ -1,23 +1,12 @@
-<!doctype html>
-<html>
-    <head>
-        <title>CGI PHP GET</title>
-        <meta charset="utf-8">
-        <link href="42.png" rel="icon" type="image/png">
-        <link href="42.png" rel="shortcut icon" type="image/png">
-        <link rel="stylesheet" href="../../stylesheet.css">
-        <meta name="author" content="gchopin">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-    <article>
-        <h1>GET</h1>
-        <p class="answer">
-        <?php
-            if (isset($_GET["test1"]))
-                echo "Name: ".$_GET["test1"]." ";
-            if (isset($_GET["test2"]))
-                echo "Surname: ".$_GET["test2"]." ";
-        ?>
-        </p>
-    </article>
-</html>
+<?php
+echo '<pre>';
+print_r($_GET);
+var_dump($_SERVER);
+if (isset($_GET["test1"]))
+    echo "test1: ".$_GET["test1"]." ";
+if (isset($_GET["test2"]))
+    echo "test2: ".$_GET["test2"]." ";
+if (isset($_GET["test3"]))
+    echo "test3: ".$_GET["test3"];
+echo '</pre>';
+?>
