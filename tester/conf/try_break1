@@ -28,7 +28,7 @@ server {
 	location / {
 	}
 }
-#euh OK nginx il télécharge aussi le fichier mais pas l'afficher?
+#euh faut afficher le contenu du fichier sans cgi non?
 server {
 	listen 127.0.0.1:8007;
 	root ./tester/www/breaking_the_conf;

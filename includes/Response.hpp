@@ -47,14 +47,14 @@ public:
     static void init_map_method(void);
     static void init_map_error();
     void sendHtmlCode(int status_code, Config::ptr_server s);
-    void sendAutoIndex(const std::string &uri, const std::string &root);
+    bool sendAutoIndex(const std::string &uri, const std::string &root);
     void run_cgi_get(Config::ptr_server conf, size_t pos_slash);
     void run_cgi_post(Config::ptr_server conf, size_t pos_slash);
     void fillResponse(const std::string &body, int status_code, const std::string &content_type);
     bool is_cgi(void);
     bool seek_cgi(Config::ptr_server conf, size_t pos_slash);
 };
-void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
+bool    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri);
 
 
 #endif

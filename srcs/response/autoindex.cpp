@@ -1,6 +1,6 @@
 #include "webserv.hpp"
 
-void    open_stream_autoindex(std::list<std::string> &lst, const std::string &root,  std::string &ret_html)
+bool    open_stream_autoindex(std::list<std::string> &lst, const std::string &root,  std::string &ret_html)
 {
     std::ifstream ifs("srcs/response/autoindex.html", std::ifstream::in);
     std::list<std::string>::iterator it(lst.begin());
@@ -11,7 +11,7 @@ void    open_stream_autoindex(std::list<std::string> &lst, const std::string &ro
     {
 	    std::cerr << "Couldn't open autoindex.html" << std::endl;
 	    //throw std::runtime_error("Couldn't open autoindex.html");
-    	return ;
+    	return (false);
     }
 	while (std::getline(ifs, str, '\n'))
     {
@@ -33,9 +33,10 @@ void    open_stream_autoindex(std::list<std::string> &lst, const std::string &ro
         }
     }
     ifs.close();
+    return (true);
 }
 
-void    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
+bool    load_directory_autoindex(std::string &ret_html, const std::string &directory, const std::string &uri)
 {
     std::list<std::string> lst;
     struct dirent   *dire = NULL;
@@ -44,7 +45,7 @@ void    load_directory_autoindex(std::string &ret_html, const std::string &direc
     if (!dir)
     {
 	    std::cerr << "Couldn't open autoindex directory." << std::endl;
-	    return ;
+	    return (false);
 	    //       throw std::runtime_error("Couldn't open autoindex directory.");
     }
 	    dire = readdir(dir);
@@ -56,8 +57,11 @@ void    load_directory_autoindex(std::string &ret_html, const std::string &direc
     if (closedir(dir) < 0)
 	   {
 	    std::cerr << "Couldn't close autoindex directory." << std::endl;
-        	return ;
+        	return (false);
 	    //throw std::runtime_error("Couldn't close autoindex directory.");
 	   }
-	open_stream_autoindex(lst, uri, ret_html);
+	bool ft_bool = open_stream_autoindex(lst, uri, ret_html);
+    if (ft_bool == false)
+        return (ft_bool);
+    return (true);
 }

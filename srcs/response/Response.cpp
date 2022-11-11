@@ -216,7 +216,10 @@ void Response::handle_get(Config::ptr_server s, const size_t &pos_slash)
         {
             std::cout << "NOT FOUND\n";
             if (s->autoindex)
-                sendAutoIndex(url, s->root + url);
+            {
+                if (sendAutoIndex(url, s->root + url) == false)
+                    sendHtmlCode(404, s);
+            }
             else
                 sendHtmlCode(404, s);
         }
@@ -397,17 +400,19 @@ void Response::sendHtmlCode(int status_code, Config::ptr_server s)
     _status_code = status_code;
 }
 
-void Response::sendAutoIndex(const std::string &uri, const std::string &directory)
+bool Response::sendAutoIndex(const std::string &uri, const std::string &directory)
 {
     std::string ret;
     std::cout << "AUTOINDEX " << directory << std::endl;
-    load_directory_autoindex(ret, directory, uri);
+    if (load_directory_autoindex(ret, directory, uri) == false)
+        return (false);
     _bodyData << ret;
     std::ostringstream os;
     os << _bodyData.str().size();
     _en_header.content_length = os.str();
     _en_header.content_type = s_entity_header::__map_ext_mime[".html"];
     _status_code = 200;
+    return (true);
 }
 
 void Response::fillResponse(const std::string &body, int status_code, const std::string &content_type)
