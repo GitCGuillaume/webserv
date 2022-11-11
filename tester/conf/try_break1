@@ -28,10 +28,7 @@ server {
 	location / {
 	}
 }
-#KO
-#ne dois pas telechager la page, mais afficher le contenu j'imagine, ou alors code d'erreur ?
-#(Voir response.cpp doit forcement renvoyer quelque chose)
-#voir ubuntu_tester (qui ne semble pas etre a jour car test method PUT + *)
+#euh OK nginx il télécharge aussi le fichier mais pas l'afficher?
 server {
 	listen 127.0.0.1:8007;
 	root ./tester/www/breaking_the_conf;
