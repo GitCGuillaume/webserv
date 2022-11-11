@@ -28,7 +28,7 @@ public:
 		size_t read_timeout;
 		size_t send_timeout;
 		std::vector<std::string> index;
-		std::vector<std::string> allow_methods;
+		std::set<std::string> allow_methods;
 		std::vector<std::pair<std::string, uint16_t> > listens;
 		std::map<std::string, std::string> rewrite;
 		std::map<int, std::string> error_page;
@@ -70,7 +70,7 @@ public:
 				os << "upload_path: " << rhs.upload_path << std::endl;
 				for (std::vector<std::string>::const_iterator it = rhs.index.begin(); it != rhs.index.end(); ++it)
 					os << "index: " << *it << std::endl;
-				for (std::vector<std::string>::const_iterator it = rhs.allow_methods.begin(); it != rhs.allow_methods.end(); ++it)
+				for (std::set<std::string>::const_iterator it = rhs.allow_methods.begin(); it != rhs.allow_methods.end(); ++it)
 					os << "allow_methods: " << *it << std::endl;
 				for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = rhs.listens.begin(); it != rhs.listens.end(); ++it)
 					os << "listen: " << it->first << ":" << it->second << std::endl;

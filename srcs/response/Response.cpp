@@ -15,7 +15,12 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
 
             size_t pos_slash = _req.getUrl().rfind("/");
             _conf = getConf(pos_slash);
-            (this->*_map_method_ptr[req.getMethod()])();
+            if (_req.getBody().size() > _conf->client_body_limit)
+                sendHtmlCode(413);
+            else if (_conf->allow_methods.find(_req.getMethod()) != _conf->allow_methods.end())
+                (this->*_map_method_ptr[req.getMethod()])();
+            else
+                sendHtmlCode(405);
         }
     }
     catch (const std::exception &e)
@@ -418,8 +423,7 @@ bool Response::post_method(void)
 
 bool Response::delete_method(void)
 {
-    size_t pos_slash = _req.getUrl().rfind("/");
-    std::string url = getFile(pos_slash);
+    std::string url = _conf->root + _req.getUrl();
     struct stat buffer;
     std::cout << "to delete " << url << std::endl;
     if (stat(url.c_str(), &buffer) == 0)

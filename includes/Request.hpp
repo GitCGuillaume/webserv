@@ -54,7 +54,7 @@ public:
     const std::string &getBody() const;
     const Client &getClient() const;
     const std::pair<std::string,uint16_t> &getIp() const;
-    size_t size();
+    size_t size() const;
     timeval get_time() const;
     void set_time();
     bool is_timeout(void) const;
@@ -79,6 +79,7 @@ private:
     const Client &_client;
 	timeval _time;
     bool _is_timeout;
+    size_t _size;
 
 
 

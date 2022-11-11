@@ -213,7 +213,7 @@ void Config::server::set_values(const std::string key, const std::string value)
 		{
 			if (!Request::is_method(values[i]))
 				throw ConfigException("allow_methods: " + value);
-			this->allow_methods.push_back(values[i]);
+			this->allow_methods.insert(values[i]);
 		}
 	}
 	else if (key == "error_page")
