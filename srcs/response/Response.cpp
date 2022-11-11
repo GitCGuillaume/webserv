@@ -105,7 +105,7 @@ void Response::run_cgi_get(Config::ptr_server conf, size_t pos_slash)
     Cgi cgi(str, "CONTENT_LENGTH=" + body.length(),
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
-            "PATH_INFO=" + _cgi_path, "PATH_TRANSLATED=" + path_info,
+            "PATH_INFO=" + path_info, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=" + str, "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=GET",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     int code = cgi.start(_cgi_path);
@@ -130,7 +130,7 @@ void Response::run_cgi_post(Config::ptr_server conf, size_t pos_slash)
     Cgi cgi(body, "CONTENT_LENGTH=" + _req.getEntityHeader().content_length,
             "CONTENT_TYPE=" + _req.getEntityHeader().content_type,
             "GATEWAY_INTERFACE=CGI/1.1",
-            "PATH_INFO=" + _cgi_path, "PATH_TRANSLATED=" + path_info,
+            "PATH_INFO=" + path_info, "PATH_TRANSLATED=" + path_info,
             "QUERY_STRING=", "REMOTE_ADDR=" + _req.getIp().first, "REMOTE_HOST=", "REQUEST_METHOD=POST",
             "SCRIPT_NAME=", "SERVER_NAME=" + conf->server_name, "SERVER_PORT=" + ss.str(), "SERVER_PROTOCOL=" + _version);
     int code = cgi.start(_cgi_path);

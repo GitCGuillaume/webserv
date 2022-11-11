@@ -1,3 +1,15 @@
+#OK
+server {
+	listen 127.0.0.1:8004;
+	root ./tester/www/breaking_the_conf;
+	index index.php;#existe pas
+	server_name html;
+	autoindex on;
+	location / {
+		client_max_body_size 0;
+	}
+}
+
 server {
 	listen 127.0.0.1:8003;
 	root ./tester/www;

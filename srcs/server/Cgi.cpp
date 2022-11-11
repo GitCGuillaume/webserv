@@ -66,8 +66,7 @@ int Cgi::start(std::string const &_cgi_path)
     else if (pid == 0)
     {
         size_t pos = _vec[3].find("=");
-        std::string path_info = _vec[3].substr(pos + 1, _vec[3].length());
-        char *ft_argv[3] = {const_cast<char *>(path_info.c_str()),
+        char *ft_argv[3] = {const_cast<char *>(_cgi_path.c_str()),
                             const_cast<char *>(_vec[4].c_str()), 0};
         char *ft_envp[_vec.size() + 2];
         for (unsigned int i = 0; i < 13; ++i)
