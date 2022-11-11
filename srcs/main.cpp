@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 	}
 	std::string conf_name;
 	if (argc == 1)
-		conf_name = "tester/default";
+		conf_name = "tester/conf/default";
 	else
 		conf_name = argv[1];
 

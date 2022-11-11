@@ -15,7 +15,7 @@ Response::Response(const Request &req, Config::ptr_server conf) : _req(req), _ve
 
             size_t pos_slash = _req.getUrl().rfind("/");
             _conf = getConf(pos_slash);
-            if (_req.getBody().size() > _conf->client_body_limit)
+            if (_conf->client_body_limit && _req.getBody().size() > _conf->client_body_limit)
                 sendHtmlCode(413);
             else if (_conf->allow_methods.find(_req.getMethod()) != _conf->allow_methods.end())
                 (this->*_map_method_ptr[req.getMethod()])();
