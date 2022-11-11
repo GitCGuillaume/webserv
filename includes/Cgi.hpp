@@ -10,8 +10,6 @@
 #include <sys/wait.h>
 #include <sstream>
 #include <fstream>
-#include <fcntl.h>
-#include <cstdio>
 
 class Cgi
 {
@@ -32,7 +30,7 @@ public:
     Cgi(Cgi const &src);
     Cgi &operator=(Cgi const &src);
     const std::stringstream &getStringStream() const;
-    int start(std::string const &_cgi_path);
+    void start(std::string const &_cgi_path);
 };
 
 #endif

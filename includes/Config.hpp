@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string.h>
+#include <cstring>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -14,7 +14,6 @@
 #include <limits>
 #include <ctype.h>
 #include "Request.hpp"
-#include <cerrno>
 
 class Config
 {
@@ -61,33 +60,31 @@ public:
 		}
 
 		friend std::ostream &operator<<(std::ostream &os, const server &rhs)
-			{
-				os << "{\n";
-				os << "server_name: " << rhs.server_name << std::endl;
-				os << "root: " << rhs.root << std::endl;
-				os << "autoindex: " << rhs.autoindex << std::endl;
-				os << "client_body_limit: " << rhs.client_body_limit << std::endl;
-				os << "read_timeout: " << rhs.read_timeout << std::endl;
-				os << "upload_path: " << rhs.upload_path << std::endl;
-				for (std::vector<std::string>::const_iterator it = rhs.index.begin(); it != rhs.index.end(); ++it)
-					os << "index: " << *it << std::endl;
-				for (std::set<std::string>::const_iterator it = rhs.allow_methods.begin(); it != rhs.allow_methods.end(); ++it)
-					os << "allow_methods: " << *it << std::endl;
-				for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = rhs.listens.begin(); it != rhs.listens.end(); ++it)
-					os << "listen: " << it->first << ":" << it->second << std::endl;
-				for (std::map<std::string, std::string>::const_iterator it = rhs.cgi_info.begin(); it != rhs.cgi_info.end(); ++it)
-					os << "cgi_info: " << it->first <<" " << it->second << std::endl;
-				for (std::map<int, std::string>::const_iterator it = rhs.error_page.begin(); it != rhs.error_page.end(); ++it)
-					os << "error_page: " << it->first <<" " << it->second << std::endl;
-				for (std::map<std::string, std::string>::const_iterator it = rhs.rewrite.begin(); it != rhs.rewrite.end(); ++it)
-					os << "rewrite: " << it->first << " " << it->second << std::endl;
-				for (std::map<std::string, server>::const_iterator it = rhs.locations.begin(); it != rhs.locations.end() ; ++it)
-					os << it->first << " " << it->second;
-				os << "}\n";
-				return (os);
-			}
-
-
+		{
+			os << "{\n";
+			os << "server_name: " << rhs.server_name << std::endl;
+			os << "root: " << rhs.root << std::endl;
+			os << "autoindex: " << rhs.autoindex << std::endl;
+			os << "client_body_limit: " << rhs.client_body_limit << std::endl;
+			os << "read_timeout: " << rhs.read_timeout << std::endl;
+			os << "upload_path: " << rhs.upload_path << std::endl;
+			for (std::vector<std::string>::const_iterator it = rhs.index.begin(); it != rhs.index.end(); ++it)
+				os << "index: " << *it << std::endl;
+			for (std::set<std::string>::const_iterator it = rhs.allow_methods.begin(); it != rhs.allow_methods.end(); ++it)
+				os << "allow_methods: " << *it << std::endl;
+			for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = rhs.listens.begin(); it != rhs.listens.end(); ++it)
+				os << "listen: " << it->first << ":" << it->second << std::endl;
+			for (std::map<std::string, std::string>::const_iterator it = rhs.cgi_info.begin(); it != rhs.cgi_info.end(); ++it)
+				os << "cgi_info: " << it->first << " " << it->second << std::endl;
+			for (std::map<int, std::string>::const_iterator it = rhs.error_page.begin(); it != rhs.error_page.end(); ++it)
+				os << "error_page: " << it->first << " " << it->second << std::endl;
+			for (std::map<std::string, std::string>::const_iterator it = rhs.rewrite.begin(); it != rhs.rewrite.end(); ++it)
+				os << "rewrite: " << it->first << " " << it->second << std::endl;
+			for (std::map<std::string, server>::const_iterator it = rhs.locations.begin(); it != rhs.locations.end(); ++it)
+				os << it->first << " " << it->second;
+			os << "}\n";
+			return (os);
+		}
 	};
 
 	typedef std::vector<server> vect_serv;
