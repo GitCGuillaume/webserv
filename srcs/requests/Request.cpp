@@ -8,7 +8,7 @@ Request::Request(const Client &client) : _is_ready(false), _client(client)
 
 Request::Request(const Request &src) : _req(src._req), _method(src._method), _url(src._url), _version(src._version), _ge_header(src._ge_header), _re_header(src._re_header), _en_header(src._en_header), _body(src._body), _is_ready(src._is_ready), _client(src._client), _time(src._time)
 {
-	//set_time();
+	set_time();
 }
 
 Request &Request::operator=(const Request &rhs)
@@ -142,6 +142,7 @@ size_t Request::parse_body(size_t start)
 void Request::reset(void)
 {
 	new (this) Request(_client);
+	set_time();
 }
 
 void Request::append_data(const char *data, size_t n)

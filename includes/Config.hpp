@@ -39,7 +39,7 @@ public:
 		void set_values(std::string key, std::string value);
 		static bool assign_port(const std::string &str, uint16_t &val);
 		std::pair<std::string, uint16_t> handle_listen(const std::string &value);
-		server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"), autoindex(false), client_body_limit(0), read_timeout(200), send_timeout(1), is_location(false) {}
+		server() : root("/var/lib/webserv/html/"), upload_path("./tester/www/upload/"), autoindex(false), client_body_limit(0), read_timeout(1), send_timeout(10), is_location(false) {}
 		const server &operator=(const server &rhs)
 		{
 			server_name = rhs.server_name;
@@ -78,6 +78,8 @@ public:
 					os << "cgi_info: " << it->first <<" " << it->second << std::endl;
 				for (std::map<int, std::string>::const_iterator it = rhs.error_page.begin(); it != rhs.error_page.end(); ++it)
 					os << "error_page: " << it->first <<" " << it->second << std::endl;
+				for (std::map<std::string, std::string>::const_iterator it = rhs.rewrite.begin(); it != rhs.rewrite.end(); ++it)
+					os << "rewrite: " << it->first << " " << it->second << std::endl;
 				for (std::map<std::string, server>::const_iterator it = rhs.locations.begin(); it != rhs.locations.end() ; ++it)
 					os << it->first << " " << it->second;
 				os << "}\n";

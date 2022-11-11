@@ -38,7 +38,7 @@ std::string Response::get_redirection(void)
     const std::string &url = _req.getUrl();
     const std::map<std::string, std::string> &rewrite = _conf->rewrite;
     const std::map<std::string, std::string>::const_iterator it = rewrite.find(url);
-    if(it != rewrite.end())
+    if (it != rewrite.end())
     {
         return (it->second);
     }
@@ -47,10 +47,10 @@ std::string Response::get_redirection(void)
 
 void Response::do_redirection(const std::string &redir)
 {
+    std::cout << "REDIR " << redir << std::endl;
     _re_header.location = redir;
     _status_code = 301;
 }
-
 
 void parse_url(const std::string &url, std::string &parse)
 {
@@ -210,9 +210,12 @@ bool Response::fill_body(std::string const &file)
 {
     std::cout << "file to open " << file << std::endl;
     std::ostringstream os;
+    struct stat s;
+
     std::ifstream is(file.c_str());
-    if (is)
+    if (is && stat(file.c_str(), &s) == 0 && (s.st_mode & S_IFREG))
     {
+        std::cout << "MERDE\n";
         os << is.rdbuf();
         _status_code = 200;
         _bodyData << os.str();
@@ -224,7 +227,7 @@ bool Response::fill_body(std::string const &file)
         {
             std::string mime = s_entity_header::__map_ext_mime[file.substr(pos)];
             if (mime.empty())
-                std::cout << "mime dont exist (request error)\n";
+                _en_header.content_type = "application/octet-stream";
             else
                 _en_header.content_type = mime;
         }
@@ -270,25 +273,34 @@ bool Response::handle_get(const size_t &pos_slash)
         }
     }
     else if (!fill_body(_conf->root + url))
-        return sendHtmlCode(404);
+    {
+        std::cout << "HERE\n";
+        do_redirection(url + "/");
+    }
     return (true);
 }
 
 bool Response::get_method(void)
 {
-    bool is_cgi = false;
-    size_t pos = _req.getUrl().rfind("/");
-    if (pos == std::string::npos)
-        return sendHtmlCode(404);
-    is_cgi = seek_cgi(pos);
-    if (is_cgi == true)
-    {
-        std::stringstream _iss;
-        run_cgi_get(pos);
-        std::cout << "iss:" << _iss.str() << std::endl;
-    }
+    std::string redir = get_redirection();
+    if (!redir.empty())
+        do_redirection(redir);
     else
-        handle_get(pos);
+    {
+        bool is_cgi = false;
+        size_t pos = _req.getUrl().rfind("/");
+        if (pos == std::string::npos)
+            return sendHtmlCode(404);
+        is_cgi = seek_cgi(pos);
+        if (is_cgi == true)
+        {
+            std::stringstream _iss;
+            run_cgi_get(pos);
+            std::cout << "iss:" << _iss.str() << std::endl;
+        }
+        else
+            handle_get(pos);
+    }
     return (true);
 }
 
@@ -544,6 +556,3 @@ std::ostream &operator<<(std::ostream &os, const Response &rhs)
     os << "---response----\n";
     return (os);
 }
-
-
-

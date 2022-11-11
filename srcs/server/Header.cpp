@@ -106,6 +106,7 @@ void s_entity_header::init_map_mime(void)
     __map_ext_mime[".php"] = "application/x-httpd-php";
     __map_ext_mime[".ppt"] = "application/vnd.ms-powerpoint";
     __map_ext_mime[".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+    __map_ext_mime[".py"] = "text/x-python";
     __map_ext_mime[".rar"] = "application/vnd.rar";
     __map_ext_mime[".rtf"] = "application/rtf";
     __map_ext_mime[".sh"] = "application/x-sh";
