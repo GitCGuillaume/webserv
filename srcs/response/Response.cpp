@@ -78,7 +78,8 @@ bool Response::seek_cgi(size_t pos_slash)
         return (false);
     std::map<std::string, std::string>::const_iterator it(_conf->cgi_info.begin());
     std::map<std::string, std::string>::const_iterator ite(_conf->cgi_info.end());
-    std::string url = getFile(pos_slash);
+    std::string url;
+    getFile(pos_slash, url);
     std::string parse;
     std::string clean_url = url;
     size_t i = url.length();
@@ -117,7 +118,9 @@ void Response::run_cgi_get(size_t pos_slash)
     if (!_conf)
         return;
     const std::string &body = _req.getBody();
-    std::string url = getFile(pos_slash);
+    std::string url;
+    getFile(pos_slash, url);
+
     std::string clean_url = url;
     size_t pos2 = url.find("?");
     if (pos2 != std::string::npos)
@@ -174,7 +177,9 @@ void Response::run_cgi_post(size_t pos_slash)
 {
     if (!_conf)
         return;
-    std::string url = getFile(pos_slash);
+    std::string url;
+    getFile(pos_slash, url);
+
     const std::string &body = _req.getBody();
     const std::string path_info = url;
     std::stringstream ss;
@@ -211,6 +216,18 @@ Config::ptr_server Response::getConf(const size_t &pos_slash) const
     return ((it != _conf->locations.end()) ? &it->second : _conf);
 }
 
+bool Response::is_valid_file(const std::string &file)
+{
+    std::cout << "file to open " << file << std::endl;
+    std::ostringstream os;
+    struct stat s;
+
+    std::ifstream is(file.c_str());
+    if (is && stat(file.c_str(), &s) == 0 && (s.st_mode & S_IFREG))
+        return (true);
+    return false;
+}
+
 bool Response::fill_body(std::string const &file)
 {
     std::cout << "file to open " << file << std::endl;
@@ -244,18 +261,24 @@ bool Response::fill_body(std::string const &file)
     return false;
 }
 
-std::string Response::getFile(size_t pos_slash)
+bool Response::getFile(size_t pos_slash, std::string &file)
 {
     const std::string &url = _req.getUrl();
+    file = _conf->root + url;
     if (pos_slash == url.size() - 1)
     {
         std::vector<std::string>::const_iterator it_index;
         for (it_index = _conf->index.begin(); it_index != _conf->index.end(); ++it_index)
         {
-            return (_conf->root + url + *it_index);
+            if (is_valid_file(file + *it_index))
+            {
+                file += *it_index;
+                return true;
+            }
         }
+        return (false);
     }
-    return (_conf->root + url);
+    return (true);
 }
 bool Response::handle_get(const size_t &pos_slash)
 {

@@ -35,10 +35,11 @@ public:
     Response(const Response &src);
     ~Response();
 
+    bool is_valid_file(const std::string &file);
     std::string get_redirection(void);
     void do_redirection(const std::string &redir);
     Config::ptr_server getConf(const size_t &pos_slash) const;
-    std::string getFile(size_t pos_slash);
+    bool getFile(size_t pos_slash, std::string &file);
     bool handle_get(const size_t &pos_slash);
     bool get_method(void);
     bool post_method(void);

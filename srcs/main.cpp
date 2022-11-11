@@ -4,11 +4,21 @@
 void load_directory_autoindex(std::string &ret_html);
 int main(int argc, char **argv)
 {
-	Config c(argv[1]);
+	
+	if (argc > 2)
+	{
+		std::cerr << "Too many arguments. Usage: ./webserv [conf]" << std::endl;
+		return (1);
+	}
+	std::string conf_name;
+	if (argc == 1)
+		conf_name = "tester/default";
+	else
+		conf_name = argv[1];
 
 	try
 	{
-		Server s(argv[1]);
+		Server s(conf_name.c_str());
 		s.loop();
 		/* code */
 	}
@@ -16,10 +26,6 @@ int main(int argc, char **argv)
 	{
 		std::cerr << e.what() << '\n';
 	}
-
-	// s.createNewSocket(9001);
-	// s.createNewSocket(9002);
-	// s.createNewSocket(80);
 
 	return (0);
 }
