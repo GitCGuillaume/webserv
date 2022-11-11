@@ -439,16 +439,21 @@ bool Response::sendHtmlCode(int status_code)
 
 bool Response::sendAutoIndex(const std::string &uri, const std::string &directory)
 {
+    int code = 0;
     std::string ret;
     std::cout << "AUTOINDEX: " << directory << std::endl;
     if (load_directory_autoindex(ret, directory, uri) == false)
-        return (false);
+        code = 404;
+       // return (false);
     _bodyData << ret;
     std::ostringstream os;
     os << _bodyData.str().size();
     _en_header.content_length = os.str();
     _en_header.content_type = s_entity_header::__map_ext_mime[".html"];
-    _status_code = 200;
+    if (code == 404)
+        _status_code = 404;
+    else
+        _status_code = 200;
     return (true);
 }
 
