@@ -214,7 +214,6 @@ bool Response::fill_body(std::string const &file)
     std::ifstream is(file.c_str());
     if (is && stat(file.c_str(), &s) == 0 && (s.st_mode & S_IFREG))
     {
-        std::cout << "MERDE\n";
         os << is.rdbuf();
         _status_code = 200;
         _bodyData << os.str();
@@ -270,7 +269,6 @@ bool Response::handle_get(const size_t &pos_slash)
         }
         if (it_index == _conf->index.end())
         {
-            std::cout << "NOT FOUND\n";
             std::ifstream is((_conf->root + url).c_str());
             if (is && _conf->autoindex)
                 /*if (*/sendAutoIndex(url, _conf->root + url);// == false)
@@ -281,7 +279,6 @@ bool Response::handle_get(const size_t &pos_slash)
     }
     else if (!fill_body(_conf->root + url))
     {
-        std::cout << "HERE\n";
         do_redirection(url + "/");
     }
     return (true);
@@ -338,8 +335,6 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 if (end != std::string::npos)
                 {
                     file = s->upload_path + field_value.substr(pos, end - pos);
-                    std::cout << "end " << end << std::endl;
-                    std::cout << "pos " << pos << std::endl;
                     std::cout << field_value.substr(pos, end - pos) << std::endl;
                     std::cout << "file: " << file << std::endl;
                     std::cout << "upload: " << s->upload_path << std::endl;
@@ -382,14 +377,12 @@ bool Response::post_method(void)
                 const std::string &body = _req.getBody();
                 pos = 0;
                 size_t end_pos;
-                // std::cout << "here" << s << std::endl;
                 while (body.find("--" + boundary + "\r\n", pos) == pos)
                 {
                     pos += 4 + boundary.size();
                     end_pos = body.find("--" + boundary + "\r\n", pos);
                     if (end_pos == std::string::npos)
                     {
-                        std::cout << "777777777777777777777777777777777777777777777777777777\n";
                         break;
                     }
                     std::cout << "BODY: " << std::endl;
@@ -400,7 +393,6 @@ bool Response::post_method(void)
                     {
                         std::ofstream ofs(file.c_str());
                         std::cout << "IMAGE:" << file << std::endl;
-                        // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
                         ofs << body.substr(pos + 2, end_pos - pos - 4);
                         ofs.close();
                     }
@@ -408,8 +400,6 @@ bool Response::post_method(void)
                         return (sendHtmlCode(400));
 
                     pos = end_pos;
-
-                    // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
                 }
             }
             handle_get(pos_slash);
@@ -417,7 +407,6 @@ bool Response::post_method(void)
         else if (is_cgi == true)
         {
             run_cgi_post(pos_slash);
-            // std::cout << "iss:" << _iss.str() << std::endl;
         }
     }
     return (true);

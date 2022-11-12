@@ -92,11 +92,9 @@ int main(int argc, char **argv)
 	std::cout << "Sending message..." << std::endl;
 	while (true)
 	{
-		std::cout << "jhkhjkhk\n";
 		std::string message("xxx");
 		msg = send(ft_socket, message.c_str(), message.size() + 1, 0);
 		usleep(1000000000);
-		// std::cout << message;
 		if (msg < 0)
 		{
 			std::cerr << "Couldn't send message." << std::endl;
