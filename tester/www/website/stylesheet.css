@@ -10,18 +10,15 @@ body {
 	height: 300px;
 }
 
-a{
-	color: #e9c30b;
-}
 
 h1 {
 	font-size: 4em;
-	color: #f34f2c;
+	color: black;
 }
 
 h2, h3 {
 	font-size: 1.8em;
-	color: #f34f2c;
+	color: black;
 }
 
 p, label {
