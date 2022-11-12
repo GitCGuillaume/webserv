@@ -10,6 +10,7 @@
 	<meta name="author" content="gchopin">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+
 <body>
 	<div id="title">
 		<div>
@@ -22,28 +23,35 @@
 		<article>
 			<h2>Links</h2>
 			<ul>
-				<li><a href="./hh.html">404 Not Found</a></li>
-				<li><a href="./upload/">List upload files</a></li>
+				<!-- <li><a href="./hh.html">404 Not Found</a></li> -->
+				<li><a href="codes.html">Response status codes</a></li>
+				<li><a href="./upload/">Uploaded files</a></li>
+			</ul>
+		</article>
+		<article>
+			<h2>Form</h2>
+			<ul>
+				<!-- <li><a href="/website/cgi-bin/php/env.php">Display php env</a> -->
+				<li><a href="./php_form/">PHP</a></li>
+				<li><a href="./ubuntu_cgi_form/">Ubuntu_cgi</a></li>
 			</ul>
 		</article>
 		<article>
 			<h2>CGI</h2>
 			<ul>
-				<li><a href="/website/cgi-bin/php/env.php">Display php env</a>
-				<li><a href="./php_form/">CGI PHP FORM</li>
-				<li><a href="./ubuntu_cgi_form/">CGI Ubuntu_cgi FORM</li>
+				<!-- <li><a href="/website/cgi-bin/php/env.php">Display php env</a> -->
 				<li><a href="../phpver/">PHP info</a></li>
 			</ul>
 		</article>
 		<article>
 			<h2>Upload</h2>
-			<form action="/website/cgi-bin/php/upload_file.php" method="post" enctype="multipart/form-data">
+			<!-- <form action="/website/cgi-bin/php/upload_file.php" method="post" enctype="multipart/form-data">
 				<label>Upload a file with CGI (Shift + move_key for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
-			</form>
+			</form> -->
 			<form action="/website/upload/" method="post" enctype="multipart/form-data">
-				<label>Upload a file without CGI (Shift + move_key for multiple files):</label>
+				<label>Upload a file (press Ctrl or Shift for multiple files):</label>
 				<input type="file" name="upload_files[]" multiple>
 				</br><input type="submit" name="submit">
 			</form>
