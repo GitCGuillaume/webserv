@@ -115,7 +115,7 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 	if (pre == std::string::npos)
 		throw ConfigException("parsing error");
 	size_t pos = _content.find_first_of(delimiter, pre);
-	if (pos == std::string::npos)
+	if (pos == std::string::npos && pre != _content.length() -1)
 		throw ConfigException("no delimiter found");
 	std::string key = _content.substr(pre, pos - pre);
 	*idx = pos;

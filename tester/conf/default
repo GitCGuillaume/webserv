@@ -1,6 +1,4 @@
-#
-server {
-	listen 127.0.0.1:8003;
+server {listen 127.0.0.1:8003;
 
 	allow_methods POST GET;
 	root ./tester/www;
