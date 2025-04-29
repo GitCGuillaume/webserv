@@ -40,7 +40,8 @@ bool open_stream_autoindex(std::set<std::string> &lst, const std::string &direct
                 if (stat((directory + str).c_str(), &fileInfo) != 0)
                     throw std::runtime_error(strerror(errno));
                 ret_html += "           <a href=\"" + str + "\">" + str + "</a>";
-                ret_html.insert(ret_html.end(), 30 - str.size(), ' ');
+                if (str.size() < 30)
+                    ret_html.insert(ret_html.end(), 30 - str.size(), ' ');
                 ret_html += std::ctime(&fileInfo.st_mtime);
                 *(ret_html.end() - 1) = ' ';
                 ret_html.insert(ret_html.end(), 10, ' ');

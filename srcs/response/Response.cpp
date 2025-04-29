@@ -106,7 +106,7 @@ bool Response::seek_cgi(size_t pos_slash)
 /*
     check if content type contain error code + parse it
 */
-int parse_content_type_cgi(std::string const &content_type, int code)
+int parse_content_type_cgi(std::string &content_type, int code)
 {
     std::string parse_cnt;
     size_t pos_status = content_type.find("Status:");
@@ -115,13 +115,16 @@ int parse_content_type_cgi(std::string const &content_type, int code)
     int err = 200;
     if (pos_status == std::string::npos && code != 0)
         return (500);
-    else if (pos_status == std::string::npos)
-        return (200);
-    parse_cnt = content_type.substr(pos_status + 8, content_type.length());
-    pos_status2 = parse_cnt.find(" ");
+    else if (pos_status != std::string::npos)
+    {
+        pos_status2 = parse_cnt.find(" ");
+        parse_cnt = content_type.substr(pos_status + 8, content_type.length() - pos_status2);
+        std::istringstream(parse_cnt) >> err;
+        content_type = content_type.substr(pos_status2 + 8);
+        return (err);
+    }
     parse_cnt.clear();
-    parse_cnt = content_type.substr(pos_status + 8, pos_status2);
-    std::istringstream(parse_cnt) >> err;
+    content_type = content_type.substr(14);
     return (err);
 }
 
@@ -214,7 +217,6 @@ bool Response::fill_body(std::string const &file)
     std::ifstream is(file.c_str());
     if (is && stat(file.c_str(), &s) == 0 && (s.st_mode & S_IFREG))
     {
-        std::cout << "MERDE\n";
         os << is.rdbuf();
         _status_code = 200;
         _bodyData << os.str();
@@ -270,18 +272,16 @@ bool Response::handle_get(const size_t &pos_slash)
         }
         if (it_index == _conf->index.end())
         {
-            std::cout << "NOT FOUND\n";
             std::ifstream is((_conf->root + url).c_str());
             if (is && _conf->autoindex)
-                /*if (*/sendAutoIndex(url, _conf->root + url);// == false)
-                    //return sendHtmlCode(404);
+                sendAutoIndex(url, _conf->root + url);
+
             else
                 return sendHtmlCode(404);
         }
     }
     else if (!fill_body(_conf->root + url))
     {
-        std::cout << "HERE\n";
         do_redirection(url + "/");
     }
     return (true);
@@ -303,7 +303,6 @@ bool Response::get_method(void)
         {
             std::stringstream _iss;
             run_cgi_get(pos);
-            std::cout << "iss:" << _iss.str() << std::endl;
         }
         else
             handle_get(pos);
@@ -313,8 +312,6 @@ bool Response::get_method(void)
 
 std::string Response::test(const std::string &body, size_t &pos, Config::ptr_server s)
 {
-    std::cout << "upload: " << s->upload_path << std::endl;
-
     size_t end_pos;
     std::string file;
     while ((end_pos = body.find(": ", pos)) != std::string::npos)
@@ -338,8 +335,6 @@ std::string Response::test(const std::string &body, size_t &pos, Config::ptr_ser
                 if (end != std::string::npos)
                 {
                     file = s->upload_path + field_value.substr(pos, end - pos);
-                    std::cout << "end " << end << std::endl;
-                    std::cout << "pos " << pos << std::endl;
                     std::cout << field_value.substr(pos, end - pos) << std::endl;
                     std::cout << "file: " << file << std::endl;
                     std::cout << "upload: " << s->upload_path << std::endl;
@@ -376,40 +371,30 @@ bool Response::post_method(void)
                     {
                         size_t end_pos = en_header.content_type.find(" \t", pos + 1);
                         boundary = en_header.content_type.substr(pos + 9, end_pos - pos);
-                        std::cout << "boundary " << boundary << std::endl;
                     }
                 }
                 const std::string &body = _req.getBody();
                 pos = 0;
                 size_t end_pos;
-                // std::cout << "here" << s << std::endl;
                 while (body.find("--" + boundary + "\r\n", pos) == pos)
                 {
                     pos += 4 + boundary.size();
                     end_pos = body.find("--" + boundary + "\r\n", pos);
                     if (end_pos == std::string::npos)
                     {
-                        std::cout << "777777777777777777777777777777777777777777777777777777\n";
                         break;
                     }
-                    std::cout << "BODY: " << std::endl;
-                    std::cout << body.substr(pos, end_pos - pos) << std::endl;
                     std::string file = test(body, pos, _conf);
 
                     if (!file.empty())
                     {
                         std::ofstream ofs(file.c_str());
-                        std::cout << "IMAGE:" << file << std::endl;
-                        // std::cout << body.substr(pos + 2, end_pos - pos) << std::endl;
                         ofs << body.substr(pos + 2, end_pos - pos - 4);
                         ofs.close();
                     }
                     else
                         return (sendHtmlCode(400));
-
                     pos = end_pos;
-
-                    // std::cout << "FUCKKKKK " << debug << " " << body.substr(pos, 15) << std::endl;
                 }
             }
             handle_get(pos_slash);
@@ -417,7 +402,6 @@ bool Response::post_method(void)
         else if (is_cgi == true)
         {
             run_cgi_post(pos_slash);
-            // std::cout << "iss:" << _iss.str() << std::endl;
         }
     }
     return (true);
@@ -465,12 +449,41 @@ void Response::init_map_method(void)
 
 bool Response::sendHtmlCode(int status_code)
 {
-    _bodyData << "<html> <head> <title>";
-    _bodyData << status_code << " " << __map_status[status_code];
-    _bodyData << "</title> </head>";
-    _bodyData << "<body><center><h1>";
-    _bodyData << status_code << " " << __map_status[status_code];
-    _bodyData << "</h1></center><hr><center>webserv/1.0</center></body> </html>";
+
+    std::map<int, std::string>::const_iterator it = _conf->error_page.find(status_code);
+    if (it != _conf->error_page.end())
+    {
+        size_t pos_slash = _req.getUrl().rfind("/");
+        if (pos_slash == std::string::npos)
+            pos_slash = 0;
+        std::ostringstream os;
+        std::string url = _conf->root + it->second;
+        if (is_valid_file(url))
+        {
+            std::ifstream is(url.c_str());
+            os << is.rdbuf();
+            _bodyData << os.str();
+        }
+        else
+        {
+            status_code = 404;
+            _bodyData << "<html> <head> <title>";
+            _bodyData << status_code << " " << __map_status[status_code];
+            _bodyData << "</title> </head>";
+            _bodyData << "<body><center><h1>";
+            _bodyData << status_code << " " << __map_status[status_code];
+            _bodyData << "</h1></center><hr><center>webserv/1.0</center></body> </html>";
+        }
+    }
+    else
+    {
+        _bodyData << "<html> <head> <title>";
+        _bodyData << status_code << " " << __map_status[status_code];
+        _bodyData << "</title> </head>";
+        _bodyData << "<body><center><h1>";
+        _bodyData << status_code << " " << __map_status[status_code];
+        _bodyData << "</h1></center><hr><center>webserv/1.0</center></body> </html>";
+    }
     std::ostringstream os;
     os << _bodyData.str().size();
     _en_header.content_length = os.str();

@@ -79,7 +79,6 @@ void Server::init_map_config(void)
 {
     for (Config::vect_serv::const_iterator it = _config.getServers().begin(); it != _config.getServers().end(); ++it)
     {
-        Config::ptr_server ref(&*it);
         for (Config::vect_listens::const_iterator it2 = it->listens.begin(); it2 != it->listens.end(); ++it2)
         {
             if (_map_config.find(*it2) == _map_config.end())
@@ -89,6 +88,14 @@ void Server::init_map_config(void)
             }
         }
     }
+}
+
+void Server::closeClient(int socket)
+{
+    epoll_ctl(_epfd, EPOLL_CTL_DEL, socket, NULL);
+    close(socket);
+    _clients.erase(socket);
+    std::cout << "[+] connection closed" << std::endl;
 }
 
 void Server::loop()
@@ -109,9 +116,7 @@ void Server::loop()
 
                 int sockClient = accept(_curr_event.data.fd, (sockaddr *)&cli_addr, &s_len);
                 if (sockClient < 0)
-                {
                     throw ServerException("accept", strerror(errno));
-                }
                 if (setnonblocking(sockClient) < 0)
                     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 host.first = inet_ntoa(cli_addr.sin_addr);
@@ -120,51 +125,54 @@ void Server::loop()
                 if (_map_config.find(host) != _map_config.end())
                 {
                     std::cout << "[+] connected with " << host.first << ": " << host.second << std::endl;
-                    std::cout << sockClient << " client server " << _curr_event.data.fd << std::endl;
                     epoll_ctl_add(_epfd, sockClient, EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLHUP);
                     _clients.insert(std::pair<int, Client>(sockClient, Client(host, sockClient, _map_config[host])));
                 }
-                else
-                {
-                }
             }
-
             if (_curr_event.events & EPOLLIN)
             {
-                // if (setnonblocking(_curr_event.data.fd) < 0)
-                //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
                 {
-                    it->second.epoll_in();
+                    try
+                    {
+                        it->second.epoll_in();
+                    }
+                    catch (const std::exception &e)
+                    {
+                        closeClient(_curr_event.data.fd);
+                        std::cerr << e.what() << '\n';
+                    }
                 }
             }
             if (_curr_event.events & EPOLLOUT)
             {
-                // if (setnonblocking(_curr_event.data.fd) < 0)
-                //     throw ServerException("setnonblocking createNewSocket", strerror(errno));
                 std::map<int, Client>::iterator it = _clients.find(_curr_event.data.fd);
                 if (it != _clients.end())
                 {
-                    if (it->second.getReq().is_ready() &&  it->second.getReq().is_timeout())
+                    if (it->second.getReq().is_ready() && it->second.getReq().is_timeout())
                     {
                         it->second.epoll_out();
-                        std::cout << "[+] connection closed by timeout" << std::endl;
-                        epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
-                        close(_curr_event.data.fd);
-                        _clients.erase(it);
+                        closeClient(_curr_event.data.fd);
                     }
                     else
-                        it->second.epoll_out();
+                    {
+                        try
+                        {
+                            it->second.epoll_out();
+                        }
+                        catch (const std::exception &e)
+                        {
+                            closeClient(_curr_event.data.fd);
+                            std::cerr << e.what() << '\n';
+                        }
+                    }
                 }
             }
 
             if (_curr_event.events & (EPOLLRDHUP | EPOLLHUP))
             {
-                std::cout << "[+] connection closed" << std::endl;
-                epoll_ctl(_epfd, EPOLL_CTL_DEL, _curr_event.data.fd, NULL);
-                close(_curr_event.data.fd);
-                _clients.erase(_curr_event.data.fd);
+                closeClient(_curr_event.data.fd);
             }
         }
     }

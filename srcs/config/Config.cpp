@@ -19,14 +19,6 @@ Config::Config(const char *conf)
 		for (std::vector<std::pair<std::string, uint16_t> >::const_iterator it = it_s->listens.begin(); it != it_s->listens.end(); ++it)
 			std::cout << "listen: " << it->first << ":" << it->second << std::endl;
 	}
-	for (std::vector<server>::iterator it_s = _servers.begin(); it_s != _servers.end(); ++it_s)
-	{
-		std::cout << *it_s ;
-	}
-
-
-
-
 }
 
 Config::Config(const Config &src) : _content(src._content), _servers(src._servers) {}
@@ -119,7 +111,7 @@ std::string Config::get_key(size_t *idx, std::string delimiter)
 	if (pre == std::string::npos)
 		throw ConfigException("parsing error");
 	size_t pos = _content.find_first_of(delimiter, pre);
-	if (pos == std::string::npos)
+	if (pos == std::string::npos && pre != _content.length() - 1)
 		throw ConfigException("no delimiter found");
 	std::string key = _content.substr(pre, pos - pre);
 	*idx = pos;
@@ -147,7 +139,7 @@ bool Config::server::assign_port(const std::string &str, uint16_t &val)
 std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string &value)
 {
 	uint16_t port = 80;
-	std::string address = "0.0.0.0";
+	std::string address = "127.0.0.1";
 	std::vector<std::string> tmp = Config::split(value, ':');
 	if (tmp.size() == 1)
 	{
@@ -168,7 +160,12 @@ std::pair<std::string, uint16_t> Config::server::handle_listen(const std::string
 	}
 	else
 		throw ConfigException("invalid listen: " + value);
-	return std::make_pair(address, port);
+	std::pair<std::string, uint16_t> listen = std::make_pair(address, port);
+	std::vector<std::pair<std::string, uint16_t> >::const_iterator it = std::find(listens.begin(), listens.end(), listen);
+	if (it != listens.end())
+		throw ConfigException("duplicate PORT value");
+
+	return listen;
 }
 
 void Config::server::set_values(const std::string key, const std::string value)
@@ -223,7 +220,7 @@ void Config::server::set_values(const std::string key, const std::string value)
 			throw ConfigException("invalid error_page: " + value);
 		for (size_t i = 0; i != values.size() - 1; i++)
 		{
-			if (!str_is_num(values[i]) || !(status_code = atoi(values[i].c_str())) || this->error_page.find(status_code) == this->error_page.end())
+			if (!str_is_num(values[i]) || !(status_code = atoi(values[i].c_str())))
 				throw ConfigException("invalid error_page: " + values[i]);
 			this->error_page[status_code] = *(values.end() - 1);
 		}

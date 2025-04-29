@@ -4,7 +4,6 @@
 #include <iostream>
 #include <sys/socket.h>
 #include <sys/epoll.h>
-#include <netinet/in.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -14,7 +13,6 @@
 #include <cstring>
 #include <errno.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -42,6 +40,7 @@ public:
     void loop(void);
     int const &getSocket() const;
     void setSocket(int const domain, int const type, int protocol);
+    void closeClient(int socket);
 private:
     std::set<int> _sockets;
     int _socket;

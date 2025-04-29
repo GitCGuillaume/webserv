@@ -1,32 +1,34 @@
 <!doctype html>
 <html>
-    <head>
-        <title>CGI PHP FORM</title>
-        <meta charset="utf-8">
-        <link href="42.png" rel="icon" type="image/png">
-        <link href="42.png" rel="shortcut icon" type="image/png">
-        <link rel="stylesheet" href="../stylesheet.css">
-        <meta name="author" content="gchopin">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
 
-    <body>
-        <article>
-            <h2>Form PHP</h2>
-            <p>Sending data to server :</p>
-            <form action="/website/cgi-bin/php/post.php" method="post">
-                <label>POST :</label>
-                </br><input type="text" name="test1" />
-                </br><input type="text" name="test2" />
-                <input type="submit" name="submit">
-            </form>
-            <p>Getting informations using URL :</p>
-            <form action="/website/cgi-bin/php/get.php" method="get">
-                <label>GET :</label>
-                </br><input type="text" name="test1" />
-                </br><input type="text" name="test2" />
-                <input type="submit" name="submit">
-            </form>
-        </article>
-    </body>
+<head>
+    <title>CGI PHP FORM</title>
+    <meta charset="utf-8">
+    <link href="42.png" rel="icon" type="image/png">
+    <link href="42.png" rel="shortcut icon" type="image/png">
+    <link rel="stylesheet" href="../stylesheet.css">
+    <meta name="author" content="gchopin">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <article>
+        <h2>Form PHP</h2>
+        <p>Send data to server:</p>
+        <form action="/website/cgi-bin/php/post.php" method="post">
+            <label>POST :</label>
+            </br><input type="text" placeholder="name" name="test1" />
+            </br><input type="text" placeholder="surname" name="test2" />
+            <input type="submit" name="submit">
+        </form>
+        <p>Get informations using URL:</p>
+        <form action="/website/cgi-bin/php/get.php" method="get">
+            <label>GET :</label>
+            </br><input type="text" placeholder="name" name="test1" />
+            </br><input type="text" placeholder="surname" name="test2" />
+            <input type="submit" name="submit">
+        </form>
+    </article>
+</body>
+
 </html>

@@ -1,8 +1,8 @@
 NAME = webserv
 
-CXX = c++
+CXX = clang++
 
-CXXFLAGS = -Wall -Wextra -std=c++98  -g3 -I $(INCLUDES) #-Werror
+CXXFLAGS = -Wall -Wextra -std=c++98 -I $(INCLUDES) -g3
 
 LDFLAGS =
 
@@ -56,8 +56,8 @@ $(NAME): $(OBJS) $(HEADER)
 
 
 clean:
-	rm -rf $(OBJS)
-	@rm -rd $(OBJS_DIR) || true
+	rm -rf $(OBJS) || true
+	@rm -rd $(OBJS_DIR) 2> /dev/null || true 
 
 fclean: clean
 	rm -f $(NAME)

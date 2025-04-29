@@ -21,22 +21,16 @@ void ServerInput::readData()
     _req.set_timeout();
     if (_req.is_timeout())
     {
-        std::cout << "READYYY\n";
         _req.setReady();
-        return ;
+        return;
     }
-    //_req.set_time();
     char buf[BUFFER_SIZE + 1];
     ssize_t n;
-    int found = 0;
     n = recv(_socket, buf, BUFFER_SIZE, 0);
-
     if (n == -1)
-    {
-        perror(0);
-        exit(1);
-    }
-
+        throw ServerInputException("readData recv", strerror(errno));
+    if (n == 0)
+        return;
     _req.append_data(buf, n);
     if (_req.getEntityHeader().content_length.empty())
     {
@@ -49,7 +43,6 @@ void ServerInput::readData()
             _req.parse();
             if (_req.is_ready())
             {
-                std::cout << "is ready" << std::endl;
                 readBytes = 0;
                 _pos_end_header = 0;
                 return;
@@ -59,7 +52,6 @@ void ServerInput::readData()
     readBytes += n;
     if (!_req.getEntityHeader().content_length.empty() && _req.getContentLength() <= (readBytes - _pos_end_header))
     {
-        // std::cout << "LA" << std::endl;
         _req.parse_body(_pos_end_header);
         _pos_end_header = 0;
         readBytes = 0;
